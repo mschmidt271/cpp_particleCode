@@ -1,0 +1,21 @@
+---
+#==========================================================================
+# Input parameters for a simple 1D, purely diffusive random walk simulation
+#==========================================================================
+
+# number of particles
+Np: 5000
+# Np: 5
+# length of 1D domain
+L: 50
+# RW starting position
+X0: 25
+# total simulation time
+maxT: 6.0
+# time step length
+# dt: 0.1
+dt: 1.0
+# diffusion coefficient
+D: 5.0
+# output file name
+pFile: "particles.txt"
