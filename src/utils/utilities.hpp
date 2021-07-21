@@ -1,6 +1,7 @@
 #ifndef UTILITIES_HPP
 #define UTILITIES_HPP
 
+#include <chrono>
 #include <string>
 #include <random>
 #include "yaml-cpp/yaml.h"
@@ -21,7 +22,7 @@ class Params{
     int Np, nSteps;
     Real L, X0, maxT, dt, D;
     std::string pFile;
-    void set_values(std::string yaml_name);
+    void set_values(const std::string &yaml_name);
     void print_summary();
 };
 
@@ -53,4 +54,5 @@ void random_walk(std::vector<Real>& p,
                  RandyNorm& rn);
 
 }
+
 #endif

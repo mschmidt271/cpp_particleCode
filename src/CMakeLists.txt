@@ -10,12 +10,6 @@ configure_file("${PROJECT_SOURCE_DIR}/src/utils/ParticleRW_config.h.in"
 # add the utils directory, with the utilities library and plotting directory
 add_subdirectory(utils)
 
-# add the external yaml-cpp library
-find_library(ycpp yaml-cpp)
-
-# Report the installation prefix.
-message(STATUS "yaml-cpp found at ${ycpp}")
-
 # add the external kokkos library
 find_library(kk kokkoscore HINTS $ENV{KOKKOS_LIBDIR})
 
@@ -28,13 +22,19 @@ find_library(kkern kokkoskernels HINTS $ENV{KKERNELS_LIBDIR})
 # Report the installation prefix.
 message(STATUS "Kokkos Kernels found at ${kkern}")
 
-# add the external kokkos-kernels library
+# add the external obenblas library
 find_library(oblas openblas HINTS $ENV{OPENBLAS_LIBDIR})
 
 # Report the installation prefix.
 message(STATUS "OpenBlas found at ${oblas}")
 
-# # add the external kokkos-kernels library
+# add the external yaml-cpp library
+find_library(ycpp yaml-cpp HINTS $ENV{YAMLCPP_LIBDIR})
+
+# Report the installation prefix.
+message(STATUS "yaml-cpp found at ${ycpp}")
+
+# # add the external lapack library
 # find_library(lpack lapack)
 
 # # Report the installation prefix.
@@ -49,10 +49,10 @@ message(STATUS "Installation prefix is ${CMAKE_INSTALL_PREFIX}")
 add_executable(ParticleRW particleRW.cpp)
 target_link_libraries(ParticleRW
                       Utils
-                      ${ycpp}
                       ${kk}
                       ${kkern}
                       ${oblas}
+                      ${ycpp}
                       )
 # add the include directories
 target_include_directories(ParticleRW PUBLIC
@@ -60,10 +60,11 @@ target_include_directories(ParticleRW PUBLIC
                            ${PROJECT_BINARY_DIR}/src/utils
                            # this is needed for utils
                            "${PROJECT_SOURCE_DIR}/src/utils"
-                           # this is needed for yaml-cpp
-                           "/usr/local/include"
                            $ENV{KOKKOS_INCDIR}
                            $ENV{KKERNELS_INCDIR}
+                           # this is needed for yaml-cpp
+                           # "/usr/local/include"
+                           $ENV{YAMLCPP_INCDIR}
                           )
 
 install(TARGETS ParticleRW Utils)

@@ -8,7 +8,7 @@ std::string toy_problem_intro() {
   return ss.str();
 }
 
-void Params::set_values(std::string yaml_name){
+void Params::set_values(const std::string &yaml_name){
   YAML::Node file_params = YAML::LoadFile(yaml_name);
 
   Np   = file_params["Np"].as<int>();
