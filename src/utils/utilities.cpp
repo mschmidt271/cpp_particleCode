@@ -12,11 +12,11 @@ void Params::set_values(std::string yaml_name){
   YAML::Node file_params = YAML::LoadFile(yaml_name);
 
   Np   = file_params["Np"].as<int>();
-  L    = file_params["L"].as<double>();
-  X0    = file_params["X0"].as<double>();
-  maxT = file_params["maxT"].as<double>();
-  dt   = file_params["dt"].as<double>();
-  D    = file_params["D"].as<double>();
+  L    = file_params["L"].as<Real>();
+  X0    = file_params["X0"].as<Real>();
+  maxT = file_params["maxT"].as<Real>();
+  dt   = file_params["dt"].as<Real>();
+  D    = file_params["D"].as<Real>();
   pFile = file_params["pFile"].as<std::string>();
 }
 
@@ -37,17 +37,17 @@ void Params::print_summary(){
 // constructor for random N(mean, var) generator that seeds with clock time
 // SOURCE: http://www.cplusplus.com/reference/random/normal_distribution/normal_distirbution/
   // AND:  http://www.cpp.re/forum/general/223250/
-RandyNorm::RandyNorm(double mean, double var) : gen(seed), dist(mean, var) {}
+RandyNorm::RandyNorm(Real mean, Real var) : gen(seed), dist(mean, var) {}
 
 // method for getting a random normal number from RandyNorm
-double RandyNorm::get_num(){
-  double num =  dist(gen);
+Real RandyNorm::get_num(){
+  Real num =  dist(gen);
   return num;
 }
 
-void random_walk(std::vector<double>& p,
-                 double D,
-                 double dt,
+void random_walk(std::vector<Real>& p,
+                 Real D,
+                 Real dt,
                  RandyNorm& rn){
   for (int i = 0; i < p.size(); ++i)
   {
@@ -55,17 +55,17 @@ void random_walk(std::vector<double>& p,
   }
 }
 
-void particleIO::write(const std::vector<double>& p,
+void particleIO::write(const std::vector<Real>& p,
                        const Params& pars,
                        int tStep){
   if (tStep == 1){
     outFile << pars.Np << " " << pars.nSteps << "\n";
-    for (std::vector<double>::const_iterator i = p.begin(); i != p.end(); ++i){
+    for (std::vector<Real>::const_iterator i = p.begin(); i != p.end(); ++i){
       outFile << *i << "\n";
     }
   }
   else{
-    for (std::vector<double>::const_iterator i = p.begin(); i != p.end(); ++i){
+    for (std::vector<Real>::const_iterator i = p.begin(); i != p.end(); ++i){
       outFile << *i << "\n";
     }
   }

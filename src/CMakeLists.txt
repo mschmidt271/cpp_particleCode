@@ -14,6 +14,35 @@ add_subdirectory(utils)
 find_library(ycpp yaml-cpp)
 
 # Report the installation prefix.
+message(STATUS "yaml-cpp found at ${ycpp}")
+
+# add the external kokkos library
+find_library(kk kokkoscore HINTS $ENV{KOKKOS_LIBDIR})
+
+# Report the installation prefix.
+message(STATUS "Kokkos found at ${kk}")
+
+# add the external kokkos-kernels library
+find_library(kkern kokkoskernels HINTS $ENV{KKERNELS_LIBDIR})
+
+# Report the installation prefix.
+message(STATUS "Kokkos Kernels found at ${kkern}")
+
+# add the external kokkos-kernels library
+find_library(oblas openblas HINTS $ENV{OPENBLAS_LIBDIR})
+
+# Report the installation prefix.
+message(STATUS "OpenBlas found at ${oblas}")
+
+# # add the external kokkos-kernels library
+# find_library(lpack lapack)
+
+# # Report the installation prefix.
+# message(STATUS "Lapack found at ${lpack}")
+
+# FIXME: probably need to track down openblas/lapack in order to use kkernels blas functions
+
+# Report the installation prefix.
 message(STATUS "Installation prefix is ${CMAKE_INSTALL_PREFIX}")
 
 # add the executable and link the libraries
@@ -21,6 +50,9 @@ add_executable(ParticleRW particleRW.cpp)
 target_link_libraries(ParticleRW
                       Utils
                       ${ycpp}
+                      ${kk}
+                      ${kkern}
+                      ${oblas}
                       )
 # add the include directories
 target_include_directories(ParticleRW PUBLIC
@@ -30,6 +62,8 @@ target_include_directories(ParticleRW PUBLIC
                            "${PROJECT_SOURCE_DIR}/src/utils"
                            # this is needed for yaml-cpp
                            "/usr/local/include"
+                           $ENV{KOKKOS_INCDIR}
+                           $ENV{KKERNELS_INCDIR}
                           )
 
 install(TARGETS ParticleRW Utils)
