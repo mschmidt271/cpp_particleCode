@@ -1,0 +1,3 @@
+[submodule "src/ext/OpenBLAS"]
+	path = src/ext/OpenBLAS
+	url = git@github.com:xianyi/OpenBLAS.git
