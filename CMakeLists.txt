@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
+CMAKE_POLICY(SET CMP0074 NEW)
 
 # set the project name and version
 project(ParticleRW VERSION 0.1)
@@ -18,6 +19,9 @@ if (DEFINED ENV{OMP_FLAGS})
 endif()
 
 message(STATUS "CMAKE_CXX_FLAGS flags are ${CMAKE_CXX_FLAGS}")
+
+# add the ext directory, with external TPLs
+add_subdirectory(ext)
 
 # add the source directory
 add_subdirectory(src)
