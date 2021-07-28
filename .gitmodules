@@ -4,3 +4,6 @@
 [submodule "ext/OpenBLAS"]
 	path = ext/OpenBLAS
 	url = git@github.com:xianyi/OpenBLAS.git
+[submodule "ext/kokkos"]
+	path = ext/kokkos
+	url = git@github.com:kokkos/kokkos.git

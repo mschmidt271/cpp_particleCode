@@ -8,10 +8,16 @@ project(ParticleRW VERSION 0.1)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-# set compiler debug flag
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
-# set compiler all warnings flag
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+set(CMAKE_BUILD_TYPE "Debug")
+
+if (CMAKE_BUILD_TYPE STREQUAL Debug)
+  # set compiler debug flag
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
+  # set compiler all warnings flag
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+else()
+  message(ERROR "This ain't ready for release, only Debug is supported")
+endif()
 
 if (DEFINED ENV{OMP_FLAGS})
   message(STATUS "OpenMP flags are $ENV{OMP_FLAGS}")

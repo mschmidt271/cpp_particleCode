@@ -1,11 +1,12 @@
 #!/bin/bash
 
 # these are the serial kokkos/kernels
-export KOKKOS_LIBDIR="/Users/mjschm/kokkos/install_clang/lib"
-export KOKKOS_INCDIR="/Users/mjschm/kokkos/install_clang/include"
-export KOKKOSKERNELS_LIBDIR="/Users/mjschm/kokkos-kernels/install_clang_noblas/lib"
-export KOKKOSKERNELS_INCDIR="/Users/mjschm/kokkos-kernels/install_clang_noblas/include"
-export KOKKOSKERNELS_LIBRARY="/Users/mjschm/kokkos-kernels/install_clang_noblas/lib/libkokkoskernels.a"
+# export KOKKOS_LIBDIR="/Users/mjschm/kokkos/install_clang/lib"
+# export KOKKOS_INCDIR="/Users/mjschm/kokkos/install_clang/include"
+# export KOKKOS_LIBRARY="libkokkoscore.a"
+# export KOKKOSKERNELS_LIBDIR="/Users/mjschm/kokkos-kernels/install_clang_noblas/lib"
+# export KOKKOSKERNELS_INCDIR="/Users/mjschm/kokkos-kernels/install_clang_noblas/include"
+# export KOKKOSKERNELS_LIBRARY="libkokkoskernels.a"
 export YAMLCPP_LIBDIR="/Users/mjschm/yaml-cpp/install_clang/lib"
 export YAMLCPP_INCDIR="/Users/mjschm/yaml-cpp/install_clang/include"
 # use this below when compiling in serial

@@ -10,11 +10,11 @@ configure_file("${PROJECT_SOURCE_DIR}/src/utils/ParticleRW_config.h.in"
 # add the utils directory, with the utilities library and plotting directory
 add_subdirectory(utils)
 
-# add the external kokkos library
-find_library(kk kokkoscore HINTS $ENV{KOKKOS_LIBDIR})
+# # add the external kokkos library
+# find_library(kk kokkoscore HINTS $ENV{KOKKOS_LIBDIR})
 
-# Report the installation prefix.
-message(STATUS "Kokkos found at ${kk}")
+# # Report the installation prefix.
+# message(STATUS "Kokkos found at ${kk}")
 
 # add the external yaml-cpp library
 find_library(ycpp yaml-cpp HINTS $ENV{YAMLCPP_LIBDIR})
@@ -28,7 +28,6 @@ message(STATUS "Installation prefix is ${CMAKE_INSTALL_PREFIX}")
 # add the executable and link the libraries
 add_executable(ParticleRW particleRW.cpp)
 target_link_libraries(ParticleRW
-                      ${kk}
                       ${LIBRARIES}
                       ${ycpp}
                       Utils
@@ -41,7 +40,6 @@ list(APPEND PARTICLERW_INCDIRS;
 # add the include directories
 target_include_directories(ParticleRW PUBLIC
                            $ENV{YAMLCPP_INCDIR}
-                           $ENV{KOKKOS_INCDIR}
                            ${PARTICLERW_INCDIRS}
                           )
 
