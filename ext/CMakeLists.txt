@@ -48,7 +48,7 @@ if (NOT EXISTS ${KOKKOS_LIBRARY})
                         -DKokkos_ENABLE_DEBUG=TRUE
                         -DKokkos_ENABLE_AGGRESSIVE_VECTORIZATION=OFF)
   endif()
-  set(KOKKOS_CMAKE_OPTS -DCMAKE_CXX_COMPILER=${CMAKE_C_COMPILER}
+  set(KOKKOS_CMAKE_OPTS -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
                         -DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR}
                         -DKokkos_ENABLE_PTHREAD=OFF
                         -DKokkos_ENABLE_OPENMP=OFF
@@ -90,7 +90,7 @@ if (NOT EXISTS ${KOKKOSKERNELS_LIBRARY})
   message(STATUS "Building Kokkos Kernels as external project")
   update_submodules()
   set(KOKKOS_CONFIG_DIR ${KOKKOS_LIBDIR}/cmake/Kokkos)
-  set(KOKKOSKERNELS_CMAKE_OPTS -DCMAKE_CXX_COMPILER=${CMAKE_C_COMPILER}
+  set(KOKKOSKERNELS_CMAKE_OPTS -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
                                -DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR}
                                -DKokkos_DIR=${KOKKOS_CONFIG_DIR}
                                -DKokkosKernels_ENABLE_EXPERIMENTAL=OFF
@@ -113,6 +113,46 @@ endif()
 list(APPEND EXT_INCDIRS ${KOKKOSKERNELS_INCLUDE_DIR})
 set(EXT_LIBRARIES ${EXT_LIBRARIES};kokkoskernels)
 
+# FIXME: this should be done in a setup script, referencing a machine file
+if (DEFINED ENV{YAML_CPP_LIBRARY})
+  set(YAML_CPP_INCLUDE_DIR $ENV{YAML_CPP_INCDIR})
+  set(YAML_CPP_LIBRARY_DIR $ENV{YAML_CPP_LIBDIR})
+  set(YAML_CPP_LIBRARY "$ENV{YAML_CPP_LIBDIR}/$ENV{YAML_CPP_LIBRARY}")
+  message(STATUS "yaml-cpp found at ${YAML_CPP_LIBRARY}")
+else()
+  set(YAML_CPP_INCLUDE_DIR "${PROJECT_BINARY_DIR}/include")
+  set(YAML_CPP_LIBRARY_DIR "${PROJECT_BINARY_DIR}/lib")
+  set(YAML_CPP_LIBRARY ${YAML_CPP_LIBRARY_DIR}/libyaml-cpp.a)
+  set(YAML_CPP_LIBDIR $ENV{YAML_CPP_LIBDIR})
+endif()
+
+add_library(yaml_cpp STATIC IMPORTED GLOBAL)
+set_target_properties(yaml_cpp PROPERTIES IMPORTED_LOCATION ${YAML_CPP_LIBRARY})
+if (NOT EXISTS ${YAML_CPP_LIBRARY})
+  message(STATUS "Building yaml_cpp as external project")
+  update_submodules()
+  set(YAML_CPP_CMAKE_OPTS -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+                          -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+                          -DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR}
+                          -DCMAKE_VERBOSE_MAKEFILE=OFF
+                          -DYAML_CPP_BUILD_TESTS=OFF)
+  ExternalProject_Add(yaml_cpp_proj
+                      PREFIX ${CMAKE_CURRENT_BINARY_DIR}/yaml-cpp
+                      SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/yaml-cpp
+                      BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/yaml-cpp
+                      INSTALL_DIR ${PROJECT_BINARY_DIR}
+                      CMAKE_ARGS ${YAML_CPP_CMAKE_OPTS}
+                      BUILD_COMMAND make -j
+                      LOG_CONFIGURE TRUE
+                      LOG_BUILD TRUE
+                      INSTALL_COMMAND make install
+                      LOG_INSTALL TRUE)
+
+  add_dependencies(yaml_cpp yaml_cpp_proj)
+endif()
+list(APPEND EXT_INCDIRS ${YAML_CPP_INCLUDE_DIR})
+set(EXT_LIBRARIES ${EXT_LIBRARIES};yaml_cpp)
+
 # Add all the libraries to the build system at large.
 set(LIBRARIES ${EXT_LIBRARIES} PARENT_SCOPE)
 list(REMOVE_DUPLICATES EXT_INCDIRS)
@@ -123,5 +163,8 @@ if (${KOKKOS_LIBRARY_DIR} MATCHES ${PROJECT_BINARY_DIR}) # we built kokkos
 endif()
 if (${KOKKOSKERNELS_LIBRARY_DIR} MATCHES ${PROJECT_BINARY_DIR}) # we built kokkos kernels
   install(FILES ${KOKKOSKERNELS_LIBRARY} DESTINATION lib)
+endif()
+if (${YAML_CPP_LIBRARY_DIR} MATCHES ${PROJECT_BINARY_DIR}) # we built yaml-cpp
+  install(FILES ${YAML_CPP_LIBRARY} DESTINATION lib)
 endif()
 

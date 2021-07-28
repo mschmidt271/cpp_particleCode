@@ -16,11 +16,11 @@ add_subdirectory(utils)
 # # Report the installation prefix.
 # message(STATUS "Kokkos found at ${kk}")
 
-# add the external yaml-cpp library
-find_library(ycpp yaml-cpp HINTS $ENV{YAMLCPP_LIBDIR})
+# # add the external yaml-cpp library
+# find_library(ycpp yaml-cpp HINTS $ENV{YAMLCPP_LIBDIR})
 
-# Report the installation prefix.
-message(STATUS "yaml-cpp found at ${ycpp}")
+# # Report the installation prefix.
+# message(STATUS "yaml-cpp found at ${ycpp}")
 
 # Report the installation prefix.
 message(STATUS "Installation prefix is ${CMAKE_INSTALL_PREFIX}")
@@ -29,7 +29,6 @@ message(STATUS "Installation prefix is ${CMAKE_INSTALL_PREFIX}")
 add_executable(ParticleRW particleRW.cpp)
 target_link_libraries(ParticleRW
                       ${LIBRARIES}
-                      ${ycpp}
                       Utils
                       )
 
@@ -39,7 +38,6 @@ list(APPEND PARTICLERW_INCDIRS;
 
 # add the include directories
 target_include_directories(ParticleRW PUBLIC
-                           $ENV{YAMLCPP_INCDIR}
                            ${PARTICLERW_INCDIRS}
                           )
 

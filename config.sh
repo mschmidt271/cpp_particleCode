@@ -7,8 +7,9 @@
 # export KOKKOSKERNELS_LIBDIR="/Users/mjschm/kokkos-kernels/install_clang_noblas/lib"
 # export KOKKOSKERNELS_INCDIR="/Users/mjschm/kokkos-kernels/install_clang_noblas/include"
 # export KOKKOSKERNELS_LIBRARY="libkokkoskernels.a"
-export YAMLCPP_LIBDIR="/Users/mjschm/yaml-cpp/install_clang/lib"
-export YAMLCPP_INCDIR="/Users/mjschm/yaml-cpp/install_clang/include"
+# export YAML_CPP_LIBDIR="/Users/mjschm/yaml-cpp/install_clang/lib"
+# export YAML_CPP_INCDIR="/Users/mjschm/yaml-cpp/install_clang/include"
+# export YAML_CPP_LIBRARY="libyaml-cpp.a"
 # use this below when compiling in serial
 # -D CMAKE_CXX_COMPILER=clang++
 
@@ -17,8 +18,8 @@ export YAMLCPP_INCDIR="/Users/mjschm/yaml-cpp/install_clang/include"
 # export KOKKOS_INCDIR="/Users/mjschm/kokkos/install_gccomp/include"
 # export KOKKOSKERNELS_LIBDIR="/Users/mjschm/kokkos-kernels/install_gccomp/lib"
 # export KOKKOSKERNELS_INCDIR="/Users/mjschm/kokkos-kernels/install_gccomp/include"
-# export YAMLCPP_LIBDIR="/Users/mjschm/yaml-cpp/install_gcc11/lib"
-# export YAMLCPP_INCDIR="/Users/mjschm/yaml-cpp/install_gcc11/include"
+# export YAML_CPP_LIBDIR="/Users/mjschm/yaml-cpp/install_gcc11/lib"
+# export YAML_CPP_INCDIR="/Users/mjschm/yaml-cpp/install_gcc11/include"
 # export OMP_FLAGS='-fopenmp'
 # use this below when compiling for openmp
 # -D CMAKE_CXX_COMPILER=g++-11
