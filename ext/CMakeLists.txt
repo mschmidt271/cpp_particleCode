@@ -21,9 +21,6 @@ macro(update_submodules)
   endif()
 endmacro()
 
-# add the external kokkos-kernels library
-# find_library(kokkoskernels kokkoskernels HINTS $ENV{KKERNELS_LIBDIR})
-
 # FIXME: this should be done in a setup script, referencing a machine file
 if (DEFINED ENV{KOKKOSKERNELS_LIBRARY})
   set(KOKKOSKERNELS_INCLUDE_DIR $ENV{KOKKOSKERNELS_INCDIR})

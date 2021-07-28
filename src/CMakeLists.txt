@@ -16,12 +16,6 @@ find_library(kk kokkoscore HINTS $ENV{KOKKOS_LIBDIR})
 # Report the installation prefix.
 message(STATUS "Kokkos found at ${kk}")
 
-# add the external kokkos-kernels library
-# find_library(kkern kokkoskernels HINTS $ENV{KKERNELS_LIBDIR})
-
-# # Report the installation prefix.
-# message(STATUS "Kokkos Kernels found at ${kkern}")
-
 # add the external yaml-cpp library
 find_library(ycpp yaml-cpp HINTS $ENV{YAMLCPP_LIBDIR})
 
@@ -49,8 +43,6 @@ target_include_directories(ParticleRW PUBLIC
                            $ENV{YAMLCPP_INCDIR}
                            $ENV{KOKKOS_INCDIR}
                            ${PARTICLERW_INCDIRS}
-                           # this is needed for yaml-cpp
-                           "/usr/local/include"
                           )
 
 install(TARGETS ParticleRW Utils)

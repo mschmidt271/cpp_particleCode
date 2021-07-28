@@ -1,27 +1,28 @@
-#include "utilities.hpp"
 #include <iostream>
 #include <vector>
+
+#include "utilities.hpp"
 // this will give the install directory location (so far)
 #include "ParticleRW_config.h"
 
 // ***TESTING***
+#include "KokkosKernels_default_types.hpp"
 #include "KokkosSparse_CrsMatrix.hpp"
 #include "KokkosSparse_spmv.hpp"
-#include "KokkosKernels_default_types.hpp"
-using Scalar  = default_scalar;
+using Scalar = default_scalar;
 using Ordinal = default_lno_t;
-using Offset  = default_size_type;
-using device_type  =
-    typename Kokkos::Device<Kokkos::DefaultExecutionSpace,
-                            typename Kokkos::DefaultExecutionSpace::memory_space>;
-using matrix_type  = typename KokkosSparse::CrsMatrix<Scalar, Ordinal, device_type, void, Offset>;
+using Offset = default_size_type;
+using device_type = typename Kokkos::Device<
+    Kokkos::DefaultExecutionSpace,
+    typename Kokkos::DefaultExecutionSpace::memory_space>;
+using matrix_type = typename KokkosSparse::CrsMatrix<Scalar, Ordinal,
+                                                     device_type, void, Offset>;
 
 #include "Kokkos_Core.hpp"
 
 using namespace particles;
 
 int main(int argc, char* argv[]) {
-
   Kokkos::initialize();
 
   {
@@ -31,7 +32,8 @@ int main(int argc, char* argv[]) {
     std::vector<int> colidx = {0, 1, 2};
     std::vector<int> rowmap = {0, 1, 2, 3};
     std::vector<Real> vals = {1, 1, 1};
-    matrix_type A("A", nrows, ncols, annz, vals.data(), rowmap.data(), colidx.data());
+    matrix_type A("A", nrows, ncols, annz, vals.data(), rowmap.data(),
+                  colidx.data());
     auto x = Kokkos::View<Real*>("x", 3);
     auto b = Kokkos::View<Real*>("b", 3);
     auto hx = Kokkos::create_mirror_view(x);
@@ -48,8 +50,7 @@ int main(int argc, char* argv[]) {
     KokkosSparse::spmv("N", alpha, A, x, beta, b);
     Kokkos::deep_copy(hb, b);
 
-    for (int i = 0; i < 3; ++i)
-    {
+    for (int i = 0; i < 3; ++i) {
       std::cout << "hb(i) = " << hb(i) << "\n";
     }
   }
@@ -71,17 +72,15 @@ int main(int argc, char* argv[]) {
   std::vector<Real> pVec(params.Np, params.X0);
 
   // create writeParticles object for writing information to file
-  particleIO particleIO(std::string(installPrefix) +
-                        std::string("/data/") +
+  ParticleIO particleIO(std::string(installPrefix) + std::string("/data/") +
                         std::string(params.pFile));
 
   // begin time stepping
-  for (int tStep = 1; tStep <= params.nSteps; ++tStep)
-  {
+  for (int tStep = 1; tStep <= params.nSteps; ++tStep) {
     std::cout << "time step = " << tStep << "\n";
     random_walk(pVec, params.D, params.dt, rN_std);
     particleIO.write(pVec, params, tStep);
   }
 
   return 0;
-  }
+}
