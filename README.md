@@ -10,7 +10,11 @@ Note that simply downloading the repository will not work with the external proj
 As such, the repository must be cloned.
 For example, in whichever directory you want to put the code:
 
-1. `git clone --recurse-submodules -j8 git@github.com:mschmidt271/cpp_particleCode.git`
+1. Clone the repository:
+    - If you use https (this is the case if you haven't set up a [github ssh key](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh)):
+        - `git clone --recurse-submodules -j8 https://github.com/mschmidt271/cpp_particleCode.git`
+    - If you use ssh:
+        - `git clone --recurse-submodules -j8 git@github.com:mschmidt271/cpp_particleCode.git`
     - Note: the `-j8` is a parallel flag, allowing git to fetch up to 8 submodules in parallel.
 1. `cd cpp_particleCode`
 
