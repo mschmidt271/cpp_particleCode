@@ -26,3 +26,14 @@ For example, in whichever directory you want to put the code:
         - Note: similarly to above, the `-j` flag executes the make using the max number of cores available.
     1. `cd install`
     1. `./run.sh`
+
+## Building With OpenMP
+
+Building with OpenMP does work on my personal Mac running Mojave with `gcc v11.1.0_1` and `libomp v11.0.0`.
+This is achieved by setting the relevant line in `config.sh` to `export USE_OPENMP=True` and ensuring the proper compiler is pointed to in the corresponding `if` block.
+If you are on an Apple machine, it is recommended to use the GCC compiler with compatible OpenMP. The easiest way to achieve this is with Homebrew, by running
+```
+brew install gcc
+brew install libomp
+```
+However, OpenMP functionality can be finicky on Mac, so reach out if you have issues.

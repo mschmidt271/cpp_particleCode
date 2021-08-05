@@ -20,14 +20,25 @@
 # export KOKKOSKERNELS_INCDIR="/Users/mjschm/kokkos-kernels/install_gccomp/include"
 # export YAML_CPP_LIBDIR="/Users/mjschm/yaml-cpp/install_gcc11/lib"
 # export YAML_CPP_INCDIR="/Users/mjschm/yaml-cpp/install_gcc11/include"
-# export OMP_FLAGS='-fopenmp'
 # use this below when compiling for openmp
 # -D CMAKE_CXX_COMPILER=g++-11
+
+export USE_OPENMP=False
+
+if $USE_OPENMP
+then
+    export CXX=g++-11
+    export CC=gcc-11
+else
+    export CXX=clang++
+    export CC=clang
+fi
 
 rm -rf CMake*
 
 cmake .. \
     -D CMAKE_INSTALL_PREFIX="./install"\
     -D CMAKE_VERBOSE_MAKEFILE=ON\
-    -D CMAKE_CXX_COMPILER=clang++\
-    -D CMAKE_C_COMPILER=clang
+    -D CMAKE_CXX_COMPILER=$CXX\
+    -D CMAKE_C_COMPILER=$CC\
+    -D PARPT_USE_OPENMP=$USE_OPENMP

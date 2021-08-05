@@ -41,17 +41,24 @@ if (NOT EXISTS ${KOKKOS_LIBRARY})
   update_submodules()
   if (CMAKE_BUILD_TYPE STREQUAL Release)
     set(KOKKOS_CMAKE_OPTS ${KOKKOS_CMAKE_OPTS}
-                        -DKokkos_ENABLE_DEBUG=FALSE
-                        -DKokkos_ENABLE_AGGRESSIVE_VECTORIZATION=ON)
+                          -DKokkos_ENABLE_DEBUG=FALSE
+                          -DKokkos_ENABLE_AGGRESSIVE_VECTORIZATION=ON)
   else()
     set(KOKKOS_CMAKE_OPTS ${KOKKOS_CMAKE_OPTS}
-                        -DKokkos_ENABLE_DEBUG=TRUE
-                        -DKokkos_ENABLE_AGGRESSIVE_VECTORIZATION=OFF)
+                          -DKokkos_ENABLE_DEBUG=TRUE
+                          -DKokkos_ENABLE_AGGRESSIVE_VECTORIZATION=OFF)
   endif()
-  set(KOKKOS_CMAKE_OPTS -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+  if (PARPT_USE_OPENMP)
+    set(KOKKOS_CMAKE_OPTS ${KOKKOS_CMAKE_OPTS}
+                          -DKokkos_ENABLE_OPENMP=ON)
+  else()
+    set(KOKKOS_CMAKE_OPTS ${KOKKOS_CMAKE_OPTS}
+                          -DKokkos_ENABLE_OPENMP=OFF)
+  endif()
+  set(KOKKOS_CMAKE_OPTS ${KOKKOS_CMAKE_OPTS}
+                        -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
                         -DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR}
                         -DKokkos_ENABLE_PTHREAD=OFF
-                        -DKokkos_ENABLE_OPENMP=OFF
                         -DKokkos_ENABLE_SERIAL=ON
                         -DKokkos_ENABLE_DEPRECATED_CODE=OFF)
   ExternalProject_Add(kokkos_proj

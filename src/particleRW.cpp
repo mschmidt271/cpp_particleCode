@@ -6,6 +6,7 @@
 #include "ParticleRW_config.h"
 
 // ***TESTING***
+#include <typeinfo>
 #include "KokkosKernels_default_types.hpp"
 #include "KokkosSparse_CrsMatrix.hpp"
 #include "KokkosSparse_spmv.hpp"
@@ -26,6 +27,9 @@ int main(int argc, char* argv[]) {
   Kokkos::initialize();
 
   {
+    printf("Kokkos execution space is: %s\n",
+         typeid(Kokkos::DefaultExecutionSpace).name());
+
     int nrows = 3;
     int ncols = 3;
     int annz = 3;

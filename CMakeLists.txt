@@ -19,9 +19,10 @@ else()
   message(ERROR "This ain't ready for release, only Debug is supported")
 endif()
 
-if (DEFINED ENV{OMP_FLAGS})
-  message(STATUS "OpenMP flags are $ENV{OMP_FLAGS}")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} $ENV{OMP_FLAGS}")
+if (PARPT_USE_OPENMP)
+  set(OMP_FLAGS "-fopenmp")
+  message(STATUS "OpenMP flags are: ${OMP_FLAGS}")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OMP_FLAGS}")
 endif()
 
 message(STATUS "CMAKE_CXX_FLAGS flags are ${CMAKE_CXX_FLAGS}")
