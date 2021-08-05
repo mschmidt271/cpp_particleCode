@@ -3,8 +3,8 @@
   # currently, just provides the install prefix
   # NOTE: here, and below, PROJECT_SOURCE_DIR refers to the root directory,
           # since that's where the project() call is
-configure_file("${PROJECT_SOURCE_DIR}/src/utils/ParticleRW_config.h.in"
-               "${PROJECT_BINARY_DIR}/src/utils/ParticleRW_config.h"
+configure_file("${PROJECT_SOURCE_DIR}/src/utils/parPT_config.h.in"
+               "${PROJECT_BINARY_DIR}/src/utils/parPT_config.h"
                )
 
 # add the utils directory, with the utilities library and plotting directory
@@ -26,22 +26,22 @@ add_subdirectory(utils)
 message(STATUS "Installation prefix is ${CMAKE_INSTALL_PREFIX}")
 
 # add the executable and link the libraries
-add_executable(ParticleRW particleRW.cpp)
-target_link_libraries(ParticleRW
+add_executable(parPT parPT.cpp)
+target_link_libraries(parPT
                       ${LIBRARIES}
                       Utils
                       )
 
-list(APPEND PARTICLERW_INCDIRS;
+list(APPEND PARPT_INCDIRS;
             ${PROJECT_SOURCE_DIR}/src/utils;
             ${PROJECT_BINARY_DIR}/src/utils)
 
 # add the include directories
-target_include_directories(ParticleRW PUBLIC
-                           ${PARTICLERW_INCDIRS}
+target_include_directories(parPT PUBLIC
+                           ${PARPT_INCDIRS}
                           )
 
-install(TARGETS ParticleRW Utils)
+install(TARGETS parPT Utils)
 install(DIRECTORY data DESTINATION ${CMAKE_INSTALL_PREFIX})
 # NOTE: PROGRAMS (vs. FILES) will automatically make the shell script executable
 install(PROGRAMS run.sh DESTINATION ${CMAKE_INSTALL_PREFIX})

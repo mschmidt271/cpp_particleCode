@@ -3,7 +3,7 @@
 
 #include "utilities.hpp"
 // this will give the install directory location (so far)
-#include "ParticleRW_config.h"
+#include "parPT_config.h"
 
 // ***TESTING***
 #include <typeinfo>
