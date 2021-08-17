@@ -24,7 +24,7 @@ For example, in whichever directory you want to put the code:
         - If you're savvy and want to pre-install the libraries that are commented in `config.sh` to cut down on build times, follow the given templates to specify their paths.
     1. `make -j install`
         - Note: similarly to above, the `-j` flag executes the make using the max number of cores available.
-    1. `cd install`
+        - Note: the current behavior, as given in `config.sh` is to install to the build directory. As such, you can re-build/install/run from the same place without changing directories repeatedly.
     1. `./run.sh`
 
 ## Building With OpenMP

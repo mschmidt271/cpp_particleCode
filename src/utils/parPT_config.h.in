@@ -1,1 +1,1 @@
-#define installPrefix "@CMAKE_INSTALL_PREFIX@"
+#define install_prefix "@CMAKE_INSTALL_PREFIX@"

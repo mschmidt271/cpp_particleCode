@@ -23,7 +23,7 @@
 # use this below when compiling for openmp
 # -D CMAKE_CXX_COMPILER=g++-11
 
-export USE_OPENMP=False
+export USE_OPENMP=True
 
 if $USE_OPENMP
 then
@@ -37,7 +37,7 @@ fi
 rm -rf CMake*
 
 cmake .. \
-    -D CMAKE_INSTALL_PREFIX="./install"\
+    -D CMAKE_INSTALL_PREFIX="./"\
     -D CMAKE_VERBOSE_MAKEFILE=ON\
     -D CMAKE_CXX_COMPILER=$CXX\
     -D CMAKE_C_COMPILER=$CC\

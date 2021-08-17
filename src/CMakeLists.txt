@@ -7,6 +7,10 @@ configure_file("${PROJECT_SOURCE_DIR}/src/utils/parPT_config.h.in"
                "${PROJECT_BINARY_DIR}/src/utils/parPT_config.h"
                )
 
+list(APPEND PARPT_INCDIRS;
+            ${PROJECT_SOURCE_DIR}/src/utils;
+            ${PROJECT_BINARY_DIR}/src/utils)
+
 # add the utils directory, with the utilities library and plotting directory
 add_subdirectory(utils)
 
@@ -31,10 +35,6 @@ target_link_libraries(parPT
                       ${LIBRARIES}
                       Utils
                       )
-
-list(APPEND PARPT_INCDIRS;
-            ${PROJECT_SOURCE_DIR}/src/utils;
-            ${PROJECT_BINARY_DIR}/src/utils)
 
 # add the include directories
 target_include_directories(parPT PUBLIC
