@@ -4,11 +4,13 @@
 #==========================================================================
 
 # number of particles
-Np: 5000
+Np: 100
 # Np: 5
-# length of 1D domain
-L: 50
-# RW starting position
+# domain limits
+omega: [0, 50]
+# initial condition type [point, uniform, equi]
+IC_type: uniform
+# particle starting position (for point source)
 X0: 25
 # total simulation time
 maxT: 6.0

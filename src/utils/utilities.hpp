@@ -37,12 +37,50 @@ class RandyNorm {
   Real get_num();
 };
 
-// A Functor for generating uint64_t random numbers templated on the
+// functor for generating uniformly-distributed random doubles
+// in the range [start, end]
+// Note: RandPoolType is currently hard-coded in the particle class
 // GeneratorPool type
 template <class RandPool>
-struct GenRandom {
+struct RandomUniform {
   // Output View for the random numbers
   ko::View<Real*> vals;
+
+  // The GeneratorPool
+  RandPool rand_pool;
+
+  typedef Real Scalar;
+  typedef typename RandPool::generator_type gen_type;
+
+  // mean and variance of the normal random variable
+  Scalar start, end;
+
+  KOKKOS_INLINE_FUNCTION
+  void operator()(int i) const {
+    // Get a random number state from the pool for the active thread
+    gen_type rgen = rand_pool.get_state();
+
+    // draw random normal numbers, with mean and variance provided
+    vals(i) = rgen.drand(start, end);
+
+    // Give the state back, which will allow another thread to acquire it
+    rand_pool.free_state(rgen);
+  }
+
+  // Constructor, Initialize all members
+  RandomUniform(ko::View<Real*> vals_, RandPool rand_pool_, Scalar start_,
+            Scalar end_)
+      : vals(vals_), rand_pool(rand_pool_), start(start_), end(end_) {}
+
+};  // end RandomUniform functor
+
+// functor for random-walking particles, templated on the GeneratorPool type
+// Note: RandPoolType is currently hard-coded in the particle class
+// GeneratorPool type
+template <class RandPool>
+struct RandomWalk {
+  // Output View for the random numbers
+  ko::View<Real*> pVec;
 
   // The GeneratorPool
   RandPool rand_pool;
@@ -59,25 +97,30 @@ struct GenRandom {
     gen_type rgen = rand_pool.get_state();
 
     // draw random normal numbers, with mean and variance provided
-    vals(i) = rgen.normal(mean, var);
+    pVec(i) = pVec(i) + rgen.normal(mean, var);
 
     // Give the state back, which will allow another thread to acquire it
     rand_pool.free_state(rgen);
   }
 
   // Constructor, Initialize all members
-  GenRandom(ko::View<Real*> vals_, RandPool rand_pool_, Scalar mean_,
+  RandomWalk(ko::View<Real*> pVec_, RandPool rand_pool_, Scalar mean_,
             Scalar var_)
-      : vals(vals_), rand_pool(rand_pool_), mean(mean_), var(var_) {}
+      : pVec(pVec_), rand_pool(rand_pool_), mean(mean_), var(var_) {}
 
-};  // end GenRandom struct
+};  // end RandomWalk functor
+
+enum IC_enum {point, uniform, equi};
 
 // class holding simulation parameters
 class Params {
  public:
   int Np, nSteps;
-  Real L, X0, maxT, dt, D;
+  Real X0, maxT, dt, D;
+  std::string IC_str;
+  std::vector<Real> omega;
   std::string pFile;
+  IC_enum IC_type;
   void set_values(const std::string& yaml_name);
   void print_summary();
   Params() = default;
@@ -97,7 +140,6 @@ class ParticleIO {
 // class for particles and associated methods
 class Particles {
  public:
-  std::string input_file;
   // real-valued position
   ko::View<Real*> X;
   // parameter views
@@ -110,6 +152,7 @@ class Particles {
   Particles(std::string input_file);
   // constructor that specifies the random number seed
   Particles(std::string input_file, int rand_seed);
+  void initialize_positions(Params params);
   void random_walk(Real D, Real dt, RandyNorm& rn);
   void random_walk();
 };
