@@ -24,19 +24,6 @@ typedef double Real;
 
 std::string toy_problem_intro();
 
-// class for generating random normal variables
-class RandyNorm {
- private:
-  Real mean, var;
-  unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-  std::default_random_engine gen;
-  std::normal_distribution<Real> dist;
-
- public:
-  RandyNorm(Real m, Real v);
-  Real get_num();
-};
-
 // functor for generating uniformly-distributed random doubles
 // in the range [start, end]
 // Note: RandPoolType is currently hard-coded in the particle class
@@ -133,7 +120,6 @@ class ParticleIO {
   std::ofstream outFile;
  public:
   ParticleIO(std::string f);
-  void write(const std::vector<Real>& p, const Params& pars, int i);
   void write(const ko::View<Real*>& p, const Params& pars, int i);
 };
 
@@ -154,7 +140,6 @@ class Particles {
   // constructor that specifies the random number seed
   Particles(std::string input_file, int rand_seed);
   void initialize_positions(Params params);
-  void random_walk(Real D, Real dt, RandyNorm& rn);
   void random_walk();
 };
 

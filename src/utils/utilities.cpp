@@ -54,7 +54,6 @@ void Params::print_summary() {
   std::cout << "**********************************\n";
   std::cout << "Np = " << Np << "\n";
   std::cout << "IC type = " << IC_str << "\n";
-  std::cout << "IC enum = " << IC_type << "\n";
   std::cout << "omega = [";
   for (auto i : omega) {std::cout << i << " ";}
   std::cout << "] \n";
@@ -65,18 +64,6 @@ void Params::print_summary() {
   std::cout << "pFile = " << pFile << "\n";
   std::cout << "nSteps = " << nSteps << "\n";
   std::cout << "***********************************\n";
-}
-
-// constructor for random N(mean, var) generator that seeds with clock time
-// SOURCE:
-// http://www.cplusplus.com/reference/random/normal_distribution/normal_distirbution/
-// AND:  http://www.cpp.re/forum/general/223250/
-RandyNorm::RandyNorm(Real mean, Real var) : gen(seed), dist(mean, var) {}
-
-// method for getting a random normal number from RandyNorm
-Real RandyNorm::get_num() {
-  Real num = dist(gen);
-  return num;
 }
 
 // constructor that places all particles in the same place (X0)
@@ -106,7 +93,6 @@ Particles::Particles(std::string _input_file)
 void Particles::initialize_positions(Params params) {
   switch (params.IC_type) {
     case point: {
-      std::cout << "params.IC_type (point) = " << params.IC_type << "\n";
       // deep copy the params X0 (host) to device
       auto X0 = ko::View<Real>("X0");
       ko::deep_copy(X0, params.X0);
@@ -116,7 +102,6 @@ void Particles::initialize_positions(Params params) {
       break;
     }
     case equi: {
-      std::cout << "params.IC_type (equi) = " << params.IC_type << "\n";
       auto hX = ko::create_mirror_view(X);
       Real dx = (params.omega[1] - params.omega[0]) /
                 static_cast<Real>(params.Np - 1);
@@ -128,18 +113,11 @@ void Particles::initialize_positions(Params params) {
       break;
     }
     case uniform: {
-      std::cout << "params.IC_type (uniform) = " << params.IC_type << "\n";
       ko::parallel_for(params.Np, RandomUniform<RandPoolType>(X, rand_pool,
                                                               params.omega[0],
                                                               params.omega[1]));
       break;
     }
-  }
-}
-
-void Particles::random_walk(Real D, Real dt, RandyNorm& rn) {
-  for (size_t i = 0; i < X.size(); ++i) {
-    X[i] = X[i] + rn.get_num() * sqrt(2.0 * D * dt);
   }
 }
 
@@ -152,20 +130,6 @@ void Particles::random_walk() {
 // constructor for WriteParticles object that takes in the filename f and
 // creates an outFile object
 ParticleIO::ParticleIO(std::string f) : outFile(f) {}
-
-void ParticleIO::write(const std::vector<Real>& p, const Params& pars,
-                       int tStep) {
-  if (tStep == 1) {
-    outFile << pars.Np << " " << pars.nSteps << "\n";
-    for (std::vector<Real>::const_iterator i = p.begin(); i != p.end(); ++i) {
-      outFile << *i << "\n";
-    }
-  } else {
-    for (std::vector<Real>::const_iterator i = p.begin(); i != p.end(); ++i) {
-      outFile << *i << "\n";
-    }
-  }
-}
 
 void ParticleIO::write(const ko::View<Real*>& X, const Params& pars,
                        int tStep) {

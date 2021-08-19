@@ -4,12 +4,12 @@
 #==========================================================================
 
 # number of particles
-Np: 5000
-# Np: 7
+# Np: 5000
+Np: 6
 # domain limits
 omega: [0, 50]
 # initial condition type [point, uniform, equi]
-IC_type: uniform
+IC_type: equi
 # particle starting position (for point source)
 X0: 25
 # total simulation time
