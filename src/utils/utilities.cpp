@@ -54,6 +54,7 @@ void Params::print_summary() {
   std::cout << "**********************************\n";
   std::cout << "Np = " << Np << "\n";
   std::cout << "IC type = " << IC_str << "\n";
+  std::cout << "IC enum = " << IC_type << "\n";
   std::cout << "omega = [";
   for (auto i : omega) {std::cout << i << " ";}
   std::cout << "] \n";
@@ -105,14 +106,17 @@ Particles::Particles(std::string _input_file)
 void Particles::initialize_positions(Params params) {
   switch (params.IC_type) {
     case point: {
+      std::cout << "params.IC_type (point) = " << params.IC_type << "\n";
       // deep copy the params X0 (host) to device
       auto X0 = ko::View<Real>("X0");
       ko::deep_copy(X0, params.X0);
       // fill the X view so particles are all located at X0
       ko::parallel_for(
           "InitX", params.Np, KOKKOS_LAMBDA(const int& i) { X(i) = X0(); });
+      break;
     }
     case equi: {
+      std::cout << "params.IC_type (equi) = " << params.IC_type << "\n";
       auto hX = ko::create_mirror_view(X);
       Real dx = (params.omega[1] - params.omega[0]) /
                 static_cast<Real>(params.Np - 1);
@@ -121,14 +125,14 @@ void Particles::initialize_positions(Params params) {
       }
       hX(params.Np - 1) = params.omega[1];
       ko::deep_copy(X, hX);
+      break;
     }
     case uniform: {
+      std::cout << "params.IC_type (uniform) = " << params.IC_type << "\n";
       ko::parallel_for(params.Np, RandomUniform<RandPoolType>(X, rand_pool,
                                                               params.omega[0],
                                                               params.omega[1]));
-      for (auto i = 0; i < params.Np; ++i) {
-        std::cout << "X(i) = " << X(i) << "\n";
-      }
+      break;
     }
   }
 }
@@ -167,7 +171,7 @@ void ParticleIO::write(const ko::View<Real*>& X, const Params& pars,
                        int tStep) {
   auto hX = ko::create_mirror_view(X);
   ko::deep_copy(hX, X);
-  if (tStep == 1) {
+  if (tStep == 0) {
     outFile << pars.Np << " " << pars.nSteps << "\n";
     for (size_t i = 0; i < hX.extent(0); ++i) {
       outFile << hX(i) << "\n";

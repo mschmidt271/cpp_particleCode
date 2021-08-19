@@ -75,10 +75,15 @@ int main(int argc, char* argv[]) {
     }
     // =========================================================================
 
-    // get the input file from command line argument
+    // get the input file name from command line argument
     std::string input_file(argv[1]);
     // create the particles object
     Particles particles(input_file);
+
+    int tStep = 0;
+
+    // write initial positions
+    particles.particleIO.write(particles.X, particles.params, tStep);
 
     // begin time stepping
     for (int tStep = 1; tStep <= particles.params.nSteps; ++tStep) {
