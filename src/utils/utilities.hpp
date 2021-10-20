@@ -12,15 +12,29 @@
 #include <string>
 
 // this gives the install directory
+#include "KokkosKernels_default_types.hpp"
+#include "KokkosSparse_CrsMatrix.hpp"
+#include "KokkosSparse_spmv.hpp"
+#include "KokkosSparse_spgemm.hpp"
 #include "parPT_config.h"
 #include "yaml-cpp/yaml.h"
 
 namespace particles {
 
+typedef double Real;
+
 // alias the kokkos namespace to make life easier
 namespace ko = Kokkos;
 
-typedef double Real;
+using Scalar = default_scalar;
+using Ordinal = default_lno_t;
+using Offset = default_size_type;
+using device_type = typename ko::Device<ko::DefaultExecutionSpace,
+                    typename ko::DefaultExecutionSpace::memory_space>;
+using execution_space = typename device_type::execution_space;
+using memory_space = typename device_type::memory_space;
+using spmat_type = typename KokkosSparse::CrsMatrix<Scalar, Ordinal,
+                                                     device_type, void, Offset>;
 
 std::string toy_problem_intro();
 
@@ -56,7 +70,7 @@ struct RandomUniform {
 
   // Constructor, Initialize all members
   RandomUniform(ko::View<Real*> vals_, RandPool rand_pool_, Scalar start_,
-            Scalar end_)
+                Scalar end_)
       : vals(vals_), rand_pool(rand_pool_), start(start_), end(end_) {}
 
 };  // end RandomUniform functor
@@ -67,7 +81,7 @@ struct RandomUniform {
 template <class RandPool>
 struct RandomWalk {
   // Output View for the random numbers
-  ko::View<Real*> pVec;
+  ko::View<Real*> pvec;
 
   // The GeneratorPool
   RandPool rand_pool;
@@ -84,26 +98,26 @@ struct RandomWalk {
     gen_type rgen = rand_pool.get_state();
 
     // draw random normal numbers, with mean and variance provided
-    pVec(i) = pVec(i) + rgen.normal(mean, var);
+    pvec(i) = pvec(i) + rgen.normal(mean, var);
 
     // Give the state back, which will allow another thread to acquire it
     rand_pool.free_state(rgen);
   }
 
   // Constructor, Initialize all members
-  RandomWalk(ko::View<Real*> pVec_, RandPool rand_pool_, Scalar mean_,
-            Scalar var_)
-      : pVec(pVec_), rand_pool(rand_pool_), mean(mean_), var(var_) {}
+  RandomWalk(ko::View<Real*> pvec_, RandPool rand_pool_, Scalar mean_,
+             Scalar var_)
+      : pvec(pvec_), rand_pool(rand_pool_), mean(mean_), var(var_) {}
 
 };  // end RandomWalk functor
 
-enum IC_enum {point, uniform, equi};
+enum IC_enum { point, uniform, equi };
 
 // class holding simulation parameters
 class Params {
  public:
   int Np, nSteps;
-  Real X0, maxT, dt, D;
+  Real X0, maxT, dt, D, denom, cdist_coeff, cutdist;
   std::string IC_str;
   std::vector<Real> omega;
   std::string pFile;
@@ -118,6 +132,7 @@ class Params {
 class ParticleIO {
  private:
   std::ofstream outFile;
+
  public:
   ParticleIO(std::string f);
   void write(const ko::View<Real*>& p, const Params& pars, int i);
@@ -141,6 +156,10 @@ class Particles {
   Particles(std::string input_file, int rand_seed);
   void initialize_positions(Params params);
   void random_walk();
+  void mass_transfer();
+  spmat_type get_transfer_mat();
+  spmat_type sparse_kernel_mat(const ko::View<Real**>& dmat,
+                               const int& nnz, const ko::View<Real*>& mask);
 };
 
 }  // namespace particles

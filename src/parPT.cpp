@@ -88,7 +88,8 @@ int main(int argc, char* argv[]) {
     // begin time stepping
     for (int tStep = 1; tStep <= particles.params.nSteps; ++tStep) {
       std::cout << "time step = " << tStep << "\n";
-      particles.random_walk();
+      // particles.random_walk();
+      particles.mass_transfer();
       particles.particleIO.write(particles.X, particles.params, tStep);
     }
 

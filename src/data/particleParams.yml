@@ -13,11 +13,14 @@ IC_type: equi
 # particle starting position (for point source)
 X0: 25
 # total simulation time
-maxT: 10.0
+maxT: 1.0
 # time step length
 # dt: 0.1
 dt: 1.0
 # diffusion coefficient
 D: 5.0
+# cutoff distance coefficient
+# e.g., cutoff distance = cdist_coeff * sqrt(beta^-1 * 4 * D * dt)
+cdist_coeff: 6
 # output file name
 pFile: "particles.txt"
