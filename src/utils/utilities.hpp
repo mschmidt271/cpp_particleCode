@@ -14,8 +14,8 @@
 // this gives the install directory
 #include "KokkosKernels_default_types.hpp"
 #include "KokkosSparse_CrsMatrix.hpp"
-#include "KokkosSparse_spmv.hpp"
 #include "KokkosSparse_spgemm.hpp"
+#include "KokkosSparse_spmv.hpp"
 #include "parPT_config.h"
 #include "yaml-cpp/yaml.h"
 
@@ -29,12 +29,13 @@ namespace ko = Kokkos;
 using Scalar = default_scalar;
 using Ordinal = default_lno_t;
 using Offset = default_size_type;
-using device_type = typename ko::Device<ko::DefaultExecutionSpace,
-                    typename ko::DefaultExecutionSpace::memory_space>;
+using device_type =
+    typename ko::Device<ko::DefaultExecutionSpace,
+                        typename ko::DefaultExecutionSpace::memory_space>;
 using execution_space = typename device_type::execution_space;
 using memory_space = typename device_type::memory_space;
 using spmat_type = typename KokkosSparse::CrsMatrix<Scalar, Ordinal,
-                                                     device_type, void, Offset>;
+                                                    device_type, void, Offset>;
 
 std::string toy_problem_intro();
 
@@ -158,8 +159,8 @@ class Particles {
   void random_walk();
   void mass_transfer();
   spmat_type get_transfer_mat();
-  spmat_type sparse_kernel_mat(const ko::View<Real**>& dmat,
-                               const int& nnz, const ko::View<Real*>& mask);
+  spmat_type sparse_kernel_mat(const ko::View<Real**>& dmat, const int& nnz,
+                               const ko::View<Real*>& mask);
 };
 
 }  // namespace particles

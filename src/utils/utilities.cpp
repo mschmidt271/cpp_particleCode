@@ -81,7 +81,7 @@ IC_enum enumerate_IC(std::string IC_str) {
 //   }
 // };
 
-} // end anonymous namespace
+}  // end anonymous namespace
 
 Params::Params(const std::string& yaml_name) {
   YAML::Node file_params = YAML::LoadFile(yaml_name);
@@ -90,8 +90,7 @@ Params::Params(const std::string& yaml_name) {
   IC_str = file_params["IC_type"].as<std::string>();
   IC_type = enumerate_IC(IC_str);
   X0 = file_params["X0"].as<Real>();
-  for (auto iter : file_params["omega"])
-  {
+  for (auto iter : file_params["omega"]) {
     omega.push_back(iter.as<Real>());
   }
   maxT = file_params["maxT"].as<Real>();
@@ -111,7 +110,9 @@ void Params::print_summary() {
   std::cout << "Np = " << Np << "\n";
   std::cout << "IC type = " << IC_str << "\n";
   std::cout << "omega = [";
-  for (auto i : omega) {std::cout << i << " ";}
+  for (auto i : omega) {
+    std::cout << i << " ";
+  }
   std::cout << "] \n";
   std::cout << "X0 = " << X0 << "\n";
   std::cout << "maxT = " << maxT << "\n";
@@ -121,7 +122,8 @@ void Params::print_summary() {
   std::cout << "cutdist = " << cutdist << "\n";
   std::cout << "pFile = " << pFile << "\n";
   std::cout << "nSteps = " << nSteps << "\n";
-  std::cout << "*************************************************************\n";
+  std::cout
+      << "*************************************************************\n";
 }
 
 // constructor for WriteParticles object that takes in the filename f and
@@ -146,7 +148,8 @@ void ParticleIO::write(const ko::View<Real*>& X, const Params& pars,
 
 // constructor that places all particles in the same place (X0)
 // NOTE: uses pre-defined random seed
-// FIXME: make a new constructor that seeds from clock-time or user-provided seed
+// FIXME: make a new constructor that seeds from clock-time or user-provided
+// seed
 Particles::Particles(std::string _input_file)
     : params(install_prefix + _input_file),
       particleIO(install_prefix + std::string("/data/") +
@@ -183,7 +186,7 @@ void Particles::initialize_positions(Params params) {
       auto hX = ko::create_mirror_view(X);
       Real dx = (params.omega[1] - params.omega[0]) /
                 static_cast<Real>(params.Np - 1);
-      for (auto i = 0; i < params.Np - 1; ++i){
+      for (auto i = 0; i < params.Np - 1; ++i) {
         hX(i) = static_cast<Real>(params.omega[0] + dx * i);
       }
       hX(params.Np - 1) = params.omega[1];
@@ -191,9 +194,9 @@ void Particles::initialize_positions(Params params) {
       break;
     }
     case uniform: {
-      ko::parallel_for(params.Np, RandomUniform<RandPoolType>(X, rand_pool,
-                                                              params.omega[0],
-                                                              params.omega[1]));
+      ko::parallel_for(
+          params.Np, RandomUniform<RandPoolType>(X, rand_pool, params.omega[0],
+                                                 params.omega[1]));
       break;
     }
   }
@@ -201,22 +204,21 @@ void Particles::initialize_positions(Params params) {
 
 // parallelized random walk function that calls the RandomWalk functor
 void Particles::random_walk() {
-  ko::parallel_for(params.Np, RandomWalk<RandPoolType>(X, rand_pool, 0.0,
-                                                       2.0 * D() * dt()));
+  ko::parallel_for(
+      params.Np, RandomWalk<RandPoolType>(X, rand_pool, 0.0, 2.0 * D() * dt()));
 }
 
 void Particles::mass_transfer() {
   spmat_type mat = get_transfer_mat();
   auto x = ko::View<Real*>("x", params.Np);
   auto b = ko::View<Real*>("b", params.Np);
-  for (int i = 0; i < params.Np; ++i)
-  {
+  for (int i = 0; i < params.Np; ++i) {
     x(i) = i;
   }
   KokkosSparse::spmv("N", 1.0, mat, x, 0.0, b);
-  std::cout << "b = " << "\n";
-  for (int i = 0; i < params.Np; ++i)
-  {
+  std::cout << "b = "
+            << "\n";
+  for (int i = 0; i < params.Np; ++i) {
     std::cout << b(i) << "\n";
   }
 }
@@ -237,7 +239,8 @@ spmat_type Particles::get_transfer_mat() {
         }
       },
       nnz);
-  ko::parallel_scan("create_reduction_maskmat", Np2,
+  ko::parallel_scan(
+      "create_reduction_maskmat", Np2,
       KOKKOS_LAMBDA(const int& i, Real& update, const bool final) {
         const Real val_i = mask(i);
         if (final) {
@@ -256,7 +259,6 @@ spmat_type Particles::sparse_kernel_mat(const ko::View<Real**>& dmat,
   auto col = ko::View<int*>("col", nnz);
   auto val = ko::View<Real*>("val", nnz);
   auto rowmap = ko::View<int*>("rowmap", params.Np + 1);
-  // auto diagmask = ko::View<int*>("diagmask", nnz);
   ko::deep_copy(rowmap, 0.0);
   ko::deep_copy(col, 0.0);
   ko::deep_copy(val, 0.0);
@@ -269,15 +271,16 @@ spmat_type Particles::sparse_kernel_mat(const ko::View<Real**>& dmat,
         if (dmat(i, j) <= cutdist) {
           row(idx) = i;
           col(idx) = j;
-          val(idx)= exp(pow(dmat(i, j), 2) / -params.denom) / sqrt(params.denom * pi);
+          val(idx) =
+              exp(pow(dmat(i, j), 2) / -params.denom) / sqrt(params.denom * pi);
         }
       });
   // ***NOTE: possibly sort by row here?***
   ko::parallel_for(
       "compute_rowmap", nnz,
       KOKKOS_LAMBDA(const int& i) { rowmap(row(i) + 1)++; });
-  ko::parallel_scan("finalize_rowmap",
-      params.Np + 1,
+  ko::parallel_scan(
+      "finalize_rowmap", params.Np + 1,
       KOKKOS_LAMBDA(const int& i, int& update, const bool final) {
         const int val_i = rowmap(i);
         update += val_i;
@@ -293,10 +296,9 @@ spmat_type Particles::sparse_kernel_mat(const ko::View<Real**>& dmat,
         }
       });
   // NOTE: we may have to do this more than once if we run into issues.
-    // I suspect we should be ok, though, since we still guarantee symmetry
+  // I suspect we should be ok, though, since we still guarantee symmetry
   ko::parallel_for(
       "normalize_mat", nnz, KOKKOS_LAMBDA(const int& i) {
-        // val(i) = val(i) / ((rowcolsum(row(i)) + rowcolsum(col(i))) / 2);
         val(i) = 2.0 * val(i) / (rowcolsum(row(i)) + rowcolsum(col(i)));
       });
   auto diagmap = ko::View<int*>("diagmap", params.Np);
@@ -306,8 +308,7 @@ spmat_type Particles::sparse_kernel_mat(const ko::View<Real**>& dmat,
         rowcolsum(i) = 0.0;
         for (int j = rowmap(i); j < rowmap(i + 1); ++j) {
           rowcolsum(i) += val(j);
-          if (col(j) == i)
-          {
+          if (col(j) == i) {
             diagmap(i) = j;
           }
         }
@@ -316,66 +317,15 @@ spmat_type Particles::sparse_kernel_mat(const ko::View<Real**>& dmat,
       "creat_transfer_mat", params.Np, KOKKOS_LAMBDA(const int& i) {
         val(diagmap(i)) = val(diagmap(i)) + 1.0 - rowcolsum(row(diagmap(i)));
       });
-  std::cout << "i, row, col, val" << "\n";
-  for (int i = 0; i < nnz; ++i)
-  {
-    std::cout << i << ", " << row(i) << ", " << col(i) << ", " << val(i) << ", " << "\n";
+  std::cout << "i, row, col, val"
+            << "\n";
+  for (int i = 0; i < nnz; ++i) {
+    std::cout << i << ", " << row(i) << ", " << col(i) << ", " << val(i) << ", "
+              << "\n";
   }
   spmat_type kmat("sparse_transfer_mat", params.Np, params.Np, nnz, val, rowmap,
                   col);
   return kmat;
 }
-
-// spmat_type Particles::get_transfer_mat(spmat_type& kmat) {
-//   spmat_type tmat;
-
-//   auto ones = ko::View<Real*>("ones", params.Np);
-//   auto rowsum = ko::View<Real*>("rowsum", params.Np);
-//   auto colsum = ko::View<Real*>("colsum", params.Np);
-//   ko::deep_copy(ones, 1.0);
-//   // NOTE: for matrix A and compatible column vector x of all 1's,
-//     // rowsum(A) = Ax
-//     // colsum(A) = transpose(A)x
-//   KokkosSparse::spmv("N", 1.0, kmat, ones, 0.0, rowsum);
-//   std::cout << "rowsum = " << "\n";
-//   for (int i = 0; i < params.Np; ++i)
-//   {
-//     std::cout << rowsum(i) << "\n";
-//   }
-//   auto rowmap = ko::View<int*>("rowmap", params.Np + 1);
-//   auto col = ko::View<int*>("col", params.Np);
-//   auto val = ko::View<Real*>("val", params.Np);
-//   ko::deep_copy(rowmap, params.Np);
-//   ko::parallel_for(
-//       "create_norm_vector", params.Np,
-//       KOKKOS_LAMBDA(const int& i) {
-//         rowmap(i) = i;
-//         col(i) = i;
-//         val(i) = ones(i) / rowsum(i);
-//       });
-//   spmat_type norm_mat("sparse_normmat", params.Np, params.Np, params.Np, val, rowmap,
-//                   col);
-//   // spmat_type input_copy(kmat);
-//   // Create KokkosKernelHandle
-//   using KernelHandle = KokkosKernels::Experimental::KokkosKernelsHandle<
-//       Offset, Ordinal, Scalar, execution_space, memory_space, memory_space>;
-//   KernelHandle kh;
-//   kh.set_team_work_size(16);
-//   kh.set_dynamic_scheduling(true);
-//   // std::string myalg("SPGEMM_KK_SPEED");
-//   //   KokkosSparse::SPGEMMAlgorithm spgemm_algorithm =
-//   //       KokkosSparse::StringToSPGEMMAlgorithm(myalg);
-//   //   kh.create_spgemm_handle(spgemm_algorithm);
-//   // KokkosSparse::spgemm_numeric(kh, kmat, false, norm_mat, false, tmat);
-//   // std::cout << "tmat = " << "\n";
-//   // for (int i = 0; i < params.Np; ++i)
-//   // {
-//   //   for (int j = 0; j < params.Np; ++j)
-//   //   {
-//   //     std::cout << tmat(i, j) << "\n";
-//   //   }
-//   // }
-//   return tmat;
-// }
 
 }  // namespace particles
