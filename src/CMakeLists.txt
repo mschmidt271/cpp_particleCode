@@ -41,7 +41,14 @@ target_include_directories(parPT PUBLIC
                            ${PARPT_INCDIRS}
                           )
 
+set(tests "MT_only"; "RW_only"; "RWMT")
+
 install(TARGETS parPT Utils)
 install(DIRECTORY data DESTINATION ${CMAKE_INSTALL_PREFIX})
+install(DIRECTORY tests DESTINATION ${CMAKE_INSTALL_PREFIX})
+foreach(test ${tests})
+  install(PROGRAMS tests/${test}/run_${test}.sh DESTINATION ${CMAKE_INSTALL_PREFIX}/tests/${test})
+endforeach()
 # NOTE: PROGRAMS (vs. FILES) will automatically make the shell script executable
 install(PROGRAMS run.sh DESTINATION ${CMAKE_INSTALL_PREFIX})
+install(PROGRAMS plot.sh DESTINATION ${CMAKE_INSTALL_PREFIX})

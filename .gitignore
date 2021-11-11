@@ -1,2 +1,3 @@
 build
 parPT_config.h
+*.ipynb_checkpoints*

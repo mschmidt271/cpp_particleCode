@@ -90,16 +90,16 @@ struct RandomWalk {
   typedef Real Scalar;
   typedef typename RandPool::generator_type gen_type;
 
-  // mean and variance of the normal random variable
-  Scalar mean, var;
+  // mean and std deviation of the normal random variable
+  Scalar mean, stddev;
 
   KOKKOS_INLINE_FUNCTION
   void operator()(int i) const {
     // Get a random number state from the pool for the active thread
     gen_type rgen = rand_pool.get_state();
 
-    // draw random normal numbers, with mean and variance provided
-    pvec(i) = pvec(i) + rgen.normal(mean, var);
+    // draw random normal numbers, with mean and std deviation provided
+    pvec(i) = pvec(i) + rgen.normal(mean, stddev);
 
     // Give the state back, which will allow another thread to acquire it
     rand_pool.free_state(rgen);
@@ -107,36 +107,40 @@ struct RandomWalk {
 
   // Constructor, Initialize all members
   RandomWalk(ko::View<Real*> pvec_, RandPool rand_pool_, Scalar mean_,
-             Scalar var_)
-      : pvec(pvec_), rand_pool(rand_pool_), mean(mean_), var(var_) {}
+             Scalar stddev_)
+      : pvec(pvec_), rand_pool(rand_pool_), mean(mean_), stddev(stddev_) {}
 
 };  // end RandomWalk functor
 
-enum IC_enum { point, uniform, equi };
+enum IC_enum_space { point_loc, uniform, equi, hat };
+enum IC_enum_mass { point_mass, heaviside, gaussian };
 
 // class holding simulation parameters
 class Params {
  public:
   int Np, nSteps;
-  Real X0, maxT, dt, D, denom, cdist_coeff, cutdist;
-  std::string IC_str;
+  Real X0_mass, X0_space, maxT, dt, D, pctRW, denom, cdist_coeff, cutdist, hat_pct;
+  std::string IC_str_space, IC_str_mass;
   std::vector<Real> omega;
   std::string pFile;
-  IC_enum IC_type;
+  IC_enum_space IC_type_space;
+  IC_enum_mass IC_type_mass;
   void set_values(const std::string& yaml_name);
   void print_summary();
   Params() = default;
   Params(const std::string& yaml_name);
+  void enumerate_IC(std::string IC_str, YAML::Node yml, bool space);
 };
 
 // class for writing particle output
 class ParticleIO {
  private:
-  std::ofstream outFile;
+  std::ofstream outfile;
 
  public:
   ParticleIO(std::string f);
-  void write(const ko::View<Real*>& p, const Params& pars, int i);
+  void write(const ko::View<Real*>& X, const ko::View<Real*>& mass,
+             const Params& pars, int i);
 };
 
 // class for particles and associated methods
@@ -144,8 +148,12 @@ class Particles {
  public:
   // real-valued position
   ko::View<Real*> X;
+  // mass carried by particles
+  ko::View<Real*> mass;
+  // mask for distmat reduction
+  ko::View<Real*> mask;
   // parameter views
-  ko::View<Real> D, dt, Np;
+  ko::View<Real> D, pctRW, dt, Np;
   Params params;
   // typedef and variable for the random pool, used by the kokkos RNG
   // Note: there's also a 1024-bit generator, but that is probably overkill
@@ -156,10 +164,11 @@ class Particles {
   // constructor that specifies the random number seed
   Particles(std::string input_file, int rand_seed);
   void initialize_positions(Params params);
+  void initialize_masses(Params params);
   void random_walk();
   void mass_transfer();
   spmat_type get_transfer_mat();
-  spmat_type sparse_kernel_mat(const ko::View<Real**>& dmat, const int& nnz,
+  spmat_type sparse_kernel_mat(const int& nnz,
                                const ko::View<Real*>& mask);
 };
 
