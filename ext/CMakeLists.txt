@@ -31,7 +31,7 @@ else()
   set(KOKKOS_INCLUDE_DIR "${PROJECT_BINARY_DIR}/include")
   set(KOKKOS_LIBRARY_DIR "${PROJECT_BINARY_DIR}/lib")
   set(KOKKOS_LIBRARY ${KOKKOS_LIBRARY_DIR}/libkokkoscore.a)
-  set(KOKKOS_LIBDIR $ENV{KOKKOS_LIBDIR})
+  # set(KOKKOS_LIBDIR $ENV{KOKKOS_LIBDIR})
 endif()
 
 add_library(kokkos STATIC IMPORTED GLOBAL)
@@ -88,7 +88,7 @@ else()
   set(KOKKOSKERNELS_INCLUDE_DIR "${PROJECT_BINARY_DIR}/include")
   set(KOKKOSKERNELS_LIBRARY_DIR "${PROJECT_BINARY_DIR}/lib")
   set(KOKKOSKERNELS_LIBRARY ${KOKKOSKERNELS_LIBRARY_DIR}/libkokkoskernels.a)
-  set(KOKKOS_LIBDIR $ENV{KOKKOS_LIBDIR})
+  # set(KOKKOS_LIBDIR $ENV{KOKKOS_LIBDIR})
 endif()
 
 add_library(kokkoskernels STATIC IMPORTED GLOBAL)
@@ -96,7 +96,7 @@ set_target_properties(kokkoskernels PROPERTIES IMPORTED_LOCATION ${KOKKOSKERNELS
 if (NOT EXISTS ${KOKKOSKERNELS_LIBRARY})
   message(STATUS "Building Kokkos Kernels as external project")
   update_submodules()
-  set(KOKKOS_CONFIG_DIR ${KOKKOS_LIBDIR}/cmake/Kokkos)
+  set(KOKKOS_CONFIG_DIR ${KOKKOS_LIBRARY_DIR}/cmake/Kokkos)
   set(KOKKOSKERNELS_CMAKE_OPTS -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
                                -DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR}
                                -DKokkos_DIR=${KOKKOS_CONFIG_DIR}

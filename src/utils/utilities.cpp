@@ -84,7 +84,7 @@ void Params::print_summary() {
   for (auto i : omega) {
     std::cout << i << " ";
   }
-  std::cout << "] \n";
+  std::cout << "\b \b] \n";
   std::cout << "IC type (space) = " << IC_str_space << "\n";
   std::cout << "IC type (mass) = " << IC_str_mass << "\n";
   if (IC_type_space == point_loc) {

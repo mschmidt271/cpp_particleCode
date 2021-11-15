@@ -1,4 +1,3 @@
-# need this include dir for yaml-cpp
 include_directories(${PARPT_INCDIRS})
 # add utilities.cpp as a library
 add_library(Utils utilities.cpp)

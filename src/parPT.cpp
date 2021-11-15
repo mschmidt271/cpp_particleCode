@@ -36,11 +36,12 @@ int main(int argc, char* argv[]) {
   // make sure the input file is specified, or print usage and exit
   if (argc < 2) usage(argv[0]);
 
-  ko::initialize();
+  ko::initialize(argc, argv);
 
   {  // Kokkos scope
     printf("Kokkos execution space is: %s\n",
            typeid(ko::DefaultExecutionSpace).name());
+    // ko::print_configuration(std::cout, true);
 
     // get the input file name from command line argument
     std::string input_file(argv[1]);
