@@ -21,6 +21,16 @@ macro(update_submodules)
   endif()
 endmacro()
 
+#----------------------------------------------------------------------------
+# Dynamic loading library
+#----------------------------------------------------------------------------
+if (NOT APPLE)
+  find_library(DL_LIBRARY libdl${CMAKE_SHARED_LIBRARY_SUFFIX} REQUIRED)
+  add_library(dl SHARED IMPORTED GLOBAL)
+  set_target_properties(dl PROPERTIES IMPORTED_LOCATION ${DL_LIBRARY})
+  set(EXT_LIBRARIES dl) # Required by kokkoscore.
+endif()
+
 # FIXME: this should be done in a setup script, referencing a machine file
 if (DEFINED ENV{KOKKOS_LIBRARY})
   set(KOKKOS_INCLUDE_DIR $ENV{KOKKOS_INCDIR})
@@ -29,8 +39,8 @@ if (DEFINED ENV{KOKKOS_LIBRARY})
   message(STATUS "Kokkos found at ${KOKKOS_LIBRARY}")
 else()
   set(KOKKOS_INCLUDE_DIR "${PROJECT_BINARY_DIR}/include")
-  set(KOKKOS_LIBRARY_DIR "${PROJECT_BINARY_DIR}/lib")
-  set(KOKKOS_LIBRARY ${KOKKOS_LIBRARY_DIR}/libkokkoscore.a)
+  set(KOKKOS_LIBRARY_DIR "${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}")
+  set(KOKKOS_LIBRARY "${KOKKOS_LIBRARY_DIR}/libkokkoscore.a")
   # set(KOKKOS_LIBDIR $ENV{KOKKOS_LIBDIR})
 endif()
 
@@ -86,7 +96,7 @@ if (DEFINED ENV{KOKKOSKERNELS_LIBRARY})
   message(STATUS "Kokkos Kernels found at ${KOKKOSKERNELS_LIBRARY}")
 else()
   set(KOKKOSKERNELS_INCLUDE_DIR "${PROJECT_BINARY_DIR}/include")
-  set(KOKKOSKERNELS_LIBRARY_DIR "${PROJECT_BINARY_DIR}/lib")
+  set(KOKKOSKERNELS_LIBRARY_DIR "${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}")
   set(KOKKOSKERNELS_LIBRARY ${KOKKOSKERNELS_LIBRARY_DIR}/libkokkoskernels.a)
   # set(KOKKOS_LIBDIR $ENV{KOKKOS_LIBDIR})
 endif()
@@ -166,12 +176,13 @@ list(REMOVE_DUPLICATES EXT_INCDIRS)
 set(PARPT_INCDIRS ${PARPT_INCDIRS};${EXT_INCDIRS} PARENT_SCOPE)
 
 if (${KOKKOS_LIBRARY_DIR} MATCHES ${PROJECT_BINARY_DIR}) # we built kokkos
-  install(FILES ${KOKKOS_LIBRARY} DESTINATION lib)
+  install(FILES ${KOKKOS_LIBRARY} DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()
 if (${KOKKOSKERNELS_LIBRARY_DIR} MATCHES ${PROJECT_BINARY_DIR}) # we built kokkos kernels
-  install(FILES ${KOKKOSKERNELS_LIBRARY} DESTINATION lib)
+  install(FILES ${KOKKOSKERNELS_LIBRARY} DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()
 if (${YAML_CPP_LIBRARY_DIR} MATCHES ${PROJECT_BINARY_DIR}) # we built yaml-cpp
+  # note that yaml-cpp is hard-coded to install to "lib"
   install(FILES ${YAML_CPP_LIBRARY} DESTINATION lib)
 endif()
 

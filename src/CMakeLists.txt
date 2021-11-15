@@ -32,8 +32,8 @@ message(STATUS "Installation prefix is ${CMAKE_INSTALL_PREFIX}")
 # add the executable and link the libraries
 add_executable(parPT parPT.cpp)
 target_link_libraries(parPT
+		      Utils
                       ${LIBRARIES}
-                      Utils
                       )
 
 # add the include directories

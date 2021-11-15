@@ -5,6 +5,9 @@ export OMP_NUM_THREADS=8
 export OMP_PROC_BIND=spread
 export OMP_PLACES=cores
 
+# whether we are on a remote computer and don't want to plot
+export remote=true
+
 # simple kernel timer location
 # export simple_kt=true
 # export KOKKOS_PROFILE_LIBRARY=/Users/mjschm/kokkos-tools/profiling/simple-kernel-timer/kp_kernel_timer.so
@@ -34,7 +37,9 @@ then
     kp_reader *.dat > prof_results.txt
     # echo "b"
     rm *.dat
-    subl prof_results.txt
+elif [ "$remote" = true ]
+then
+    ./bin/parPT /data/particleParams.yaml -v
 else
     # run the program and redirect the error output
     ./bin/parPT /data/particleParams.yaml --kokkos-threads=8 -v 2> data/a.err
