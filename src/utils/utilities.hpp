@@ -135,7 +135,7 @@ class Params {
 // class for writing particle output
 class ParticleIO {
  private:
-  std::ofstream outfile;
+  FILE *outfile;
 
  public:
   ParticleIO(std::string f);

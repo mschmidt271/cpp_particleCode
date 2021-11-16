@@ -107,7 +107,7 @@ void Params::print_summary() {
 
 // constructor for WriteParticles object that takes in the filename f and
 // creates an outfile object
-ParticleIO::ParticleIO(std::string f) : outfile(f) {}
+ParticleIO::ParticleIO(std::string f) { outfile = fopen(f.c_str(), "w"); }
 
 void ParticleIO::write(const ko::View<Real*>& X, const ko::View<Real*>& mass,
                        const Params& pars, int tStep) {
@@ -116,37 +116,29 @@ void ParticleIO::write(const ko::View<Real*>& X, const ko::View<Real*>& mass,
   ko::deep_copy(hX, X);
   ko::deep_copy(hmass, mass);
   if (tStep == 0) {
-    outfile << pars.Np << " " << pars.nSteps << "\n";
-    outfile << pars.IC_type_space << " ";
-    outfile << pars.IC_type_mass << " ";
+    fprintf(outfile, "%i %i\n", pars.Np, pars.nSteps);
+    fprintf(outfile, "%i ", pars.IC_type_space);
+    fprintf(outfile, "%i ", pars.IC_type_mass);
     for (auto i : pars.omega) {
-      outfile << i << " ";
+      fprintf(outfile, "%g ", i);
     }
     if (pars.IC_type_space == point_loc) {
-      outfile << pars.X0_space << " ";
-      outfile << -999 << " ";
+      fprintf(outfile, "%g -999 ", pars.X0_space);
     } else if (pars.IC_type_space == hat) {
-      outfile << pars.hat_pct << " ";
-      outfile << -999 << " ";
+      fprintf(outfile, "%g -999 ", pars.hat_pct);
     }
     else if (pars.IC_type_space == equi) {
-      outfile << -999 << " ";
-      outfile << -999 << " ";
+      fprintf(outfile, "-999 -999 ");
     }
-    outfile << pars.X0_mass << " ";
-    outfile << pars.maxT << " ";
-    outfile << pars.dt << " ";
-    outfile << pars.D << " ";
-    outfile << pars.pctRW << " ";
-    outfile << pars.cdist_coeff << " ";
-    outfile << pars.cutdist << "\n";
-    for (size_t i = 0; i < hX.extent(0); ++i) {
-      outfile << hX(i) << " " << hmass(i) << "\n";
-    }
-  } else {
-    for (size_t i = 0; i < hX.extent(0); ++i) {
-      outfile << hX(i) << " " << hmass(i) << "\n";
-    }
+    fprintf(outfile, "%g %g %g %g %g %g %g\n", pars.X0_mass, pars.maxT, pars.dt,
+            pars.D, pars.pctRW, pars.cdist_coeff, pars.cutdist);
+      for (size_t i = 0; i < hX.extent(0); ++i) {
+        fprintf(outfile, "%g %g\n", hX(i), hmass(i));
+      }
+    } else {
+      for (size_t i = 0; i < hX.extent(0); ++i) {
+        fprintf(outfile, "%g %g\n", hX(i), hmass(i));
+      }
   }
 }
 
@@ -365,7 +357,7 @@ spmat_type Particles::sparse_kernel_mat(const int& nnz,
         }
       });
   ko::parallel_for(
-      "creat_transfer_mat", params.Np, KOKKOS_LAMBDA(const int& i) {
+      "create_transfer_mat", params.Np, KOKKOS_LAMBDA(const int& i) {
         val(diagmap(i)) = val(diagmap(i)) + 1.0 - rowcolsum(row(diagmap(i)));
       });
   // std::cout << "i, row, col, val"
