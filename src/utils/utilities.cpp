@@ -269,7 +269,7 @@ spmat_type Particles::get_transfer_mat() {
   ko::parallel_reduce(
       "sum nnz", ko::MDRangePolicy<ko::Rank<2>>({0, 0}, {params.Np, params.Np}),
       KOKKOS_LAMBDA(const int& i, const int& j, int& val) {
-        Real dist = abs(X(i) - X(j));
+        Real dist = fabs(X(i) - X(j));
         int idx = j + (i * params.Np);
         mask(idx)= 0;
         if (dist <= cutdist) {
@@ -309,7 +309,7 @@ spmat_type Particles::sparse_kernel_mat(const int& nnz,
       ko::MDRangePolicy<ko::Rank<2>>({0, 0}, {Np, Np}),
       KOKKOS_LAMBDA(const int& i, const int& j) {
         int idx = mask(j + (i * Np));
-        Real d = abs(X(i) - X(j));
+        Real d = fabs(X(i) - X(j));
         if (d <= cutdist) {
           row(idx) = i;
           col(idx) = j;
