@@ -160,7 +160,7 @@ Particles::Particles(std::string _input_file)
   ko::deep_copy(pctRW, params.pctRW);
   dt = ko::View<Real>("dt");
   ko::deep_copy(dt, params.dt);
-  Np = ko::View<Real>("Np");
+  Np = ko::View<int>("Np");
   ko::deep_copy(Np, params.Np);
 
   // initialize the X view
@@ -240,21 +240,21 @@ void Particles::initialize_masses(Params params) {
 // parallelized random walk function that calls the RandomWalk functor
 void Particles::random_walk() {
   ko::Profiling::pushRegion("RW_fxn_pre-if");
-  auto hpctRW = ko::create_mirror_view(pctRW);
-  ko::deep_copy(hpctRW, pctRW);
-  if (hpctRW() > 0.0) {
+  // auto hpctRW = ko::create_mirror_view(pctRW);
+  // ko::deep_copy(hpctRW, pctRW);
+  if (params.pctRW > 0.0) {
     ko::Profiling::pushRegion("RW_fxn");
-    Real var = sqrt(2.0 * pctRW() * D() * dt());
+    // Real var = sqrt(2.0 * pctRW() * D() * dt());
     ko::parallel_for(params.Np,
                      RandomWalk<RandPoolType>(X, rand_pool, 0.0,
-                                              var));
+                                              2.0 * params.pctRW * params.D * params.dt));
     ko::Profiling::popRegion();
     ko::Profiling::popRegion();
   }
 }
 
 void Particles::mass_transfer() {
-  if (pctRW() < 1.0)
+  if (params.pctRW < 1.0)
   {
     ko::Profiling::pushRegion("build_Tmat");
     spmat_type mat = get_transfer_mat();
@@ -268,20 +268,25 @@ void Particles::mass_transfer() {
 }
 
 spmat_type Particles::get_transfer_mat() {
-  Real Np2 = pow(params.Np, 2);
+  int Np2 = pow(params.Np, 2);
   // auto dmat = ko::View<Real**>("dist_mat", params.Np, params.Np);
-  Real cutdist = params.cutdist;
+  // Real cutdist = params.cutdist;
+  auto dcutdist = ko::View<Real>("cutdist");
+  ko::deep_copy(dcutdist, params.cutdist);
   int nnz = 0;
   // auto mask = ko::View<Real*>("idx_mask", Np2);
+  auto lX = X;
+  auto lNp = Np;
+  auto lmask = mask;
   ko::parallel_reduce(
       "sum nnz", ko::MDRangePolicy<ko::Rank<2>>({0, 0}, {params.Np, params.Np}),
       KOKKOS_LAMBDA(const int& i, const int& j, int& val) {
-        Real dist = fabs(X(i) - X(j));
-        int idx = j + (i * params.Np);
-        mask(idx)= 0;
-        if (dist <= cutdist) {
+        Real dist = fabs(lX(i) - lX(j));
+        int idx = j + (i * lNp());
+        lmask(idx)= 0;
+        if (dist <= dcutdist()) {
           val += 1;
-          mask(idx) = 1;
+          lmask(idx) = 1;
         }
       },
       nnz);
