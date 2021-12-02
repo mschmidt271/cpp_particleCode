@@ -153,7 +153,7 @@ class Particles {
   // mask for distmat reduction
   ko::View<Real*> mask;
   // parameter views
-  ko::View<Real> D, pctRW, dt;
+  ko::View<Real> D, pctRW, dt, cutdist;
   ko::View<int> Np;
   Params params;
   // typedef and variable for the random pool, used by the kokkos RNG

@@ -160,6 +160,8 @@ Particles::Particles(std::string _input_file)
   ko::deep_copy(pctRW, params.pctRW);
   dt = ko::View<Real>("dt");
   ko::deep_copy(dt, params.dt);
+  cutdist = ko::View<Real>("cutdist");
+  ko::deep_copy(cutdist, params.cutdist);
   Np = ko::View<int>("Np");
   ko::deep_copy(Np, params.Np);
 
@@ -240,14 +242,12 @@ void Particles::initialize_masses(Params params) {
 // parallelized random walk function that calls the RandomWalk functor
 void Particles::random_walk() {
   ko::Profiling::pushRegion("RW_fxn_pre-if");
-  // auto hpctRW = ko::create_mirror_view(pctRW);
-  // ko::deep_copy(hpctRW, pctRW);
   if (params.pctRW > 0.0) {
     ko::Profiling::pushRegion("RW_fxn");
-    // Real var = sqrt(2.0 * pctRW() * D() * dt());
     ko::parallel_for(params.Np,
-                     RandomWalk<RandPoolType>(X, rand_pool, 0.0,
-                                              2.0 * params.pctRW * params.D * params.dt));
+                     RandomWalk<RandPoolType>(
+                         X, rand_pool, 0.0,
+                         sqrt(2.0 * params.pctRW * params.D * params.dt)));
     ko::Profiling::popRegion();
     ko::Profiling::popRegion();
   }
@@ -269,15 +269,13 @@ void Particles::mass_transfer() {
 
 spmat_type Particles::get_transfer_mat() {
   int Np2 = pow(params.Np, 2);
-  // auto dmat = ko::View<Real**>("dist_mat", params.Np, params.Np);
-  // Real cutdist = params.cutdist;
   auto dcutdist = ko::View<Real>("cutdist");
   ko::deep_copy(dcutdist, params.cutdist);
   int nnz = 0;
-  // auto mask = ko::View<Real*>("idx_mask", Np2);
   auto lX = X;
   auto lNp = Np;
   auto lmask = mask;
+  auto lcutdist = cutdist;
   ko::parallel_reduce(
       "sum nnz", ko::MDRangePolicy<ko::Rank<2>>({0, 0}, {params.Np, params.Np}),
       KOKKOS_LAMBDA(const int& i, const int& j, int& val) {
@@ -293,9 +291,9 @@ spmat_type Particles::get_transfer_mat() {
   ko::parallel_scan(
       "create_reduction_maskmat", Np2,
       KOKKOS_LAMBDA(const int& i, Real& update, const bool final) {
-        const Real val_i = mask(i);
+        const Real val_i = lmask(i);
         if (final) {
-          mask(i) = update;
+          lmask(i) = update;
         }
         update += val_i;
       });
@@ -312,17 +310,21 @@ spmat_type Particles::sparse_kernel_mat(const int& nnz,
   ko::deep_copy(rowmap, 0.0);
   ko::deep_copy(col, 0.0);
   ko::deep_copy(val, 0.0);
-  Real cutdist = params.cutdist;
+  // Real cutdist = params.cutdist;
   int Np = params.Np;
   Real denom = params.denom;
   Real c = sqrt(denom * pi);
+  auto lX = X;
+  auto lNp = Np;
+  auto lmask = mask;
+  auto lcutdist = cutdist;
   ko::parallel_for(
       "form_sparse_kmat",
       ko::MDRangePolicy<ko::Rank<2>>({0, 0}, {Np, Np}),
       KOKKOS_LAMBDA(const int& i, const int& j) {
-        int idx = mask(j + (i * Np));
-        Real d = fabs(X(i) - X(j));
-        if (d <= cutdist) {
+        int idx = lmask(j + (i * lNp));
+        Real d = fabs(lX(i) - lX(j));
+        if (d <= lcutdist) {
           row(idx) = i;
           col(idx) = j;
           val(idx) =
