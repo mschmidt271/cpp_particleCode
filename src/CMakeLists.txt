@@ -31,10 +31,19 @@ message(STATUS "Installation prefix is ${CMAKE_INSTALL_PREFIX}")
 
 # add the executable and link the libraries
 add_executable(parPT parPT.cpp)
+
+if(PARPT_USE_CUDA)
+  find_package(CUDA)
+  cuda_add_cublas_to_target(parPT)
+  list(APPEND LIBRARIES; ${CUDA_cusparse_LIBRARY})
+endif()
+
 target_link_libraries(parPT
-		      Utils
+	            	      Utils
                       ${LIBRARIES}
                       )
+
+message(STATUS "Libraries = ${LIBRARIES}")
 
 # add the include directories
 target_include_directories(parPT PUBLIC

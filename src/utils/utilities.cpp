@@ -151,7 +151,7 @@ Particles::Particles(std::string _input_file)
       particleIO(install_prefix + std::string(params.pFile)),
       rand_pool(5374857) {
   params.print_summary();
-
+  
   // create views of a few parameters on device and deep copy the corresponding
   // values from params
   D = ko::View<Real>("D");
@@ -239,10 +239,17 @@ void Particles::initialize_masses(Params params) {
 
 // parallelized random walk function that calls the RandomWalk functor
 void Particles::random_walk() {
-  if (pctRW() > 0.0) {
+  ko::Profiling::pushRegion("RW_fxn_pre-if");
+  auto hpctRW = ko::create_mirror_view(pctRW);
+  ko::deep_copy(hpctRW, pctRW);
+  if (hpctRW() > 0.0) {
+    ko::Profiling::pushRegion("RW_fxn");
+    Real var = sqrt(2.0 * pctRW() * D() * dt());
     ko::parallel_for(params.Np,
                      RandomWalk<RandPoolType>(X, rand_pool, 0.0,
-                                              sqrt(2.0 * pctRW() * D() * dt())));
+                                              var));
+    ko::Profiling::popRegion();
+    ko::Profiling::popRegion();
   }
 }
 

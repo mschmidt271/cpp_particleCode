@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # these are the serial kokkos/kernels
-export USE_OPENMP=false
+# export USE_OPENMP=false
+# export USE_CUDA=false
 # export KOKKOS_LIBDIR="/Users/mjschm/kokkos/install_clang/lib"
 # export KOKKOS_INCDIR="/Users/mjschm/kokkos/install_clang/include"
 # export KOKKOS_LIBRARY="libkokkoscore.a"
@@ -15,7 +16,7 @@ export USE_OPENMP=false
 # -D CMAKE_CXX_COMPILER=clang++
 
 # these are the gcc/openmp kokkos/kernels
-export USE_OPENMP=true
+# export USE_OPENMP=true
 # export KOKKOS_LIBDIR="/Users/mjschm/kokkos/install_gccomp/lib"
 # export KOKKOS_INCDIR="/Users/mjschm/kokkos/install_gccomp/include"
 # export KOKKOS_LIBRARY="libkokkoscore.a"
@@ -28,10 +29,28 @@ export USE_OPENMP=true
 # use this below when compiling for openmp
 # -D CMAKE_CXX_COMPILER=g++-11
 
+# these are the cuda kokkos/kernels
+export USE_OPENMP=false
+export USE_CUDA=true
+export KOKKOS_LIBDIR="/home/mjschm/kokkos/install/lib64"
+export KOKKOS_INCDIR="/home/mjschm/kokkos/install/include"
+export KOKKOS_LIBRARY="libkokkoscore.a"
+# export KOKKOSKERNELS_LIBDIR="/Users/mjschm/kokkos-kernels/install_gccomp/lib"
+# export KOKKOSKERNELS_INCDIR="/Users/mjschm/kokkos-kernels/install_gccomp/include"
+# export KOKKOSKERNELS_LIBRARY="libkokkoskernels.a"
+# export YAML_CPP_LIBDIR="/Users/mjschm/yaml-cpp/install_gcc11/lib"
+# export YAML_CPP_INCDIR="/Users/mjschm/yaml-cpp/install_gcc11/include"
+# export YAML_CPP_LIBRARY="libyaml-cpp.a"
+
 export OS=`uname -s`
 if [ "$OS" == "Linux" ]
 then
-    export CXX=g++
+    if [ "$USE_CUDA" = true ]
+    then
+      export CXX=$HOME/kokkos/bin/nvcc_wrapper
+    else
+      export CXX=g++
+    fi
     export CC=gcc
 else
     if [ "$USE_OPENMP" = true ]
@@ -51,5 +70,5 @@ cmake .. \
     -D CMAKE_VERBOSE_MAKEFILE=ON\
     -D CMAKE_CXX_COMPILER=$CXX\
     -D CMAKE_C_COMPILER=$CC\
-    -D PARPT_USE_OPENMP=$USE_OPENMP
-
+    -D PARPT_USE_OPENMP=$USE_OPENMP\
+    -D PARPT_USE_CUDA=$USE_CUDA

@@ -23,8 +23,8 @@ export remote=true
 # export PATH=${PATH}:/Users/mjschm/kokkos-tools/profiling/
 
 # kernel logger
-# export KOKKOS_PROFILE_LIBRARY=/Users/mjschm/kokkos-tools/debugging/kernel-logger/kp_kernel_logger.so
-# export PATH=${PATH}:/Users/mjschm/kokkos-tools/debugging/
+export KOKKOS_PROFILE_LIBRARY=${HOME}/kokkos-tools/kp_kernel_logger.so
+export PATH=${PATH}:${HOME}/kokkos-tools/
 
 if [ "$st_stack" = true ]
 then
@@ -41,7 +41,7 @@ elif [ "$remote" = true ]
 then
     ./bin/parPT /data/particleParams.yaml -v
 else
-    # run the program and redirect the error output
+    # run the program and redirect the error output (cpu)
     ./bin/parPT /data/particleParams.yaml --kokkos-threads=8 -v 2> data/a.err
     # echo "c"
     # ./bin/parPT /data/particleParams.yaml -v

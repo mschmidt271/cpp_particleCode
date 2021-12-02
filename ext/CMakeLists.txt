@@ -60,10 +60,21 @@ if (NOT EXISTS ${KOKKOS_LIBRARY})
   endif()
   if (PARPT_USE_OPENMP)
     set(KOKKOS_CMAKE_OPTS ${KOKKOS_CMAKE_OPTS}
-                          -DKokkos_ENABLE_OPENMP=ON)
+                          -DKokkos_ENABLE_OPENMP=ON
+                          -DKokkos_ENABLE_SERIAL=ON)
+  elseif(PARPT_USE_CUDA)
+    set(KOKKOS_CMAKE_OPTS ${KOKKOS_CMAKE_OPTS}
+                          -DKokkos_ENABLE_CUDA=ON
+                          -DKokkos_ENABLE_OPENMP=ON
+                          -DKokkos_ENABLE_SERIAL=ON
+                          -DKokkos_ARCH_MAXWELL52=ON
+                          -DKokkos_ENABLE_CUDA_LAMBDA=ON)
   else()
     set(KOKKOS_CMAKE_OPTS ${KOKKOS_CMAKE_OPTS}
-                          -DKokkos_ENABLE_OPENMP=OFF)
+                          -DKokkos_ENABLE_OPENMP=OFF
+                          -DKokkos_ENABLE_CUDA=OFF
+                          -DKokkos_ENABLE_SERIAL=ON)
+
   endif()
   set(KOKKOS_CMAKE_OPTS ${KOKKOS_CMAKE_OPTS}
                         -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}

@@ -41,27 +41,39 @@ int main(int argc, char* argv[]) {
   {  // Kokkos scope
     printf("Kokkos execution space is: %s\n",
            typeid(ko::DefaultExecutionSpace).name());
-    // ko::print_configuration(std::cout, true);
+    ko::print_configuration(std::cout, true);
 
     // get the input file name from command line argument
     std::string input_file(argv[1]);
     // create the particles object
+    ko::Profiling::pushRegion("ctor");
     Particles particles(input_file);
+    ko::Profiling::popRegion();
 
     int tStep = 0;
-
+    
+    ko::Profiling::pushRegion("write positions");
     // write initial positions
     particles.particleIO.write(particles.X, particles.mass, particles.params,
                                tStep);
+    ko::Profiling::popRegion();
 
+    ko::Profiling::pushRegion("timestepping");
     // begin time stepping
     for (int tStep = 1; tStep <= particles.params.nSteps; ++tStep) {
       // std::cout << "time step = " << tStep << "\n";
+      ko::Profiling::pushRegion("RW");
       particles.random_walk();
+      ko::Profiling::popRegion();
+      ko::Profiling::pushRegion("MT");
       particles.mass_transfer();
+      ko::Profiling::popRegion();
+      ko::Profiling::pushRegion("tstep_write");
       particles.particleIO.write(particles.X, particles.mass, particles.params,
                                  tStep);
+      ko::Profiling::popRegion();
     }
+    ko::Profiling::popRegion();
 
   }  // end Kokkos scope
 
