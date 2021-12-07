@@ -39,7 +39,7 @@ then
     rm *.dat
 elif [ "$remote" = true ]
 then
-    ./bin/parPT /data/particleParams.yaml -v
+    ./bin/parPT /data/particleParams.yaml -v 2> data/a.err
 else
     # run the program and redirect the error output (cpu)
     ./bin/parPT /data/particleParams.yaml --kokkos-threads=8 -v 2> data/a.err

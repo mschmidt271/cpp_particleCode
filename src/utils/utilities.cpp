@@ -258,11 +258,33 @@ void Particles::mass_transfer() {
   {
     ko::Profiling::pushRegion("build_Tmat");
     spmat_type mat = get_transfer_mat();
+    //ko::parallel_for(
+    //  "print_rows", params.Np,
+    //  KOKKOS_LAMBDA(const int& i) {
+    //    auto rowi = mat.row(i);
+    //    const Ordinal numentries = rowi.length;
+    //    for (Ordinal j = 0; j < numentries; ++j) {
+    //      Ordinal colidx = rowi.colidx(j);
+    //      if (colidx == 500) { printf("row = %i, col = %i, val = %g\n", i, j, rowi.value(j)); }
+    //    }
+    //  }
+    //);
     ko::Profiling::popRegion();
     ko::Profiling::pushRegion("matvec");
     auto tmpmass = ko::View<Real*>("tmpmass", params.Np);
     ko::deep_copy(tmpmass, mass);
+    //auto htmass = ko::create_mirror_view(tmpmass);
+    //ko::deep_copy(htmass, tmpmass);
+    //for (Ordinal i = 498; i < 503; ++i) {
+    //printf("tmpmass(%i) = %g", i, htmass(i));
+    //    }
+    //std::cin.get();
     KokkosSparse::spmv("N", 1.0, mat, tmpmass, 0.0, mass);
+    //ko::deep_copy(htmass, mass);
+    //for (Ordinal i = 498; i < 503; ++i) {
+    //  printf("tmpmass(%i) = %g\n", i, htmass(i));
+    //}
+    //std::cin.get(); 
     ko::Profiling::popRegion();
   }
 }
@@ -297,7 +319,17 @@ spmat_type Particles::get_transfer_mat() {
         }
         update += val_i;
       });
-  auto kmat = sparse_kernel_mat(nnz, mask);
+  spmat_type kmat = sparse_kernel_mat(nnz, mask);
+  //ko::parallel_for(
+  //"print_rows", params.Np,
+  //KOKKOS_LAMBDA(const int& i) {
+  //  auto rowi = kmat.row(i);
+  //  const Ordinal numentries = rowi.length;
+  //  for (Ordinal j = 0; j < numentries; ++j) {
+  //    printf("row = %i, col = %i, val = %g\n", i, j, rowi.value(j));
+  //  }
+  //}
+//);
   return kmat;
 }
 
@@ -324,17 +356,28 @@ spmat_type Particles::sparse_kernel_mat(const int& nnz,
       KOKKOS_LAMBDA(const int& i, const int& j) {
         int idx = lmask(j + (i * lNp));
         Real d = fabs(lX(i) - lX(j));
-        if (d <= lcutdist) {
+        if (d <= lcutdist()) {
           row(idx) = i;
           col(idx) = j;
           val(idx) =
               exp(pow(d, 2) / -denom) / c;
+          //if ((i > 499 and i  < 502) and (j > 499 and j < 502)) {
+          //  printf("row, col, val = %i, %i, %g\n", i, j, val(idx));
+          //}
+
         }
       });
+  //std::cin.get();
   // ***NOTE: possibly (probably) sort by row here?***
   ko::parallel_for(
       "compute_rowmap", nnz,
-      KOKKOS_LAMBDA(const int& i) { rowmap(row(i) + 1)++; });
+      KOKKOS_LAMBDA(const int& i) { ko::atomic_increment(&rowmap(row(i) + 1)); });
+  //auto hrowmap = ko::create_mirror_view(rowmap);
+  //ko::deep_copy(hrowmap, rowmap);
+  //for (Ordinal i = 345; i < 350; ++i) {
+  //  printf("rowmap(%i) = %i\n", i, hrowmap(i));
+  //}
+  //std::cin.get();
   ko::parallel_scan(
       "finalize_rowmap", params.Np + 1,
       KOKKOS_LAMBDA(const int& i, int& update, const bool final) {
@@ -344,6 +387,11 @@ spmat_type Particles::sparse_kernel_mat(const int& nnz,
           rowmap(i) = update;
         }
       });
+  //ko::deep_copy(hrowmap, rowmap);
+  //for (Ordinal i = 345; i < 350; ++i) {
+  //  printf("rowmap(%i) = %i\n", i, hrowmap(i));
+  //}
+  //std::cin.get();
   auto rowcolsum = ko::View<Real*>("rowcolsum", params.Np);
   // NOTE: possibly try a team policy here, a la sec. 8.1 in the Kokkos v3 paper
   ko::parallel_for(
@@ -357,7 +405,9 @@ spmat_type Particles::sparse_kernel_mat(const int& nnz,
   ko::parallel_for(
       "normalize_mat", nnz, KOKKOS_LAMBDA(const int& i) {
         val(i) = 2.0 * val(i) / (rowcolsum(row(i)) + rowcolsum(col(i)));
+        //if (i < 10) { printf("val(%i) = %g\n", i, val(i));  }
       });
+  //std::cin.get();
   auto diagmap = ko::View<int*>("diagmap", params.Np);
   // compute the rowsum again for the transfer mat construction
   ko::parallel_for(
@@ -382,6 +432,16 @@ spmat_type Particles::sparse_kernel_mat(const int& nnz,
   // }
   spmat_type kmat("sparse_transfer_mat", params.Np, params.Np, nnz, val, rowmap,
                   col);
+  //ko::parallel_for(
+  //"print_rows", params.Np,
+  //KOKKOS_LAMBDA(const int& i) {
+  //  auto rowi = kmat.row(i);
+  //  const Ordinal numentries = rowi.length;
+  //  for (Ordinal j = 0; j < numentries; ++j) {
+  //    printf("row = %i, col = %i, val = %g\n", i, j, rowi.value(j));
+  //  }
+  //}
+  //);
   return kmat;
 }
 
