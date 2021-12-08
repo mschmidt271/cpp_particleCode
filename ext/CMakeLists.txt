@@ -63,12 +63,14 @@ if (NOT EXISTS ${KOKKOS_LIBRARY})
                           -DKokkos_ENABLE_OPENMP=ON
                           -DKokkos_ENABLE_SERIAL=ON)
   elseif(PARPT_USE_CUDA)
+    message(STATUS "GPU_DEVICE_ARCH_FLAG = $ENV{GPU_DEVICE_ARCH_FLAG}")
     set(KOKKOS_CMAKE_OPTS ${KOKKOS_CMAKE_OPTS}
                           -DKokkos_ENABLE_CUDA=ON
                           -DKokkos_ENABLE_OPENMP=ON
                           -DKokkos_ENABLE_SERIAL=ON
-                          -DKokkos_ARCH_MAXWELL52=ON
+                          $ENV{GPU_DEVICE_ARCH_FLAG}
                           -DKokkos_ENABLE_CUDA_LAMBDA=ON)
+    message(STATUS "KOKKOS_CMAKE_OPTS = ${KOKKOS_CMAKE_OPTS}")
   else()
     set(KOKKOS_CMAKE_OPTS ${KOKKOS_CMAKE_OPTS}
                           -DKokkos_ENABLE_OPENMP=OFF

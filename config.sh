@@ -12,8 +12,6 @@
 # export YAML_CPP_LIBDIR="/Users/mjschm/yaml-cpp/install_clang/lib"
 # export YAML_CPP_INCDIR="/Users/mjschm/yaml-cpp/install_clang/include"
 # export YAML_CPP_LIBRARY="libyaml-cpp.a"
-# use this below when compiling in serial
-# -D CMAKE_CXX_COMPILER=clang++
 
 # these are the gcc/openmp kokkos/kernels
 # export USE_OPENMP=true
@@ -26,15 +24,14 @@
 # export YAML_CPP_LIBDIR="/Users/mjschm/yaml-cpp/install_gcc11/lib"
 # export YAML_CPP_INCDIR="/Users/mjschm/yaml-cpp/install_gcc11/include"
 # export YAML_CPP_LIBRARY="libyaml-cpp.a"
-# use this below when compiling for openmp
-# -D CMAKE_CXX_COMPILER=g++-11
 
 # these are the cuda kokkos/kernels
-export USE_OPENMP=false
-export USE_CUDA=true
-export KOKKOS_LIBDIR="/home/mjschm/kokkos/install/lib64"
-export KOKKOS_INCDIR="/home/mjschm/kokkos/install/include"
-export KOKKOS_LIBRARY="libkokkoscore.a"
+# export USE_OPENMP=false
+# export USE_CUDA=true
+# export KOKKOS_LIBDIR="/home/mjschm/kokkos/install/lib64"
+# export KOKKOS_INCDIR="/home/mjschm/kokkos/install/include"
+# export KOKKOS_LIBRARY="libkokkoscore.a"
+# export BUILD_KOKKOS=false
 # export KOKKOSKERNELS_LIBDIR="/Users/mjschm/kokkos-kernels/install_gccomp/lib"
 # export KOKKOSKERNELS_INCDIR="/Users/mjschm/kokkos-kernels/install_gccomp/include"
 # export KOKKOSKERNELS_LIBRARY="libkokkoskernels.a"
@@ -42,14 +39,31 @@ export KOKKOS_LIBRARY="libkokkoscore.a"
 # export YAML_CPP_INCDIR="/Users/mjschm/yaml-cpp/install_gcc11/include"
 # export YAML_CPP_LIBRARY="libyaml-cpp.a"
 
+# if we are building kokkos as an external project
+export USE_OPENMP=false
+export USE_CUDA=true
+export BUILD_KOKKOS=true
+export DEVICE_ARCH="MAXWELL52"
+export YAML_CPP_LIBDIR="/Users/mjschm/yaml-cpp/install_gcc11/lib"
+export YAML_CPP_INCDIR="/Users/mjschm/yaml-cpp/install_gcc11/include"
+export YAML_CPP_LIBRARY="libyaml-cpp.a"
+
 export OS=`uname -s`
 if [ "$OS" == "Linux" ]
 then
     if [ "$USE_CUDA" = true ]
     then
-      export CXX=$HOME/kokkos/bin/nvcc_wrapper
+        if [ "$BUILD_KOKKOS" = true ]
+        then
+            export CXX=`pwd`/../ext/kokkos/bin/nvcc_wrapper
+            echo $CXX
+            export GPU_DEVICE_ARCH_FLAG="-DKokkos_ARCH_"$DEVICE_ARCH"=ON"
+            echo $GPU_DEVICE_ARCH_FLAG
+        else
+            export CXX=$HOME/kokkos/bin/nvcc_wrapper
+        fi
     else
-      export CXX=g++
+        export CXX=g++
     fi
     export CC=gcc
 else
