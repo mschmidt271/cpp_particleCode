@@ -43,10 +43,12 @@
 export USE_OPENMP=false
 export USE_CUDA=true
 export BUILD_KOKKOS=true
-export DEVICE_ARCH="MAXWELL52"
-export YAML_CPP_LIBDIR="/Users/mjschm/yaml-cpp/install_gcc11/lib"
-export YAML_CPP_INCDIR="/Users/mjschm/yaml-cpp/install_gcc11/include"
-export YAML_CPP_LIBRARY="libyaml-cpp.a"
+# export DEVICE_ARCH="MAXWELL52"
+# Nick's workstation gpu
+export DEVICE_ARCH="TURING75"
+# export YAML_CPP_LIBDIR="/Users/mjschm/yaml-cpp/install_gcc11/lib"
+# export YAML_CPP_INCDIR="/Users/mjschm/yaml-cpp/install_gcc11/include"
+# export YAML_CPP_LIBRARY="libyaml-cpp.a"
 
 export OS=`uname -s`
 if [ "$OS" == "Linux" ]

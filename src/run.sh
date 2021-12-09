@@ -9,10 +9,12 @@ export OMP_PLACES=cores
 export remote=true
 # export laptop=true
 
+export KK_TOOLS_DIR=/home/pfsuser/mjschmidt/kokkos-tools
+
 # simple kernel timer location
 export simple_kt=true
-export KOKKOS_PROFILE_LIBRARY=${HOME}/kokkos-tools/kp_kernel_timer.so
-export PATH=${PATH}:${HOME}/kokkos-tools/
+export KOKKOS_PROFILE_LIBRARY=${KK_TOOLS_DIR}/kp_kernel_timer.so
+export PATH=${PATH}:${KK_TOOLS_DIR}
 
 # space time stack
 # export st_stack=true
@@ -24,8 +26,8 @@ export PATH=${PATH}:${HOME}/kokkos-tools/
 # export PATH=${PATH}:${HOME}/kokkos-tools/profiling/
 
 # kernel logger
-# export KOKKOS_PROFILE_LIBRARY=${HOME}/kokkos-tools/kp_kernel_logger.so
-# export PATH=${PATH}:${HOME}/kokkos-tools/
+# export KOKKOS_PROFILE_LIBRARY=${KK_TOOLS_DIR}/kp_kernel_logger.so
+# export PATH=${PATH}:${KK_TOOLS_DIR}
 
 if [ "$laptop" = true ]
 then
@@ -58,11 +60,11 @@ then
     if [ "$simple_kt" = true ]
     then
         ./bin/parPT /data/particleParams.yaml -v
-        kp_reader *.json > prof_results.txt
-        rm s1024454*.json
+        # kp_reader *.json > prof_results.txt
+        # rm s1024454*.json
+         kp_reader *.dat > prof_results.txt
+         rm clamps-*.dat
         vim prof_results.txt
-        # echo "b"
-        # rm prof_results.txt
     else
         ./bin/parPT /data/particleParams.yaml -v 2> data/a.err
     fi

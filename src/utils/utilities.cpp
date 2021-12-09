@@ -180,9 +180,10 @@ void Particles::initialize_positions(Params params) {
       // deep copy the params X0 (host) to device
       auto X0 = ko::View<Real>("X0");
       ko::deep_copy(X0, params.X0_space);
+      auto lX = X;
       // fill the X view so particles are all located at X0
       ko::parallel_for(
-          "InitX", params.Np, KOKKOS_LAMBDA(const int& i) { X(i) = X0(); });
+          "InitX", params.Np, KOKKOS_LAMBDA(const int& i) { lX(i) = X0(); });
       break;
     }
     case equi: {

@@ -49,6 +49,8 @@ set_target_properties(kokkos PROPERTIES IMPORTED_LOCATION ${KOKKOS_LIBRARY})
 if (NOT EXISTS ${KOKKOS_LIBRARY})
   message(STATUS "Building Kokkos as external project")
   update_submodules()
+  set(KOKKOS_CMAKE_OPTS ${KOKKOS_CMAKE_OPTS}
+                        -DKokkos_ENABLE_DEPRECATED_CODE=OFF)
   if (CMAKE_BUILD_TYPE STREQUAL Release)
     set(KOKKOS_CMAKE_OPTS ${KOKKOS_CMAKE_OPTS}
                           -DKokkos_ENABLE_DEBUG=FALSE
