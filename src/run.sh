@@ -6,10 +6,14 @@ export OMP_PROC_BIND=spread
 export OMP_PLACES=cores
 
 # whether we are on a remote computer and don't want to plot
+# FIXME: change this to string matching so we only need one field
 export remote=true
+export laptop=false
 # export laptop=true
+# export remote=false
 
-export KK_TOOLS_DIR=/home/pfsuser/mjschmidt/kokkos-tools
+# export KK_TOOLS_DIR=/home/pfsuser/mjschmidt/kokkos-tools\
+export KK_TOOLS_DIR=${HOME}/kokkos-tools
 
 # simple kernel timer location
 export simple_kt=true
@@ -39,8 +43,8 @@ then
     elif [ "$simple_kt" = true ]
     then
         ./bin/parPT /data/particleParams.yaml -v
-        kp_reader *.json > prof_results.txt
-        rm s1046231*.json
+        kp_reader *.dat > prof_results.txt
+        rm s1046231*.dat
         subl prof_results.txt
         # echo "b"
         # rm prof_results.txt
@@ -60,10 +64,10 @@ then
     if [ "$simple_kt" = true ]
     then
         ./bin/parPT /data/particleParams.yaml -v
-        # kp_reader *.json > prof_results.txt
-        # rm s1024454*.json
-         kp_reader *.dat > prof_results.txt
-         rm clamps-*.dat
+        kp_reader *.dat > prof_results.txt
+        rm s1024454*.dat
+         # kp_reader *.dat > prof_results.txt
+         # rm clamps-*.dat
         vim prof_results.txt
     else
         ./bin/parPT /data/particleParams.yaml -v 2> data/a.err
