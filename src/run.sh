@@ -1,16 +1,16 @@
 #!/bin/bash
 
 # OpenMP environment variables
-export OMP_NUM_THREADS=8
+export OMP_NUM_THREADS=12
 export OMP_PROC_BIND=spread
 export OMP_PLACES=cores
 
 # whether we are on a remote computer and don't want to plot
 # FIXME: change this to string matching so we only need one field
-export remote=true
-export laptop=false
-# export laptop=true
-# export remote=false
+# export remote=true
+# export laptop=false
+export laptop=true
+export remote=false
 
 # export KK_TOOLS_DIR=/home/pfsuser/mjschmidt/kokkos-tools\
 export KK_TOOLS_DIR=${HOME}/kokkos-tools

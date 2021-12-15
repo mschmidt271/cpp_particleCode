@@ -4,7 +4,7 @@
 #==========================================================================
 
 # number of particles
-Np: 10001
+Np: 5001
 # Np: 6
 # domain limits
 omega: [0, 50]
@@ -36,4 +36,4 @@ pctRW: 0.5
 # e.g., cutoff distance = cdist_coeff * sqrt(beta^-1 * 4 * D * dt)
 cdist_coeff: 6
 # output file name
-pFile: "/data/particles.txt"
+pFile: "/tests/RWMT/particles.txt"

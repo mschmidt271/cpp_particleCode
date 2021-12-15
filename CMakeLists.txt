@@ -23,13 +23,16 @@ if (PARPT_USE_OPENMP)
   set(OMP_FLAGS "-fopenmp")
   message(STATUS "OpenMP flags are: ${OMP_FLAGS}")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OMP_FLAGS}")
-elseif(PARPT_USE_CUDA)
+endif()
+if(PARPT_USE_CUDA)
   set(CUDA_FLAGS "--expt-extended-lambda")
   set(CUDA_FLAGS "${CUDA_FLAGS} --expt-relaxed-constexpr")
   set(CUDA_FLAGS "${CUDA_FLAGS} -fopenmp")
-  set(CUDA_FLAGS "${CUDA_FLAGS} -arch=sm_75")
+  if($ENV{$DEVICE_ARCH} EQUAL "TURING75")
+    set(CUDA_FLAGS "${CUDA_FLAGS} -arch=sm_75")
+  endif()
   message(STATUS "Cuda flags are: ${CUDA_FLAGS}")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CUDA_FLAGS}")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CUDA_FLAGS} ${OMP_FLAGS}")
 endif()
 
 message(STATUS "CMAKE_CXX_FLAGS flags are ${CMAKE_CXX_FLAGS}")
@@ -39,3 +42,7 @@ add_subdirectory(ext)
 
 # add the source directory
 add_subdirectory(src)
+
+# add the profiling directory and make the run script executable
+install(DIRECTORY profiling DESTINATION ${CMAKE_INSTALL_PREFIX})
+install(PROGRAMS profiling/run_profile_ens.sh DESTINATION ${CMAKE_INSTALL_PREFIX}/profiling)
