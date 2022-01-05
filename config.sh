@@ -40,6 +40,20 @@ export YAML_CPP_LIBDIR="${HOME}/yaml-cpp/install/lib"
 export YAML_CPP_INCDIR="${HOME}/yaml-cpp/install/include"
 export YAML_CPP_LIBRARY="libyaml-cpp.a"
 
+# these are the openmp only libs (pete's workstation)
+# export USE_OPENMP=true
+# export USE_CUDA=false
+# export KOKKOS_LIBDIR="${HOME}/kokkos/install_omp_only/lib64"
+# export KOKKOS_INCDIR="${HOME}/kokkos/install_omp_only/include"
+# export KOKKOS_LIBRARY="libkokkoscore.a"
+# export BUILD_KOKKOS=false
+# export KOKKOSKERNELS_LIBDIR="${HOME}/kokkos-kernels/install_omp_only/lib64"
+# export KOKKOSKERNELS_INCDIR="${HOME}/kokkos-kernels/install_omp_only/include"
+# export KOKKOSKERNELS_LIBRARY="libkokkoskernels.a"
+# export YAML_CPP_LIBDIR="${HOME}/yaml-cpp/install/lib"
+# export YAML_CPP_INCDIR="${HOME}/yaml-cpp/install/include"
+# export YAML_CPP_LIBRARY="libyaml-cpp.a"
+
 # if we are building kokkos as an external project
 # export USE_OPENMP=false
 # export USE_CUDA=true
