@@ -10,6 +10,7 @@ export OMP_PLACES=cores
 # export laptop=false
 export laptop=false
 export remote=true
+export run_cuda=true
 
 # location on Nick's workstation
 # export KK_TOOLS_DIR=/home/pfsuser/mjschmidt/kokkos-tools\
@@ -47,21 +48,33 @@ then
     done
 elif [ "$remote" = true ]
 then
-    export ncores=$(grep -c ^processor /proc/cpuinfo)
-    # do a few less so as not to overrun things
-    let "ncores-=6"
-    printf "Running profiler up to $ncores cores\n"
-    for (( ncore = 1; ncore <= 2; ncore++ ))
-    do
-        export OMP_NUM_THREADS=$ncore
-        printf "Running for ${ncore} cores...\n"
-        export f="results/${fname}_${ncore}.txt"
-        ../bin/parPT /data/particleParams.yaml -v > "out/${fname}_${ncore}.out"\
-            2> "err/${fname}_${ncore}.err"
+    if [ "$run_cuda" = false ]
+    then
+        export ncores=$(grep -c ^processor /proc/cpuinfo)
+        # do a few less so as not to overrun things
+        let "ncores-=6"
+        printf "Running profiler up to $ncores cores\n"
+        for (( ncore = 1; ncore <= 2; ncore++ ))
+        do
+            export OMP_NUM_THREADS=$ncore
+            printf "Running for ${ncore} cores...\n"
+            export f="results/${fname}_${ncore}.txt"
+            ../bin/parPT /data/particleParams.yaml -v > "out/${fname}_${ncore}.out"\
+                2> "err/${fname}_${ncore}.err"
+            kp_reader *.dat > $f
+            # pete's workstation
+            rm s1024454*.dat
+            # nick's workstation
+            # rm clamps-*.dat
+        done
+    elif [ "$run_cuda" = true ]
+    then
+        printf "Running profiler using cuda\n"
+        export f="results/${fname}_cuda.txt"
+        ../bin/parPT /data/particleParams.yaml -v > "out/${fname}_cuda.out"\
+            2> "err/${fname}_cuda.err"
         kp_reader *.dat > $f
         # pete's workstation
         rm s1024454*.dat
-        # nick's workstation
-        # rm clamps-*.dat
-    done
+    fi
 fi
