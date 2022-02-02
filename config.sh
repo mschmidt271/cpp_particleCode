@@ -14,31 +14,34 @@
 # export YAML_CPP_LIBRARY="libyaml-cpp.a"
 
 # these are the gcc/openmp libs
-# export USE_OPENMP=true
-# export USE_CUDA=false
-# export KOKKOS_LIBDIR="${HOME}/kokkos/install_gccomp/lib"
-# export KOKKOS_INCDIR="${HOME}/kokkos/install_gccomp/include"
-# export KOKKOS_LIBRARY="libkokkoscore.a"
-# export KOKKOSKERNELS_LIBDIR="${HOME}/kokkos-kernels/install_gccomp/lib"
-# export KOKKOSKERNELS_INCDIR="${HOME}/kokkos-kernels/install_gccomp/include"
-# export KOKKOSKERNELS_LIBRARY="libkokkoskernels.a"
-# export YAML_CPP_LIBDIR="${HOME}/yaml-cpp/install_gcc11/lib"
-# export YAML_CPP_INCDIR="${HOME}/yaml-cpp/install_gcc11/include"
-# export YAML_CPP_LIBRARY="libyaml-cpp.a"
+export USE_OPENMP=true
+export USE_CUDA=false
+export KOKKOS_LIBDIR="${HOME}/kokkos/install_gccomp/lib"
+export KOKKOS_INCDIR="${HOME}/kokkos/install_gccomp/include"
+export KOKKOS_LIBRARY="libkokkoscore.a"
+export KOKKOSKERNELS_LIBDIR="${HOME}/kokkos-kernels/install_gccomp/lib"
+export KOKKOSKERNELS_INCDIR="${HOME}/kokkos-kernels/install_gccomp/include"
+export KOKKOSKERNELS_LIBRARY="libkokkoskernels.a"
+export YAML_CPP_LIBDIR="${HOME}/yaml-cpp/install_gcc11/lib"
+export YAML_CPP_INCDIR="${HOME}/yaml-cpp/install_gcc11/include"
+export YAML_CPP_LIBRARY="libyaml-cpp.a"
+export ARBORX_LIBDIR="${HOME}/ArborX/install_gccomp/lib/cmake/ArborX"
+export ARBORX_INCDIR="${HOME}/ArborX/install_gccomp/include"
+# export ARBORX_LIBRARY="libyaml-cpp.a"
 
 # these are the cuda libs
-export USE_OPENMP=true
-export USE_CUDA=true
-export KOKKOS_LIBDIR="${HOME}/kokkos/install/lib64"
-export KOKKOS_INCDIR="${HOME}/kokkos/install/include"
-export KOKKOS_LIBRARY="libkokkoscore.a"
-export BUILD_KOKKOS=false
-export KOKKOSKERNELS_LIBDIR="${HOME}/kokkos-kernels/install/lib64"
-export KOKKOSKERNELS_INCDIR="${HOME}/kokkos-kernels/install/include"
-export KOKKOSKERNELS_LIBRARY="libkokkoskernels.a"
-export YAML_CPP_LIBDIR="${HOME}/yaml-cpp/install/lib"
-export YAML_CPP_INCDIR="${HOME}/yaml-cpp/install/include"
-export YAML_CPP_LIBRARY="libyaml-cpp.a"
+# export USE_OPENMP=true
+# export USE_CUDA=true
+# export KOKKOS_LIBDIR="${HOME}/kokkos/install/lib64"
+# export KOKKOS_INCDIR="${HOME}/kokkos/install/include"
+# export KOKKOS_LIBRARY="libkokkoscore.a"
+# export BUILD_KOKKOS=false
+# export KOKKOSKERNELS_LIBDIR="${HOME}/kokkos-kernels/install/lib64"
+# export KOKKOSKERNELS_INCDIR="${HOME}/kokkos-kernels/install/include"
+# export KOKKOSKERNELS_LIBRARY="libkokkoskernels.a"
+# export YAML_CPP_LIBDIR="${HOME}/yaml-cpp/install/lib"
+# export YAML_CPP_INCDIR="${HOME}/yaml-cpp/install/include"
+# export YAML_CPP_LIBRARY="libyaml-cpp.a"
 
 # these are the openmp only libs (pete's workstation)
 # export USE_OPENMP=true
