@@ -18,6 +18,7 @@
 #include "KokkosSparse_spmv.hpp"
 #include "parPT_config.h"
 #include "yaml-cpp/yaml.h"
+#include "ArborX.hpp"
 
 namespace particles {
 

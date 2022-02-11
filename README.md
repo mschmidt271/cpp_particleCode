@@ -1,8 +1,10 @@
 # cpp_particleCode
+<!-- use this page when I switch to mkdocs -->
+<!-- https://majianglin2003.medium.com/how-to-use-markdown-and-mkdocs-to-write-and-organize-technical-notes-9aad3f3b9c82 -->
 
 This repository contains a basic random walk particle code, written in C++.
 
-The only current dependencies are __python3__, with __numpy__ and __matplotlib__ (should be installed on Mac, but `brew install python`, `pip install numpy`, and `pip install matplotlib` should get you there if not).
+The only current dependencies are **cmake**, __python3__ with __numpy__ and __matplotlib__. On Mac, your easiest option is to use [homebrew](https://docs.brew.sh/Installation) and then `brew install cmake`, `brew install python`, `pip install numpy`, and `pip install matplotlib`. Note that if python scripts aren't running properly, you may need to use `pip3` in the above.
 
 As it stands, the top of the main script includes a toy example of constructing a sparse matrix using Kokkos Kernels and conducting a matrix-vector multiply, also using Kokkos Kernels.
 

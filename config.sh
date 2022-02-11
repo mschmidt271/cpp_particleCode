@@ -1,32 +1,35 @@
 #!/bin/bash
 
 # these are the serial libs
-# export USE_OPENMP=false
-# export USE_CUDA=false
-# export KOKKOS_LIBDIR="${HOME}/kokkos/install_clang/lib"
-# export KOKKOS_INCDIR="${HOME}/kokkos/install_clang/include"
-# export KOKKOS_LIBRARY="libkokkoscore.a"
-# export KOKKOSKERNELS_LIBDIR="${HOME}/kokkos-kernels/install_clang/lib"
-# export KOKKOSKERNELS_INCDIR="${HOME}/kokkos-kernels/install_clang/include"
-# export KOKKOSKERNELS_LIBRARY="libkokkoskernels.a"
-# export YAML_CPP_LIBDIR="${HOME}/yaml-cpp/install_clang/lib"
-# export YAML_CPP_INCDIR="${HOME}/yaml-cpp/install_clang/include"
-# export YAML_CPP_LIBRARY="libyaml-cpp.a"
+export USE_OPENMP=false
+export USE_CUDA=false
+export KOKKOS_LIBDIR="${HOME}/kokkos/install_clang/lib"
+export KOKKOS_INCDIR="${HOME}/kokkos/install_clang/include"
+export KOKKOS_LIBRARY="libkokkoscore.a"
+export KOKKOSKERNELS_LIBDIR="${HOME}/kokkos-kernels/install_clang/lib"
+export KOKKOSKERNELS_INCDIR="${HOME}/kokkos-kernels/install_clang/include"
+export KOKKOSKERNELS_LIBRARY="libkokkoskernels.a"
+export YAML_CPP_LIBDIR="${HOME}/yaml-cpp/install_clang/lib"
+export YAML_CPP_INCDIR="${HOME}/yaml-cpp/install_clang/include"
+export YAML_CPP_LIBRARY="libyaml-cpp.a"
+# export ARBORX_LIBDIR="${HOME}/ArborX/install_clang/lib/cmake/ArborX"
+# export ARBORX_INCDIR="${HOME}/ArborX/install_clang/{include,include/details}"
+# export ARBORX_LIBRARY="libyaml-cpp.a"
 
 # these are the gcc/openmp libs
-export USE_OPENMP=true
-export USE_CUDA=false
-export KOKKOS_LIBDIR="${HOME}/kokkos/install_gccomp/lib"
-export KOKKOS_INCDIR="${HOME}/kokkos/install_gccomp/include"
-export KOKKOS_LIBRARY="libkokkoscore.a"
-export KOKKOSKERNELS_LIBDIR="${HOME}/kokkos-kernels/install_gccomp/lib"
-export KOKKOSKERNELS_INCDIR="${HOME}/kokkos-kernels/install_gccomp/include"
-export KOKKOSKERNELS_LIBRARY="libkokkoskernels.a"
-export YAML_CPP_LIBDIR="${HOME}/yaml-cpp/install_gcc11/lib"
-export YAML_CPP_INCDIR="${HOME}/yaml-cpp/install_gcc11/include"
-export YAML_CPP_LIBRARY="libyaml-cpp.a"
-export ARBORX_LIBDIR="${HOME}/ArborX/install_gccomp/lib/cmake/ArborX"
-export ARBORX_INCDIR="${HOME}/ArborX/install_gccomp/include"
+# export USE_OPENMP=true
+# export USE_CUDA=false
+# export KOKKOS_LIBDIR="${HOME}/kokkos/install_gccomp/lib"
+# export KOKKOS_INCDIR="${HOME}/kokkos/install_gccomp/include"
+# export KOKKOS_LIBRARY="libkokkoscore.a"
+# export KOKKOSKERNELS_LIBDIR="${HOME}/kokkos-kernels/install_gccomp/lib"
+# export KOKKOSKERNELS_INCDIR="${HOME}/kokkos-kernels/install_gccomp/include"
+# export KOKKOSKERNELS_LIBRARY="libkokkoskernels.a"
+# export YAML_CPP_LIBDIR="${HOME}/yaml-cpp/install_gcc11/lib"
+# export YAML_CPP_INCDIR="${HOME}/yaml-cpp/install_gcc11/include"
+# export YAML_CPP_LIBRARY="libyaml-cpp.a"
+# export ARBORX_LIBDIR="${HOME}/ArborX/install_gccomp/lib/cmake/ArborX"
+# export ARBORX_INCDIR="${HOME}/ArborX/install_gccomp/include"
 # export ARBORX_LIBRARY="libyaml-cpp.a"
 
 # these are the cuda libs
@@ -83,9 +86,9 @@ then
             export CXX=$HOME/kokkos/bin/nvcc_wrapper
         fi
     else
-        export CXX=g++
+        export CXX=mpicxx
     fi
-    export CC=gcc
+    export CC=mpicc
 else
     if [ "$USE_OPENMP" = true ]
     then

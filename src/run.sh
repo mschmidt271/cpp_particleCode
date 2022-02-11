@@ -11,14 +11,16 @@ export OMP_PLACES=cores
 # export laptop=false
 export laptop=true
 export remote=false
+export simple_kt=false
+export plot=false
 
 # export KK_TOOLS_DIR=/home/pfsuser/mjschmidt/kokkos-tools\
-export KK_TOOLS_DIR=${HOME}/kokkos-tools
+# export KK_TOOLS_DIR=${HOME}/kokkos-tools
 
 # simple kernel timer location
-export simple_kt=true
-export KOKKOS_PROFILE_LIBRARY=${KK_TOOLS_DIR}/kp_kernel_timer.so
-export PATH=${PATH}:${KK_TOOLS_DIR}
+# export simple_kt=true
+# export KOKKOS_PROFILE_LIBRARY=${KK_TOOLS_DIR}/kp_kernel_timer.so
+# export PATH=${PATH}:${KK_TOOLS_DIR}
 
 # space time stack
 # export st_stack=true
@@ -49,15 +51,21 @@ then
         # echo "b"
         # rm prof_results.txt
     else
-        # run the program and redirect the error output (cpu)
-        ./bin/parPT /data/particleParams.yaml --kokkos-threads=8 -v 2> data/a.err
-        # echo "c"
-        # ./bin/parPT /data/particleParams.yaml -v
-        cd plotting
-        python3 plotParticles.py3
-        cd ..
-        # run the program and redirect screen and error output
-        # ./parPT.exe > a.out 2> a.err
+        if [ "$plot" = true ]
+        then
+            # run the program and redirect the error output (cpu)
+            ./bin/parPT /data/particleParams.yaml --kokkos-threads=8 -v 2> data/a.err
+            # ./bin/parPT /data/particleParams.yaml -v
+            cd plotting
+            python3 plotParticles.py3
+            cd ..
+        else
+            # run the program and redirect the error output (cpu)
+            ./bin/parPT /data/particleParams.yaml --kokkos-threads=8 -v 2> data/a.err
+            # ./bin/parPT /data/particleParams.yaml -v
+            # run the program and redirect screen and error output
+            # ./parPT.exe > a.out 2> a.err
+        fi
     fi
 elif [ "$remote" = true ]
 then

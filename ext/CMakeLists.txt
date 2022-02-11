@@ -43,6 +43,8 @@ else()
   set(KOKKOS_LIBRARY "${KOKKOS_LIBRARY_DIR}/libkokkoscore.a")
   # set(KOKKOS_LIBDIR $ENV{KOKKOS_LIBDIR})
 endif()
+# this gets used by kkernels and arborx
+set(KOKKOS_CONFIG_DIR ${KOKKOS_LIBRARY_DIR}/cmake/Kokkos)
 
 add_library(kokkos STATIC IMPORTED GLOBAL)
 set_target_properties(kokkos PROPERTIES IMPORTED_LOCATION ${KOKKOS_LIBRARY})
@@ -118,7 +120,7 @@ set_target_properties(kokkoskernels PROPERTIES IMPORTED_LOCATION ${KOKKOSKERNELS
 if (NOT EXISTS ${KOKKOSKERNELS_LIBRARY})
   message(STATUS "Building Kokkos Kernels as external project")
   update_submodules()
-  set(KOKKOS_CONFIG_DIR ${KOKKOS_LIBRARY_DIR}/cmake/Kokkos)
+  # set(KOKKOS_CONFIG_DIR ${KOKKOS_LIBRARY_DIR}/cmake/Kokkos)
   set(KOKKOSKERNELS_CMAKE_OPTS -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
                                -DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR}
                                -DKokkos_DIR=${KOKKOS_CONFIG_DIR}
@@ -182,6 +184,71 @@ endif()
 list(APPEND EXT_INCDIRS ${YAML_CPP_INCLUDE_DIR})
 set(EXT_LIBRARIES ${EXT_LIBRARIES};yaml_cpp)
 
+# FIXME: this should be done in a setup script, referencing a machine file
+if (DEFINED ENV{ARBORX_INCDIR})
+  set(ARBORX_INCLUDE_DIR $ENV{ARBORX_INCDIR})
+  # set(ARBORX_LIBRARY_DIR $ENV{ARBORX_LIBDIR})
+  # set(ARBORX_LIBRARY "$ENV{ARBORX_LIBDIR}/$ENV{ARBORX_LIBRARY}")
+  message(STATUS "ArborX headers found at ${ARBORX_INCLUDE_DIR}")
+  set(EXTERNAL_ARBORX TRUE)
+else()
+  set(ARBORX_INCLUDE_DIR "${PROJECT_BINARY_DIR}/include")
+  set(EXTERNAL_ARBORX FALSE)
+  # set(ARBORX_LIBRARY_DIR "${PROJECT_BINARY_DIR}/lib")
+  # set(ARBORX_LIBRARY ${ARBORX_LIBRARY_DIR}/libyaml-cpp.a)
+  # set(ARBORX_LIBDIR $ENV{ARBORX_LIBDIR})
+endif()
+
+add_library(arborx INTERFACE)
+# set_target_properties(arborx PROPERTIES IMPORTED_LOCATION ${ARBORX_LIBRARY})
+if (NOT EXTERNAL_ARBORX)
+  message(STATUS "Building ArborX as external project")
+  if (CMAKE_BUILD_TYPE STREQUAL Release)
+    set(ARBORX_CMAKE_OPTS ${ARBORX_CMAKE_OPTS}
+                          -DCMAKE_BUILD_TYPE=DEBUG)
+  else()
+    set(ARBORX_CMAKE_OPTS ${ARBORX_CMAKE_OPTS}
+                          -DCMAKE_BUILD_TYPE=RELEASE)
+  endif()
+  if (PARPT_USE_OPENMP)
+    set(ARBORX_CMAKE_OPTS ${ARBORX_CMAKE_OPTS}
+                          -DARBORX_ENABLE_MPI=ON)
+  elseif(PARPT_USE_CUDA)
+    message(STATUS "GPU_DEVICE_ARCH_FLAG = $ENV{GPU_DEVICE_ARCH_FLAG}")
+    set(ARBORX_CMAKE_OPTS ${ARBORX_CMAKE_OPTS}
+                          -DARBORX_ENABLE_MPI=ON)
+    message(STATUS "ARBORX_CMAKE_OPTS = ${ARBORX_CMAKE_OPTS}")
+  else()
+    set(ARBORX_CMAKE_OPTS ${ARBORX_CMAKE_OPTS}
+                          -DARBORX_ENABLE_MPI=OFF)
+
+  endif()
+  set(ARBORX_CMAKE_OPTS -DCMAKE_BUILD_TYPE=DEBUG
+                        -DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR}
+                        -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+                        -DCMAKE_PREFIX_PATH=${KOKKOS_CONFIG_DIR}
+                        -DCMAKE_CXX_EXTENSIONS=OFF
+                        -DARBORX_ENABLE_TESTS=OFF
+                        -DARBORX_ENABLE_EXAMPLES=OFF)
+  ExternalProject_Add(arborx_proj
+                      PREFIX ${CMAKE_CURRENT_BINARY_DIR}/arborx
+                      SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/arborx
+                      BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/arborx
+                      INSTALL_DIR ${PROJECT_BINARY_DIR}
+                      CMAKE_ARGS ${ARBORX_CMAKE_OPTS}
+                      DEPENDS kokkos
+                      BUILD_COMMAND make -j
+                      LOG_CONFIGURE TRUE
+                      LOG_BUILD TRUE
+                      INSTALL_COMMAND make install
+                      LOG_INSTALL TRUE)
+
+  add_dependencies(arborx arborx_proj)
+endif()
+# not sure if this is too hacky, but it appears to work
+list(APPEND EXT_INCDIRS "${PROJECT_BINARY_DIR}/{include,include/details}")
+# set(EXT_LIBRARIES ${EXT_LIBRARIES};ARBORX)
+
 # Add all the libraries to the build system at large.
 set(LIBRARIES ${EXT_LIBRARIES} PARENT_SCOPE)
 list(REMOVE_DUPLICATES EXT_INCDIRS)
@@ -197,4 +264,3 @@ if (${YAML_CPP_LIBRARY_DIR} MATCHES ${PROJECT_BINARY_DIR}) # we built yaml-cpp
   # note that yaml-cpp is hard-coded to install to "lib"
   install(FILES ${YAML_CPP_LIBRARY} DESTINATION lib)
 endif()
-
