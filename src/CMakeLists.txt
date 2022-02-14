@@ -14,6 +14,9 @@ list(APPEND PARPT_INCDIRS;
 # add the utils directory, with the utilities library and plotting directory
 add_subdirectory(utils)
 
+# add the unit testing subdirectory (FIXME: automate this one day...)
+add_subdirectory(unit_test)
+
 # # add the external kokkos library
 # find_library(kk kokkoscore HINTS $ENV{KOKKOS_LIBDIR})
 
@@ -55,6 +58,7 @@ set(tests "MT_only" ; "RW_only" ; "RWMT")
 install(TARGETS parPT Utils)
 install(DIRECTORY data DESTINATION ${CMAKE_INSTALL_PREFIX})
 install(DIRECTORY tests DESTINATION ${CMAKE_INSTALL_PREFIX})
+install(DIRECTORY unit_test DESTINATION ${CMAKE_INSTALL_PREFIX})
 foreach(test ${tests})
   install(PROGRAMS tests/${test}/run_${test}.sh DESTINATION ${CMAKE_INSTALL_PREFIX}/tests/${test})
 endforeach()
