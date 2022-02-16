@@ -84,48 +84,56 @@ struct ArborX::AccessTraits<NearestToOrigin, ArborX::PredicatesTag> {
 
 namespace {
 
-// **TESTING**
-// clever code from SO
-template <typename T>
-constexpr auto type_name() {
-  std::string_view name, prefix, suffix;
-#ifdef __clang__
-  name = __PRETTY_FUNCTION__;
-  prefix = "auto type_name() [T = ";
-  suffix = "]";
-#elif defined(__GNUC__)
-  name = __PRETTY_FUNCTION__;
-  prefix = "constexpr auto type_name() [with T = ";
-  suffix = "]";
-#elif defined(_MSC_VER)
-  name = __FUNCSIG__;
-  prefix = "auto __cdecl type_name<";
-  suffix = ">(void)";
-#endif
-  name.remove_prefix(prefix.size());
-  name.remove_suffix(suffix.size());
-  return name;
+// Print usage information and exit.
+void usage(const char* exe) {
+  fprintf(stderr, "ERROR: Too few inputs to %s--usage:\n", exe);
+  fprintf(stderr, "%s <input_pts.yml> <outfile.txt>\n", exe);
+  exit(1);
 }
+
+// **TESTING**
+// // clever code from SO (seems to only work with clang or c++17)
+// template <typename T>
+// constexpr auto type_name() {
+//   std::string_view name, prefix, suffix;
+// #ifdef __clang__
+//   name = __PRETTY_FUNCTION__;
+//   prefix = "auto type_name() [T = ";
+//   suffix = "]";
+// #elif defined(__GNUC__)
+//   name = __PRETTY_FUNCTION__;
+//   prefix = "constexpr auto type_name() [with T = ";
+//   suffix = "]";
+// #elif defined(_MSC_VER)
+//   name = __FUNCSIG__;
+//   prefix = "auto __cdecl type_name<";
+//   suffix = ">(void)";
+// #endif
+//   name.remove_prefix(prefix.size());
+//   name.remove_suffix(suffix.size());
+//   return name;
+// }
 }  // namespace
 
 int main(int argc, char* argv[]) {
+  if (argc < 3) usage(argv[0]);
 
-  ko::initialize(argc, argv);
+  ko::ScopeGuard kokkos(argc, argv);
 
-  {  // Kokkos scope
+  // {  // Kokkos scope
     printf("Kokkos execution space is: %s\n", typeid(ExecutionSpace).name());
-    ko::print_configuration(std::cout, true);
+    // ko::print_configuration(std::cout, true);
 
     std::string infile = install_prefix;
-    infile += "/unit_test/arborx/test_pts.yaml";
+    infile += "/unit_test/arborx/";
+    infile += argv[1];
 
     int xlen, dim;
-    Real L, radius;
+    Real radius;
 
     auto root = YAML::LoadFile(infile);
     xlen = root["N"].as<int>();
     dim = root["dim"].as<int>();
-    L = root["L"].as<Real>();
     radius = root["dist"].as<Real>();
 
     auto X = ko::View<Real**>("X", dim, xlen);
@@ -141,75 +149,20 @@ int main(int argc, char* argv[]) {
       int j = 0;
       for (auto iter : node) {
         hX(i, j) = iter.as<Real>();
-        std::cout << "hX(i, j) = " << hX(i, j) << "\n";
         ++j;
       }
     }
     ko::deep_copy(X, hX);
-
-    // Real dx = (L - 1) / static_cast<Real>(xlen - 1);
-    // for (auto i = 0; i < xlen - 1; ++i) {
-    //   hX(i) = static_cast<Real>(1 + dx * i);
-    // }
-    // hX(xlen - 1) = L;
-    // ko::deep_copy(X, hX);
-
-    std::cout << "X(5) = " << X(0, 4) << " " << X(1, 4) << X(2, 4)<< "\n";
-    std::cout << "X(143) = " << X(0, 142) << " " << X(1, 142) << X(2, 142)<< "\n";
-    std::cout << "X(147) = " << X(0, 146) << " " << X(1, 146) << X(2, 146)<< "\n";
-
-    // // for (int i = 0; i < xlen; ++i)
-    // // {
-    //   std::cout << "X(0, 1) = " << X(0, 1) << "\n";
-    //   std::cout << "X(0, 2) = " << X(0, 2) << "\n";
-    //   std::cout << "X(0, 3) = " << X(0, 3) << "\n";
-    //   std::cout << "X(0, 4) = " << X(0, 4) << "\n";
-    //   std::cout << "X(0, 5) = " << X(0, 5) << "\n";
-    //   std::cout << "===============================" << "\n";
-    // // }
-
-    // // for (int i = 0; i < xlen; ++i)
-    // // {
-    //   std::cout << "X(1, 1) = " << X(1, 1) << "\n";
-    //   std::cout << "X(1, 2) = " << X(1, 2) << "\n";
-    //   std::cout << "X(1, 3) = " << X(1, 3) << "\n";
-    //   std::cout << "X(1, 4) = " << X(1, 4) << "\n";
-    //   std::cout << "X(1, 5) = " << X(1, 5) << "\n";
-    //   std::cout << "===============================" << "\n";
-    // // }
-
-    // // for (int i = 0; i < xlen; ++i)
-    // // {
-    //   std::cout << "X(2, 1) = " << X(2, 1) << "\n";
-    //   std::cout << "X(2, 2) = " << X(2, 2) << "\n";
-    //   std::cout << "X(2, 3) = " << X(2, 3) << "\n";
-    //   std::cout << "X(2, 4) = " << X(2, 4) << "\n";
-    //   std::cout << "X(2, 5) = " << X(2, 5) << "\n";
-    //   std::cout << "===============================" << "\n";
-    // // }
 
     auto fX = ko::View<float**>("float X", 3, xlen);
     ko::deep_copy(fX, 0.0);
     ko::deep_copy(ko::subview(fX, ko::make_pair(0, dim), ko::ALL()), ko::subview(X, ko::make_pair(0, dim), ko::ALL()));
     auto fzero = ko::View<float*>("float 0.0", xlen);
     ko::deep_copy(fzero, 0.0);
-    // if (dim == 1)
-    // {
-    //   ko::deep_copy(ko::subview(fX, 1, ko::ALL), 0.0);
-    //   ko::deep_copy(ko::subview(fX, 2, ko::ALL), 0.0);
-    // }
-    // else if (dim == 2)
-    // {
-    //   ko::deep_copy(ko::subview(fX, 2, ko::ALL), 0.0);
-    // }
+
     auto frad = ko::View<float*>("float radius", xlen);
     ko::deep_copy(frad, radius);
 
-    std::cout << "fX(5) = " << fX(0, 4) << " " << fX(1, 4) << fX(2, 4)<< "\n";
-    std::cout << "fX(143) = " << fX(0, 142) << " " << fX(1, 142) << fX(2, 142)<< "\n";
-    std::cout << "fX(147) = " << fX(0, 146) << " " << fX(1, 146) << fX(2, 146)<< "\n";
-
-    // ArborX::BVH<MemorySpace> bvh{ExecutionSpace(), PointCloud{&fX(0, ko::ALL()), &fX(1, ko::ALL()), &fX(2, ko::ALL()), xlen}};
     ArborX::BVH<MemorySpace> bvh{ExecutionSpace(), PointCloud{&ko::subview(fX, 0, ko::ALL())(), &ko::subview(fX, 1, ko::ALL())(), &ko::subview(fX, 2, ko::ALL())(), xlen}};
     ko::View<int*, MemorySpace> offsets("offsets", 0);
     ko::View<int*, MemorySpace> indices("indices", 0);
@@ -222,12 +175,12 @@ int main(int argc, char* argv[]) {
 
     FILE* outFile;
     std::string fname = install_prefix;
-    fname += "/unit_test/arborx/cpp_results.txt";
+    fname += "/unit_test/arborx/";
+    fname += argv[2];
     outFile = fopen(fname.c_str(),"w");
 
     for (int i = 0; i < xlen; ++i)
     {
-      // std::cout << "i = " << i + 1 << "\n";
       for (int j = hoff(i); j < hoff(i + 1); ++j)
         {
          fprintf(outFile, "%i", hind(j) + 1);
@@ -240,9 +193,9 @@ int main(int argc, char* argv[]) {
     }
     fclose(outFile);
 
-  }  // end Kokkos scope
+  // }  // end Kokkos scope
 
-  ko::finalize();
+  // ko::finalize();
 
   return 0;
 }

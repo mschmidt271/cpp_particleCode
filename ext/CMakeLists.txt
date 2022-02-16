@@ -186,13 +186,16 @@ set(EXT_LIBRARIES ${EXT_LIBRARIES};yaml_cpp)
 
 # FIXME: this should be done in a setup script, referencing a machine file
 if (DEFINED ENV{ARBORX_INCDIR})
-  set(ARBORX_INCLUDE_DIR $ENV{ARBORX_INCDIR})
+  # this may be silly, but I'm sticking with it for now
+  # FIXME: maybe pass in $ENV{ARBORX_ROOT_DIR}
+  string(REPLACE "/include" "" ARBORX_INCLUDE_DIR "$ENV{ARBORX_INCDIR}")
+  set(ARBORX_INCLUDE_DIR "${ARBORX_INCLUDE_DIR}/{include,include/details}")
   # set(ARBORX_LIBRARY_DIR $ENV{ARBORX_LIBDIR})
   # set(ARBORX_LIBRARY "$ENV{ARBORX_LIBDIR}/$ENV{ARBORX_LIBRARY}")
   message(STATUS "ArborX headers found at ${ARBORX_INCLUDE_DIR}")
   set(EXTERNAL_ARBORX TRUE)
 else()
-  set(ARBORX_INCLUDE_DIR "${PROJECT_BINARY_DIR}/include")
+  set(ARBORX_INCLUDE_DIR "${PROJECT_BINARY_DIR}/{include,include/details}")
   set(EXTERNAL_ARBORX FALSE)
   # set(ARBORX_LIBRARY_DIR "${PROJECT_BINARY_DIR}/lib")
   # set(ARBORX_LIBRARY ${ARBORX_LIBRARY_DIR}/libyaml-cpp.a)
@@ -212,11 +215,11 @@ if (NOT EXTERNAL_ARBORX)
   endif()
   if (PARPT_USE_OPENMP)
     set(ARBORX_CMAKE_OPTS ${ARBORX_CMAKE_OPTS}
-                          -DARBORX_ENABLE_MPI=ON)
+                          -DARBORX_ENABLE_MPI=OFF)
   elseif(PARPT_USE_CUDA)
     message(STATUS "GPU_DEVICE_ARCH_FLAG = $ENV{GPU_DEVICE_ARCH_FLAG}")
     set(ARBORX_CMAKE_OPTS ${ARBORX_CMAKE_OPTS}
-                          -DARBORX_ENABLE_MPI=ON)
+                          -DARBORX_ENABLE_MPI=OFF) # FIXME: decide whether this is the right call
     message(STATUS "ARBORX_CMAKE_OPTS = ${ARBORX_CMAKE_OPTS}")
   else()
     set(ARBORX_CMAKE_OPTS ${ARBORX_CMAKE_OPTS}
@@ -246,7 +249,7 @@ if (NOT EXTERNAL_ARBORX)
   add_dependencies(arborx arborx_proj)
 endif()
 # not sure if this is too hacky, but it appears to work
-list(APPEND EXT_INCDIRS "${PROJECT_BINARY_DIR}/{include,include/details}")
+list(APPEND EXT_INCDIRS ${ARBORX_INCLUDE_DIR})
 # set(EXT_LIBRARIES ${EXT_LIBRARIES};ARBORX)
 
 # Add all the libraries to the build system at large.
