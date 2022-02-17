@@ -234,9 +234,9 @@ if (NOT EXTERNAL_ARBORX)
                         -DARBORX_ENABLE_TESTS=OFF
                         -DARBORX_ENABLE_EXAMPLES=OFF)
   ExternalProject_Add(arborx_proj
-                      PREFIX ${CMAKE_CURRENT_BINARY_DIR}/arborx
-                      SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/arborx
-                      BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/arborx
+                      PREFIX ${CMAKE_CURRENT_BINARY_DIR}/ArborX
+                      SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ArborX
+                      BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/ArborX
                       INSTALL_DIR ${PROJECT_BINARY_DIR}
                       CMAKE_ARGS ${ARBORX_CMAKE_OPTS}
                       DEPENDS kokkos

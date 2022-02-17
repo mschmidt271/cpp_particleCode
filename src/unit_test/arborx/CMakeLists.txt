@@ -1,7 +1,7 @@
 include_directories(${PARPT_INCDIRS})
 # add utilities.cpp as a library
 add_executable(AX_test arborx_test.cpp)
-set(AX_LIBS yaml_cpp kokkos kokkoskernels arborx)
+set(AX_LIBS dl yaml_cpp kokkos kokkoskernels arborx)
 add_dependencies(${AX_LIBS})
 
 target_link_libraries(AX_test

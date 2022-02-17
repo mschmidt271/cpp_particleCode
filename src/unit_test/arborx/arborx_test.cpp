@@ -122,6 +122,18 @@ int main(int argc, char* argv[]) {
 
   // {  // Kokkos scope
     printf("Kokkos execution space is: %s\n", typeid(ExecutionSpace).name());
+
+    // if (Kokkos::SpaceAccessibility<ExecutionSpace, MemorySpace>::accessible)
+    // {
+    //   printf("True");
+    // }
+    // else
+    // {
+    //   printf("False");
+    // }
+
+
+    // printf(ko::SpaceAccessibility<ExecutionSpace, MemorySpace>::accessible);
     // ko::print_configuration(std::cout, true);
 
     std::string infile = install_prefix;
@@ -131,11 +143,15 @@ int main(int argc, char* argv[]) {
     int xlen, dim;
     Real radius;
 
+
+    ko::Profiling::pushRegion("read params from yaml");
     auto root = YAML::LoadFile(infile);
     xlen = root["N"].as<int>();
     dim = root["dim"].as<int>();
     radius = root["dist"].as<Real>();
+    ko::Profiling::popRegion();
 
+    ko::Profiling::pushRegion("create X views and read from yaml");
     auto X = ko::View<Real**>("X", dim, xlen);
     ko::deep_copy(X, 0.0);
     auto hX = ko::create_mirror_view(X);
@@ -153,7 +169,9 @@ int main(int argc, char* argv[]) {
       }
     }
     ko::deep_copy(X, hX);
+    ko::Profiling::popRegion();
 
+    ko::Profiling::pushRegion("create device/float views");
     auto fX = ko::View<float**>("float X", 3, xlen);
     ko::deep_copy(fX, 0.0);
     ko::deep_copy(ko::subview(fX, ko::make_pair(0, dim), ko::ALL()), ko::subview(X, ko::make_pair(0, dim), ko::ALL()));
@@ -162,17 +180,29 @@ int main(int argc, char* argv[]) {
 
     auto frad = ko::View<float*>("float radius", xlen);
     ko::deep_copy(frad, radius);
+    auto dxlen = ko::View<int>("device xlen");
+    ko::deep_copy(dxlen, xlen);
+    ko::Profiling::popRegion();
 
+    ko::Profiling::pushRegion("create BVH");
     ArborX::BVH<MemorySpace> bvh{ExecutionSpace(), PointCloud{&ko::subview(fX, 0, ko::ALL())(), &ko::subview(fX, 1, ko::ALL())(), &ko::subview(fX, 2, ko::ALL())(), xlen}};
+    ko::Profiling::popRegion();
+    ko::Profiling::pushRegion("create offset/indices views");
     ko::View<int*, MemorySpace> offsets("offsets", 0);
     ko::View<int*, MemorySpace> indices("indices", 0);
+    ko::Profiling::popRegion();
+    ko::Profiling::pushRegion("query BVH");
     ArborX::query(bvh, ExecutionSpace(), Spheres{&ko::subview(fX, 0, ko::ALL())(), &ko::subview(fX, 1, ko::ALL())(), &ko::subview(fX, 2, ko::ALL())(), &frad(), xlen}, indices, offsets);
+    ko::Profiling::popRegion();
 
+    ko::Profiling::pushRegion("deep copy results to host");
     auto hoff = ko::create_mirror_view(offsets);
     auto hind = ko::create_mirror_view(indices);
     ko::deep_copy(hoff, offsets);
     ko::deep_copy(hind, indices);
+    ko::Profiling::popRegion();
 
+    ko::Profiling::pushRegion("write to file");
     FILE* outFile;
     std::string fname = install_prefix;
     fname += "/unit_test/arborx/";
@@ -192,6 +222,7 @@ int main(int argc, char* argv[]) {
         fprintf(outFile, "\n");
     }
     fclose(outFile);
+    ko::Profiling::popRegion();
 
   // }  // end Kokkos scope
 

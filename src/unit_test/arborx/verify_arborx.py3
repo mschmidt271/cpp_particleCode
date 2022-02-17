@@ -1,4 +1,4 @@
-#!/usr/local/bin/python3
+#!/usr/bin/env python3
 
 from doctest import testfile
 import numpy as np
@@ -61,6 +61,3 @@ for i in range(N):
 
 print('Average number of neighbors found = ', float(tot_results) / float(N))
 print('Total incorrect indices = ', int(sum(errs)))
-
-
-
