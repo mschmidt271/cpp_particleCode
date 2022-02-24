@@ -25,10 +25,12 @@ endmacro()
 # Dynamic loading library
 #----------------------------------------------------------------------------
 if (NOT APPLE)
-  find_library(DL_LIBRARY libdl${CMAKE_SHARED_LIBRARY_SUFFIX} REQUIRED)
-  add_library(dl SHARED IMPORTED GLOBAL)
-  set_target_properties(dl PROPERTIES IMPORTED_LOCATION ${DL_LIBRARY})
-  set(EXT_LIBRARIES dl) # Required by kokkoscore.
+  # find_library(DL_LIBRARY libdl${CMAKE_SHARED_LIBRARY_SUFFIX} REQUIRED)
+  # add_library(dl SHARED IMPORTED GLOBAL)
+  # set_target_properties(dl PROPERTIES IMPORTED_LOCATION ${DL_LIBRARY})
+  # set(EXT_LIBRARIES dl) # Required by kokkoscore.
+  # message(STATUS "libdl found at ${DL_LIBRARY}")
+  set(EXT_LIBRARIES ${CMAKE_DL_LIBS})
 endif()
 
 # FIXME: this should be done in a setup script, referencing a machine file
@@ -188,14 +190,15 @@ set(EXT_LIBRARIES ${EXT_LIBRARIES};yaml_cpp)
 if (DEFINED ENV{ARBORX_INCDIR})
   # this may be silly, but I'm sticking with it for now
   # FIXME: maybe pass in $ENV{ARBORX_ROOT_DIR}
-  string(REPLACE "/include" "" ARBORX_INCLUDE_DIR "$ENV{ARBORX_INCDIR}")
-  set(ARBORX_INCLUDE_DIR "${ARBORX_INCLUDE_DIR}/{include,include/details}")
+  string(REPLACE "/include" "" ARBORX_INCLUDE_DIRS "$ENV{ARBORX_INCDIR}")
+  set(ARBORX_INCLUDE_DIRS ${ARBORX_INCLUDE_DIRS}/include
+                          ${ARBORX_INCLUDE_DIRS}/include/details)
   # set(ARBORX_LIBRARY_DIR $ENV{ARBORX_LIBDIR})
   # set(ARBORX_LIBRARY "$ENV{ARBORX_LIBDIR}/$ENV{ARBORX_LIBRARY}")
-  message(STATUS "ArborX headers found at ${ARBORX_INCLUDE_DIR}")
+  message(STATUS "ArborX headers found at ${ARBORX_INCLUDE_DIRS}")
   set(EXTERNAL_ARBORX TRUE)
 else()
-  set(ARBORX_INCLUDE_DIR "${PROJECT_BINARY_DIR}/{include,include/details}")
+  set(ARBORX_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/{include,include/details}")
   set(EXTERNAL_ARBORX FALSE)
   # set(ARBORX_LIBRARY_DIR "${PROJECT_BINARY_DIR}/lib")
   # set(ARBORX_LIBRARY ${ARBORX_LIBRARY_DIR}/libyaml-cpp.a)
@@ -249,7 +252,7 @@ if (NOT EXTERNAL_ARBORX)
   add_dependencies(arborx arborx_proj)
 endif()
 # not sure if this is too hacky, but it appears to work
-list(APPEND EXT_INCDIRS ${ARBORX_INCLUDE_DIR})
+list(APPEND EXT_INCDIRS ${ARBORX_INCLUDE_DIRS})
 # set(EXT_LIBRARIES ${EXT_LIBRARIES};ARBORX)
 
 # Add all the libraries to the build system at large.

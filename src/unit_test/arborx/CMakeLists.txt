@@ -1,12 +1,16 @@
 include_directories(${PARPT_INCDIRS})
 # add utilities.cpp as a library
 add_executable(AX_test arborx_test.cpp)
-set(AX_LIBS dl yaml_cpp kokkos kokkoskernels arborx)
-add_dependencies(${AX_LIBS})
+set(AX_LIBS ${LIBRARIES} arborx)
+message(STATUS "AX_LIBS = ${AX_LIBS}")
 
 target_link_libraries(AX_test
                       ${AX_LIBS}
                       )
+
+# if (LINUX)
+#   set(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} -ldl")
+# endif()
 
 # add the include directories
 target_include_directories(AX_test PUBLIC
