@@ -5,20 +5,20 @@
 # export USE_OPENMP=false
 # export USE_CUDA=false
 # (2)
-# export USE_OPENMP=true
-# export USE_CUDA=false
+export USE_OPENMP=true
+export USE_CUDA=false
 # (3) ***NOT CURRENTLY SUPPORTED***
 # export USE_OPENMP=false
 # export USE_CUDA=true
 # (4)
-export USE_OPENMP=true
-export USE_CUDA=true
+# export USE_OPENMP=true
+# export USE_CUDA=true
 
 export MACHINE=`hostname`
 export HOME_DIR=$HOME
 echo "Configuring for ${MACHINE}"
 if [ $MACHINE = s1046231 ]; then
-    export KO_LIBDIR="lib64"
+    export KO_LIBDIR="lib"
     if [ "$USE_OPENMP" = false ]; then
         echo "Building for serial"
         export KO_ROOT="${HOME_DIR}/kokkos/install_clang"
@@ -119,7 +119,7 @@ echo "Home directory is ${HOME_DIR}"
 export MAC_SERIAL_CPP="clang++"
 export MAC_SERIAL_C="clang"
 export MAC_OMP_CPP="g++-11"
-export MAC_OMP_CPP="gcc-11"
+export MAC_OMP_C="gcc-11"
 export LINUX_CPP="mpicxx"
 export LINUX_C="mpicc"
 
