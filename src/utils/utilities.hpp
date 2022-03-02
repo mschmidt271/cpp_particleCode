@@ -149,9 +149,11 @@ class Particles {
  public:
   // real-valued position
   ko::View<Real*> X;
-  // mass carried by particles
+  // FIXME: keep a mirror (private?) of these for writing out every xx time steps
+  // mass carried by particles (FIXME: units, )
   ko::View<Real*> mass;
   // mask for distmat reduction
+  // FIXME: make this int/boolean
   ko::View<Real*> mask;
   // parameter views
   ko::View<Real> D, pctRW, dt, cutdist;

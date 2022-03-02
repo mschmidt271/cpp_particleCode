@@ -115,87 +115,38 @@ int main(int argc, char* argv[]) {
     printf("Kokkos execution space is: %s\n", typeid(ExecutionSpace).name());
     ko::print_configuration(std::cout, true);
 
-    int xlen = 1e4;
-    Real omega = 10.0;
-    Real radius = 2.268;
+    // get the input file name from command line argument
+    std::string input_file(argv[1]);
+    // create the particles object
+    ko::Profiling::pushRegion("ctor");
+    Particles particles(input_file);
+    ko::Profiling::popRegion();
 
-    auto X = ko::View<Real*>("X", xlen);
-      auto hX = ko::create_mirror_view(X);
-      Real dx = (omega - 1) / static_cast<Real>(xlen - 1);
-      for (auto i = 0; i < xlen - 1; ++i) {
-        hX(i) = static_cast<Real>(1 + dx * i);
-      }
-      hX(xlen - 1) = omega;
-    ko::deep_copy(X, hX);
+    int tStep = 0;
 
-    auto fX = ko::View<float*>("float X", xlen);
-    ko::deep_copy(fX, X);
-    auto fzero = ko::View<float*>("float 0.0", xlen);
-    ko::deep_copy(fzero, 0.0);
-    auto frad = ko::View<float*>("float radius", xlen);
-    ko::deep_copy(frad, radius);
+    ko::Profiling::pushRegion("write positions");
+    // write initial positions
+    particles.particleIO.write(particles.X, particles.mass, particles.params,
+                               tStep);
+    ko::Profiling::popRegion();
 
-    ArborX::BVH<MemorySpace> bvh{ExecutionSpace(), PointCloud{&fX(), &fzero(), &fzero(), xlen}};
-    ko::View<int*, MemorySpace> offsets("offsets", 0);
-    ko::View<int*, MemorySpace> indices("indices", 0);
-    ArborX::query(bvh, ExecutionSpace(), Spheres{&fX(), &fzero(), &fzero(), &frad(), xlen}, indices, offsets);
-
-    auto hoff = ko::create_mirror_view(offsets);
-    auto hind = ko::create_mirror_view(indices);
-    ko::deep_copy(hoff, offsets);
-    ko::deep_copy(hind, indices);
-
-    FILE* outFile;
-    outFile = fopen("/Users/mjschm/Desktop/temp/cpp.txt","w");
-
-    for (int i = 0; i < xlen; ++i)
-    {
-      // std::cout << "i = " << i + 1 << "\n";
-      for (int j = hoff(i); j < hoff(i + 1); ++j)
-        {
-         fprintf(outFile, "%i", hind(j) + 1);
-         if (j < hoff(i + 1) - 1)
-         {
-            fprintf(outFile, ", ");
-         }
-        }
-        fprintf(outFile, "\n");
+    ko::Profiling::pushRegion("timestepping");
+    // begin time stepping
+    for (int tStep = 1; tStep <= particles.params.nSteps; ++tStep) {
+      // std::cout << "time step = " << tStep << "\n";
+      ko::Profiling::pushRegion("RW");
+      particles.random_walk();
+      ko::Profiling::popRegion();
+      ko::Profiling::pushRegion("MT");
+      particles.mass_transfer();
+      ko::Profiling::popRegion();
+      ko::Profiling::pushRegion("tstep_write");
+      particles.particleIO.write(particles.X, particles.mass,
+      particles.params,
+                                 tStep);
+      ko::Profiling::popRegion();
     }
-    fclose(outFile);
-
-
-    // // get the input file name from command line argument
-    // std::string input_file(argv[1]);
-    // // create the particles object
-    // ko::Profiling::pushRegion("ctor");
-    // Particles particles(input_file);
-    // ko::Profiling::popRegion();
-
-    // int tStep = 0;
-
-    // ko::Profiling::pushRegion("write positions");
-    // // write initial positions
-    // particles.particleIO.write(particles.X, particles.mass, particles.params,
-    //                            tStep);
-    // ko::Profiling::popRegion();
-
-    // ko::Profiling::pushRegion("timestepping");
-    // // begin time stepping
-    // for (int tStep = 1; tStep <= particles.params.nSteps; ++tStep) {
-    //   // std::cout << "time step = " << tStep << "\n";
-    //   ko::Profiling::pushRegion("RW");
-    //   particles.random_walk();
-    //   ko::Profiling::popRegion();
-    //   ko::Profiling::pushRegion("MT");
-    //   particles.mass_transfer();
-    //   ko::Profiling::popRegion();
-    //   ko::Profiling::pushRegion("tstep_write");
-    //   particles.particleIO.write(particles.X, particles.mass,
-    //   particles.params,
-    //                              tStep);
-    //   ko::Profiling::popRegion();
-    // }
-    // ko::Profiling::popRegion();
+    ko::Profiling::popRegion();
 
   }  // end Kokkos scope
 

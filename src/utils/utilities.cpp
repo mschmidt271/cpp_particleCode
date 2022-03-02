@@ -116,6 +116,7 @@ void ParticleIO::write(const ko::View<Real*>& X, const ko::View<Real*>& mass,
   ko::deep_copy(hX, X);
   ko::deep_copy(hmass, mass);
   if (tStep == 0) {
+    // FIXME: consider looking into spdlog for formatting
     fprintf(outfile, "%i %i\n", pars.Np, pars.nSteps);
     fprintf(outfile, "%i ", pars.IC_type_space);
     fprintf(outfile, "%i ", pars.IC_type_mass);
@@ -154,6 +155,7 @@ Particles::Particles(std::string _input_file)
   
   // create views of a few parameters on device and deep copy the corresponding
   // values from params
+  // could just have a kokkos view of the params struct
   D = ko::View<Real>("D");
   ko::deep_copy(D, params.D);
   pctRW = ko::View<Real>("pctRW");
@@ -287,6 +289,7 @@ spmat_type Particles::get_transfer_mat() {
         }
       },
       nnz);
+  // FIXME: there's a chance this could compute nnz, depending on how I do the scan (inclusive/exclusive)
   ko::parallel_scan(
       "create_reduction_maskmat", Np2,
       KOKKOS_LAMBDA(const int& i, Real& update, const bool final) {
@@ -313,6 +316,7 @@ spmat_type Particles::sparse_kernel_mat(const int& nnz,
   auto lNp = Np;
   auto lmask = mask;
   auto lcutdist = cutdist;
+  // FIXME: could maybe create the rowmap in this kernel, using the mask array?
   ko::parallel_for(
       "form_sparse_kmat",
       ko::MDRangePolicy<ko::Rank<2>>({0, 0}, {Np, Np}),
