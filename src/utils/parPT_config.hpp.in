@@ -1,0 +1,9 @@
+#ifndef PARPT_CONFIG_HPP
+#define PARPT_CONFIG_HPP
+
+#define install_prefix "@CMAKE_INSTALL_PREFIX@"
+
+// real-valued variables are of this type, provided in the cmake configuration
+typedef @PARPT_REAL_TYPE@ Real;
+
+#endif

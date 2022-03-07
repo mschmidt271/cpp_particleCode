@@ -11,32 +11,15 @@
 #include <sstream>
 #include <string>
 
-// this gives the install directory
+#include "ArborX.hpp"
 #include "KokkosKernels_default_types.hpp"
 #include "KokkosSparse_CrsMatrix.hpp"
 #include "KokkosSparse_spgemm.hpp"
 #include "KokkosSparse_spmv.hpp"
-#include "parPT_config.h"
+#include "type_defs.hpp"
 #include "yaml-cpp/yaml.h"
-#include "ArborX.hpp"
 
 namespace particles {
-
-typedef double Real;
-
-// alias the kokkos namespace to make life easier
-namespace ko = Kokkos;
-
-using Scalar = default_scalar;
-using Ordinal = default_lno_t;
-using Offset = default_size_type;
-using device_type =
-    typename ko::Device<ko::DefaultExecutionSpace,
-                        typename ko::DefaultExecutionSpace::memory_space>;
-using execution_space = typename device_type::execution_space;
-using memory_space = typename device_type::memory_space;
-using spmat_type = typename KokkosSparse::CrsMatrix<Scalar, Ordinal,
-                                                    device_type, void, Offset>;
 
 std::string toy_problem_intro();
 
@@ -120,7 +103,8 @@ enum IC_enum_mass { point_mass, heaviside, gaussian };
 class Params {
  public:
   int Np, nSteps;
-  Real X0_mass, X0_space, maxT, dt, D, pctRW, denom, cdist_coeff, cutdist, hat_pct;
+  Real X0_mass, X0_space, maxT, dt, D, pctRW, denom, cdist_coeff, cutdist,
+      hat_pct;
   std::string IC_str_space, IC_str_mass;
   std::vector<Real> omega;
   std::string pFile;
@@ -136,7 +120,7 @@ class Params {
 // class for writing particle output
 class ParticleIO {
  private:
-  FILE *outfile;
+  FILE* outfile;
 
  public:
   ParticleIO(std::string f);
@@ -149,8 +133,8 @@ class Particles {
  public:
   // real-valued position
   ko::View<Real*> X;
-  // FIXME: keep a mirror (private?) of these for writing out every xx time steps
-  // mass carried by particles (FIXME: units, )
+  // FIXME: keep a mirror (private?) of these for writing out every xx time
+  // steps mass carried by particles (FIXME: units, )
   ko::View<Real*> mass;
   // mask for distmat reduction
   // FIXME: make this int/boolean
@@ -171,9 +155,8 @@ class Particles {
   void initialize_masses(Params params);
   void random_walk();
   void mass_transfer();
-  spmat_type get_transfer_mat();
-  spmat_type sparse_kernel_mat(const int& nnz,
-                               const ko::View<Real*>& mask);
+  SpmatType get_transfer_mat();
+  SpmatType sparse_kernel_mat(const int& nnz, const ko::View<Real*>& mask);
 };
 
 }  // namespace particles

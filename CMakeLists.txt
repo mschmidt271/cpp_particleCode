@@ -8,6 +8,7 @@ project(parPT VERSION 0.1 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+# FIXME: pull this out to the config file when things are release-ish
 set(CMAKE_BUILD_TYPE "Debug")
 
 if (CMAKE_BUILD_TYPE STREQUAL Debug)
@@ -18,16 +19,19 @@ if (CMAKE_BUILD_TYPE STREQUAL Debug)
 else()
   message(ERROR "This ain't ready for release, only Debug is supported")
 endif()
+message(STATUS "Build type = ${CMAKE_BUILD_TYPE}")
 
 # Are we on Linux?
 if (UNIX AND NOT APPLE)
   set(LINUX ON)
 endif()
 
+# for some reason, Linux machines need the extra flag
 if(LINUX)
   set(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} -ldl")
 endif()
 
+# openmp/cuda flags
 if (PARPT_USE_OPENMP)
   set(OMP_FLAGS "-fopenmp")
   message(STATUS "OpenMP flags are: ${OMP_FLAGS}")
@@ -37,6 +41,7 @@ if(PARPT_USE_CUDA)
   set(CUDA_FLAGS "--expt-extended-lambda")
   set(CUDA_FLAGS "${CUDA_FLAGS} --expt-relaxed-constexpr")
   set(CUDA_FLAGS "${CUDA_FLAGS} -fopenmp")
+  # this is due to some weirdness with the kokkos nvcc_wrapper
   if("$ENV{DEVICE_ARCH}" STREQUAL "TURING75")
     set(CUDA_FLAGS "${CUDA_FLAGS} -arch=sm_75")
   endif()
@@ -46,10 +51,10 @@ endif()
 
 message(STATUS "CMAKE_CXX_FLAGS flags are ${CMAKE_CXX_FLAGS}")
 
-# add the ext directory, with external TPLs
+# add the ext directory, with the external TPLs
 add_subdirectory(ext)
 
-# add the source directory
+# add the source files directory
 add_subdirectory(src)
 
 # add the profiling directory and make the run script executable

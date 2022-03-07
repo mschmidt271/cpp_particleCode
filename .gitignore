@@ -1,5 +1,5 @@
 build
-parPT_config.h
+parPT_config.hpp
 *.ipynb_checkpoints*
 profiling_results/
 build_cuda/

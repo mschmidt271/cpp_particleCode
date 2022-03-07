@@ -1,6 +1,7 @@
 #!/bin/bash
 
-# choose only one of these options
+# ==============================================================================
+# choose only one of these build options
 # (1)
 # export USE_OPENMP=false
 # export USE_CUDA=false
@@ -13,7 +14,26 @@ export USE_CUDA=false
 # (4)
 # export USE_OPENMP=true
 # export USE_CUDA=true
+# ==============================================================================
+# change these to the compilers you plan to use
+# note that cuda builds require the CXX compiler to be the
+# kokkos-provided nvcc_wrapper
+export MAC_SERIAL_CPP="clang++"
+export MAC_SERIAL_C="clang"
+export MAC_OMP_CPP="g++-11"
+export MAC_OMP_C="gcc-11"
+export LINUX_CPP="mpicxx"
+export LINUX_C="mpicc"
+# if you are using a machine that isn't listed below and you are building
+# for GPU, provide the architecture name
+# see the "Architecture Keywords" section of:
+# https://github.com/kokkos/kokkos/wiki/Compiling
+# export GPU_ARCHITECTURE="schmidt27"
+# ==============================================================================
 
+# these are for the various machines I use.
+# I would recommend either adding similar logic for yours, or just
+# hard coding for your environment of choice below all this logic
 export MACHINE=`hostname`
 export HOME_DIR=$HOME
 echo "Configuring for ${MACHINE}"
@@ -63,8 +83,8 @@ elif [ $MACHINE = s1024454 ]; then
     elif [ "$USE_OPENMP" = true ] && [ "$USE_CUDA" = true ]; then
         echo "Building for OpenMP and CUDA"
         export DEVICE_ARCH="MAXWELL52"
-        export KO_ROOT="${HOME_DIR}/kokkos/install"
-        export KK_ROOT="${HOME_DIR}/kokkos-kernels/install"
+        export KO_ROOT="${HOME_DIR}/kokkos/install_cuda"
+        export KK_ROOT="${HOME_DIR}/kokkos-kernels/install_cuda"
         export YCPP_ROOT="${HOME_DIR}/yaml-cpp/install"
         export AX_ROOT="${HOME_DIR}/ArborX/install_cuda"
     else
@@ -109,21 +129,13 @@ elif [ $MACHINE = clamps ]; then
         exit
     fi
 else
-    "Unrecognized machine--atempting default build (this may not work)"
+    echo "Unrecognized machine--atempting default build (this may not work)"
+    export DEVICE_ARCH=$GPU_ARCHITECTURE
 fi
 echo "Home directory is ${HOME_DIR}"
 
-# change these to the compilers you plan to use
-# note that cuda builds require the CXX compiler to be the
-# kokkos-provided nvcc_wrapper
-export MAC_SERIAL_CPP="clang++"
-export MAC_SERIAL_C="clang"
-export MAC_OMP_CPP="g++-11"
-export MAC_OMP_C="gcc-11"
-export LINUX_CPP="mpicxx"
-export LINUX_C="mpicc"
-
-# set these manually to where they are on your machine, or just comment out
+# set these manually to where they are on your machine,
+# or just comment out to build them as subprojects if you don't have them built
 export KOKKOS_LIBDIR="${KO_ROOT}/${KO_LIBDIR}"
 export KOKKOS_INCDIR="${KO_ROOT}/include"
 export KOKKOS_LIBRARY="libkokkoscore.a"
@@ -135,6 +147,7 @@ export YAML_CPP_INCDIR="${YCPP_ROOT}/include"
 export YAML_CPP_LIBRARY="libyaml-cpp.a"
 export ARBORX_INCDIR="${AX_ROOT}/include"
 
+# as long as everything above looks good, you should be all set from here down
 export OS=`uname -s`
 if [ "$OS" == "Linux" ]
 then
@@ -155,7 +168,6 @@ then
     export CC=$LINUX_C
 else
     if [ "$USE_OPENMP" = true ]
-    # change these to your compilers
     then
         export CXX=$MAC_OMP_CPP
         export CC=$MAC_OMP_CPP
@@ -167,10 +179,21 @@ fi
 
 rm -rf CMake*
 
+# this configures the build with the following options:
+# -D CMAKE_INSTALL_PREFIX="./"\
+    # installs in build directory "./"
+# -D CMAKE_VERBOSE_MAKEFILE=ON\
+    # the build spits out a lot of info
+# Below are the compiler and build type options from above
+# -D CMAKE_CXX_COMPILER=$CXX\
+# -D CMAKE_C_COMPILER=$CC\
+# -D PARPT_USE_OPENMP=$USE_OPENMP\
+# -D PARPT_USE_CUDA=$USE_CUDA
 cmake .. \
     -D CMAKE_INSTALL_PREFIX="./"\
     -D CMAKE_VERBOSE_MAKEFILE=ON\
     -D CMAKE_CXX_COMPILER=$CXX\
     -D CMAKE_C_COMPILER=$CC\
     -D PARPT_USE_OPENMP=$USE_OPENMP\
-    -D PARPT_USE_CUDA=$USE_CUDA
+    -D PARPT_USE_CUDA=$USE_CUDA\
+    -D PARPT_PRECISION="double"

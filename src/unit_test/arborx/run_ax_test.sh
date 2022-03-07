@@ -8,7 +8,7 @@
 export dim=(1 2 3)
 export N=(1000 1000 1000)
 export L=(10 5 5)
-export dist=(1.1 1.3 1.6)
+export dist=(1.1345 1.3 1.6)
 export pt_type=("rand" "rand" "rand")
 export infile=("test_pts.yaml" "test_pts.yaml" "test_pts.yaml")
 export outfile=("cpp_results.txt" "cpp_results.txt" "cpp_results.txt")
@@ -17,7 +17,7 @@ export outfile=("cpp_results.txt" "cpp_results.txt" "cpp_results.txt")
 export KOKKOS_PROFILE_LIBRARY=${HOME}/kokkos-tools/kp_kernel_logger.so
 export PATH=${PATH}:${HOME}/kokkos-tools/
 
-for ((i=0; i<=0; i++))
+for ((i=0; i<=2; i++))
 do
     echo "==========================================="
     ./gen_pts.py3 ${dim[i]} ${N[i]} ${L[i]} ${dist[i]} ${pt_type[i]} --fname=${infile[i]}

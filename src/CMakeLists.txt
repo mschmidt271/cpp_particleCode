@@ -1,11 +1,27 @@
+# Precision of floating point numbers.
+if (PARPT_PRECISION STREQUAL "single")
+  set(PARPT_REAL_TYPE "float")
+  set(PARPT_DOUBLE_PRECISION 0)
+elseif(PARPT_PRECISION STREQUAL "double")
+  set(PARPT_REAL_TYPE "double")
+  set(PARPT_DOUBLE_PRECISION 1)
+elseif(PARPT_PRECISION)
+  message(FATAL_ERROR "Invalid PARPT_PRECISION: ${PARPT_PRECISION} (use 'single' or 'double')")
+else()
+  message(FATAL_ERROR "PARPT_PRECISION not set (use 'single' or 'double')")
+endif()
+message(STATUS "Using ${PARPT_PRECISION} precision floating point numbers")
 
 # generate a configure file
   # currently, just provides the install prefix
   # NOTE: here, and below, PROJECT_SOURCE_DIR refers to the root directory,
           # since that's where the project() call is
-configure_file("${PROJECT_SOURCE_DIR}/src/utils/parPT_config.h.in"
-               "${PROJECT_BINARY_DIR}/src/utils/parPT_config.h"
+configure_file("${PROJECT_SOURCE_DIR}/src/utils/parPT_config.hpp.in"
+               "${PROJECT_BINARY_DIR}/src/utils/parPT_config.hpp"
+               @ONLY
                )
+
+message(STATUS "PARPT_REAL_TYPE = ${PARPT_REAL_TYPE}")
 
 list(APPEND PARPT_INCDIRS;
             ${PROJECT_SOURCE_DIR}/src/utils;
@@ -41,8 +57,10 @@ if(PARPT_USE_CUDA)
   list(APPEND LIBRARIES; ${CUDA_cusparse_LIBRARY})
 endif()
 
+set(PARPT_LIBS Utils)
+set(LIBRARIES ${LIBRARIES};${PARPT_LIBS})
+
 target_link_libraries(parPT
-	            	      Utils
                       ${LIBRARIES}
                       )
 
@@ -51,6 +69,7 @@ message(STATUS "Libraries = ${LIBRARIES}")
 # add the include directories
 target_include_directories(parPT PUBLIC
                            ${PARPT_INCDIRS}
+                           ${PROJECT_SOURCE_DIR}/src
                           )
 
 set(tests "MT_only" ; "RW_only" ; "RWMT")

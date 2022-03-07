@@ -10,7 +10,7 @@ foreach(dir include;lib;bin;share)
   endif()
 endforeach()
 
-# Keep track of whether we've updated our submodules.
+# Keep track of whether we've updated our submodules and do so if not
 set(SUBMODULES_UPDATED FALSE)
 macro(update_submodules)
   if (NOT SUBMODULES_UPDATED)
@@ -25,15 +25,13 @@ endmacro()
 # Dynamic loading library
 #----------------------------------------------------------------------------
 if (NOT APPLE)
-  # find_library(DL_LIBRARY libdl${CMAKE_SHARED_LIBRARY_SUFFIX} REQUIRED)
-  # add_library(dl SHARED IMPORTED GLOBAL)
-  # set_target_properties(dl PROPERTIES IMPORTED_LOCATION ${DL_LIBRARY})
-  # set(EXT_LIBRARIES dl) # Required by kokkoscore.
-  # message(STATUS "libdl found at ${DL_LIBRARY}")
   set(EXT_LIBRARIES ${CMAKE_DL_LIBS})
 endif()
 
-# FIXME: this should be done in a setup script, referencing a machine file
+# ==============================================================================
+# Kokkos build
+# ==============================================================================
+# FIXME: this should be done in a setup script, referencing a machine file?
 if (DEFINED ENV{KOKKOS_LIBRARY})
   set(KOKKOS_INCLUDE_DIR $ENV{KOKKOS_INCDIR})
   set(KOKKOS_LIBRARY_DIR $ENV{KOKKOS_LIBDIR})
@@ -43,7 +41,6 @@ else()
   set(KOKKOS_INCLUDE_DIR "${PROJECT_BINARY_DIR}/include")
   set(KOKKOS_LIBRARY_DIR "${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}")
   set(KOKKOS_LIBRARY "${KOKKOS_LIBRARY_DIR}/libkokkoscore.a")
-  # set(KOKKOS_LIBDIR $ENV{KOKKOS_LIBDIR})
 endif()
 # this gets used by kkernels and arborx
 set(KOKKOS_CONFIG_DIR ${KOKKOS_LIBRARY_DIR}/cmake/Kokkos)
@@ -103,6 +100,10 @@ if (NOT EXISTS ${KOKKOS_LIBRARY})
 endif()
 list(APPEND EXT_INCDIRS ${KOKKOS_INCLUDE_DIR})
 set(EXT_LIBRARIES ${EXT_LIBRARIES};kokkos)
+# ==============================================================================
+# ==============================================================================
+# Kokkos Kernels build
+# ==============================================================================
 
 # FIXME: this should be done in a setup script, referencing a machine file
 if (DEFINED ENV{KOKKOSKERNELS_LIBRARY})
@@ -114,7 +115,6 @@ else()
   set(KOKKOSKERNELS_INCLUDE_DIR "${PROJECT_BINARY_DIR}/include")
   set(KOKKOSKERNELS_LIBRARY_DIR "${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}")
   set(KOKKOSKERNELS_LIBRARY ${KOKKOSKERNELS_LIBRARY_DIR}/libkokkoskernels.a)
-  # set(KOKKOS_LIBDIR $ENV{KOKKOS_LIBDIR})
 endif()
 
 add_library(kokkoskernels STATIC IMPORTED GLOBAL)
@@ -122,7 +122,6 @@ set_target_properties(kokkoskernels PROPERTIES IMPORTED_LOCATION ${KOKKOSKERNELS
 if (NOT EXISTS ${KOKKOSKERNELS_LIBRARY})
   message(STATUS "Building Kokkos Kernels as external project")
   update_submodules()
-  # set(KOKKOS_CONFIG_DIR ${KOKKOS_LIBRARY_DIR}/cmake/Kokkos)
   set(KOKKOSKERNELS_CMAKE_OPTS -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
                                -DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR}
                                -DKokkos_DIR=${KOKKOS_CONFIG_DIR}
@@ -145,6 +144,11 @@ if (NOT EXISTS ${KOKKOSKERNELS_LIBRARY})
 endif()
 list(APPEND EXT_INCDIRS ${KOKKOSKERNELS_INCLUDE_DIR})
 set(EXT_LIBRARIES ${EXT_LIBRARIES};kokkoskernels)
+
+# ==============================================================================
+# ==============================================================================
+# yaml-cpp build
+# ==============================================================================
 
 # FIXME: this should be done in a setup script, referencing a machine file
 if (DEFINED ENV{YAML_CPP_LIBRARY})
@@ -186,27 +190,27 @@ endif()
 list(APPEND EXT_INCDIRS ${YAML_CPP_INCLUDE_DIR})
 set(EXT_LIBRARIES ${EXT_LIBRARIES};yaml_cpp)
 
+# ==============================================================================
+# ==============================================================================
+# ArborX build
+# ==============================================================================
+
 # FIXME: this should be done in a setup script, referencing a machine file
 if (DEFINED ENV{ARBORX_INCDIR})
-  # this may be silly, but I'm sticking with it for now
+  # this may be silly, but I'm sticking with it for now, for consistency's sake
+  # in the convention of what's provided in the config file
   # FIXME: maybe pass in $ENV{ARBORX_ROOT_DIR}
   string(REPLACE "/include" "" ARBORX_INCLUDE_DIRS "$ENV{ARBORX_INCDIR}")
   set(ARBORX_INCLUDE_DIRS ${ARBORX_INCLUDE_DIRS}/include
                           ${ARBORX_INCLUDE_DIRS}/include/details)
-  # set(ARBORX_LIBRARY_DIR $ENV{ARBORX_LIBDIR})
-  # set(ARBORX_LIBRARY "$ENV{ARBORX_LIBDIR}/$ENV{ARBORX_LIBRARY}")
   message(STATUS "ArborX headers found at ${ARBORX_INCLUDE_DIRS}")
   set(EXTERNAL_ARBORX TRUE)
 else()
   set(ARBORX_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/{include,include/details}")
   set(EXTERNAL_ARBORX FALSE)
-  # set(ARBORX_LIBRARY_DIR "${PROJECT_BINARY_DIR}/lib")
-  # set(ARBORX_LIBRARY ${ARBORX_LIBRARY_DIR}/libyaml-cpp.a)
-  # set(ARBORX_LIBDIR $ENV{ARBORX_LIBDIR})
 endif()
 
 add_library(arborx INTERFACE)
-# set_target_properties(arborx PROPERTIES IMPORTED_LOCATION ${ARBORX_LIBRARY})
 if (NOT EXTERNAL_ARBORX)
   message(STATUS "Building ArborX as external project")
   if (CMAKE_BUILD_TYPE STREQUAL Release)
@@ -222,7 +226,7 @@ if (NOT EXTERNAL_ARBORX)
   elseif(PARPT_USE_CUDA)
     message(STATUS "GPU_DEVICE_ARCH_FLAG = $ENV{GPU_DEVICE_ARCH_FLAG}")
     set(ARBORX_CMAKE_OPTS ${ARBORX_CMAKE_OPTS}
-                          -DARBORX_ENABLE_MPI=OFF) # FIXME: decide whether this is the right call
+                          -DARBORX_ENABLE_MPI=OFF)
     message(STATUS "ARBORX_CMAKE_OPTS = ${ARBORX_CMAKE_OPTS}")
   else()
     set(ARBORX_CMAKE_OPTS ${ARBORX_CMAKE_OPTS}
@@ -251,9 +255,7 @@ if (NOT EXTERNAL_ARBORX)
 
   add_dependencies(arborx arborx_proj)
 endif()
-# not sure if this is too hacky, but it appears to work
 list(APPEND EXT_INCDIRS ${ARBORX_INCLUDE_DIRS})
-# set(EXT_LIBRARIES ${EXT_LIBRARIES};ARBORX)
 
 # Add all the libraries to the build system at large.
 set(LIBRARIES ${EXT_LIBRARIES} PARENT_SCOPE)
