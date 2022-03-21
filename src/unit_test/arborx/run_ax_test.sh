@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # OpenMP environment variables
-# export OMP_NUM_THREADS=12
-# export OMP_PROC_BIND=spread
+export OMP_NUM_THREADS=12
+export OMP_PROC_BIND=spread
 # export OMP_PLACES=threads
 
 export dim=(1 2 3)

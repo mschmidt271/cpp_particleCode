@@ -1,27 +1,28 @@
 #ifndef UTILITIES_HPP
 #define UTILITIES_HPP
 
-#include <Kokkos_Core.hpp>
-#include <Kokkos_Random.hpp>
-#include <chrono>
-#include <cmath>
-#include <fstream>
-#include <iostream>
-#include <random>
-#include <sstream>
-#include <string>
+// ***TESTING***
+// #include <chrono>
+// #include <fstream>
+// #include <random>
+// #include <sstream>
 
-#include "ArborX.hpp"
-#include "KokkosKernels_default_types.hpp"
-#include "KokkosSparse_CrsMatrix.hpp"
-#include "KokkosSparse_spgemm.hpp"
+#include <cmath>
+// #include <iostream>
+// #include <string>
+
+// #include "ArborX.hpp"
+#include "ArborX_LinearBVH.hpp"
+#include "Kokkos_Core.hpp"
+#include "Kokkos_Random.hpp"
 #include "KokkosSparse_spmv.hpp"
 #include "type_defs.hpp"
+#include "version_info.hpp"
 #include "yaml-cpp/yaml.h"
 
-namespace particles {
+// using namespace utils;
 
-std::string toy_problem_intro();
+namespace particles {
 
 // functor for generating uniformly-distributed random doubles
 // in the range [start, end]

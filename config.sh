@@ -136,16 +136,16 @@ echo "Home directory is ${HOME_DIR}"
 
 # set these manually to where they are on your machine,
 # or just comment out to build them as subprojects if you don't have them built
-# export KOKKOS_LIBDIR="${KO_ROOT}/${KO_LIBDIR}"
-# export KOKKOS_INCDIR="${KO_ROOT}/include"
-# export KOKKOS_LIBRARY="libkokkoscore.a"
-# export KOKKOSKERNELS_LIBDIR="${KK_ROOT}/${KO_LIBDIR}"
-# export KOKKOSKERNELS_INCDIR="${KK_ROOT}/include"
-# export KOKKOSKERNELS_LIBRARY="libkokkoskernels.a"
-# export YAML_CPP_LIBDIR="${YCPP_ROOT}/lib"
-# export YAML_CPP_INCDIR="${YCPP_ROOT}/include"
-# export YAML_CPP_LIBRARY="libyaml-cpp.a"
-# export ARBORX_INCDIR="${AX_ROOT}/include"
+export KOKKOS_LIBDIR="${KO_ROOT}/${KO_LIBDIR}"
+export KOKKOS_INCDIR="${KO_ROOT}/include"
+export KOKKOS_LIBRARY="libkokkoscore.a"
+export KOKKOSKERNELS_LIBDIR="${KK_ROOT}/${KO_LIBDIR}"
+export KOKKOSKERNELS_INCDIR="${KK_ROOT}/include"
+export KOKKOSKERNELS_LIBRARY="libkokkoskernels.a"
+export YAML_CPP_LIBDIR="${YCPP_ROOT}/lib"
+export YAML_CPP_INCDIR="${YCPP_ROOT}/include"
+export YAML_CPP_LIBRARY="libyaml-cpp.a"
+export ARBORX_INCDIR="${AX_ROOT}/include"
 
 # as long as everything above looks good, you should be all set from here down
 export OS=`uname -s`

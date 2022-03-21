@@ -1,8 +1,5 @@
-#include <ArborX_LinearBVH.hpp>
-
-#include "KokkosKernels_default_types.hpp"
+#include "ArborX_LinearBVH.hpp"
 #include "Kokkos_Core.hpp"
-#include "parPT_config.hpp"
 #include "type_defs.hpp"
 #include "yaml-cpp/yaml.h"
 

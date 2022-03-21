@@ -2,12 +2,6 @@
 
 namespace particles {
 
-std::string toy_problem_intro() {
-  std::ostringstream ss;
-  ss << "1D Particle Tracking With Random Walks and Mass Transfer\n";
-  return ss.str();
-}
-
 // anonymous namespace for utility fxns used below
 namespace {
 
@@ -78,7 +72,7 @@ void Params::enumerate_IC(std::string IC_str, YAML::Node yml, bool space) {
 
 void Params::print_summary() {
   std::cout << "************************************************************\n";
-  std::cout << "  " << particles::toy_problem_intro();
+  std::cout << utils::print_version_info();
   std::cout << "************************************************************\n";
   std::cout << "Np = " << Np << "\n";
   std::cout << "omega = [";

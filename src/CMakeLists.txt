@@ -69,11 +69,12 @@ message(STATUS "Libraries = ${LIBRARIES}")
 # add the include directories
 target_include_directories(parPT PUBLIC
                            ${PARPT_INCDIRS}
-                           ${PROJECT_SOURCE_DIR}/src
+                           # ${PROJECT_SOURCE_DIR}/src
                           )
 
 set(tests "MT_only" ; "RW_only" ; "RWMT")
 
+# FIXME: is this necessary?
 install(TARGETS parPT Utils)
 install(DIRECTORY data DESTINATION ${CMAKE_INSTALL_PREFIX})
 install(DIRECTORY tests DESTINATION ${CMAKE_INSTALL_PREFIX})

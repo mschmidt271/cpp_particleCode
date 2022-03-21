@@ -2,7 +2,6 @@
 #define TYPE_DEFS_HPP
 
 #include "KokkosKernels_default_types.hpp"
-#include "Kokkos_Core.hpp"
 #include "KokkosSparse_CrsMatrix.hpp"
 #include "parPT_config.hpp"
 

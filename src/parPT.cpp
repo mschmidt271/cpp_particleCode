@@ -4,9 +4,9 @@
 #include "utilities.hpp"
 
 // ***TESTING***
-#include <ArborX_LinearBVH.hpp>
-#include <string_view>
-#include <typeinfo>
+// #include <ArborX_LinearBVH.hpp>
+// #include <string_view>
+// #include <typeinfo>
 
 #include "KokkosKernels_default_types.hpp"
 #include "KokkosSparse_CrsMatrix.hpp"
