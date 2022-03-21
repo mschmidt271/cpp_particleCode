@@ -10,3 +10,6 @@
 [submodule "ext/ArborX"]
 	path = ext/ArborX
 	url = git@github.com:arborx/ArborX.git
+[submodule "ext/spdlog"]
+	path = ext/spdlog
+	url = git@github.com:gabime/spdlog.git
