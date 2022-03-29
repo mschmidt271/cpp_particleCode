@@ -30,9 +30,6 @@ list(APPEND PARPT_INCDIRS;
 # add the utils directory, with the utilities library and plotting directory
 add_subdirectory(utils)
 
-# add the unit testing subdirectory (FIXME: automate this one day...)
-add_subdirectory(unit_test)
-
 # # add the external kokkos library
 # find_library(kk kokkoscore HINTS $ENV{KOKKOS_LIBDIR})
 
@@ -57,8 +54,15 @@ if(PARPT_USE_CUDA)
   list(APPEND LIBRARIES; ${CUDA_cusparse_LIBRARY})
 endif()
 
+# add_dependencies(PARPT_LIBS)
+
 set(PARPT_LIBS Utils)
 set(LIBRARIES ${LIBRARIES};${PARPT_LIBS})
+
+# add the unit testing subdirectory (FIXME: automate this one day...)
+# NOTE: in order for this to see the PARPT_LIBS, this has be be after they are
+# appended to LIBRARIES b^.^d
+add_subdirectory(unit_test)
 
 target_link_libraries(parPT
                       ${LIBRARIES}

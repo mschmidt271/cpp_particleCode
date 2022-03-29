@@ -257,6 +257,54 @@ if (NOT EXTERNAL_ARBORX)
 endif()
 list(APPEND EXT_INCDIRS ${ARBORX_INCLUDE_DIRS})
 
+# ==============================================================================
+# ==============================================================================
+# spdlog build
+# ==============================================================================
+
+# FIXME: this should be done in a setup script, referencing a machine file
+if (DEFINED ENV{SPDLOG_LIBRARY})
+  set(SPDLOG_INCLUDE_DIR $ENV{SPDLOG_INCDIR})
+  set(SPDLOG_LIBRARY_DIR $ENV{SPDLOG_LIBDIR})
+  set(SPDLOG_LIBRARY "$ENV{SPDLOG_LIBDIR}/$ENV{SPDLOG_LIBRARY}")
+  message(STATUS "spdlog found at ${SPDLOG_LIBRARY}")
+else()
+  set(SPDLOG_INCLUDE_DIR "${PROJECT_BINARY_DIR}/include")
+  set(SPDLOG_LIBRARY_DIR "${PROJECT_BINARY_DIR}/lib")
+  set(SPDLOG_LIBRARY ${SPDLOG_LIBRARY_DIR}/libspdlog.a)
+  set(SPDLOG_LIBDIR $ENV{SPDLOG_LIBDIR})
+endif()
+
+add_library(spdlog STATIC IMPORTED GLOBAL)
+set_target_properties(spdlog PROPERTIES IMPORTED_LOCATION ${SPDLOG_LIBRARY})
+if (NOT EXISTS ${SPDLOG_LIBRARY})
+  message(STATUS "Building spdlog as external project")
+  update_submodules()
+  set(SPDLOG_CMAKE_OPTS -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+                        -DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR}
+                        -DCMAKE_BUILD_TYPE=RelWithDebInfo
+                        -DBUILD_SHARED_LIBS=OFF
+                        -DSPDLOG_BUILD_EXAMPLES=OFF
+                        -DSPDLOG_BUILD_TESTS=OFF
+                        -DSPDLOG_INSTALL=ON
+                        -DCMAKE_VERBOSE_MAKEFILE=OFF)
+  ExternalProject_Add(spdlog_proj
+                      PREFIX ${CMAKE_CURRENT_BINARY_DIR}/spdlog
+                      SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/spdlog
+                      BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/spdlog
+                      INSTALL_DIR ${PROJECT_BINARY_DIR}
+                      CMAKE_ARGS ${SPDLOG_CMAKE_OPTS}
+                      BUILD_COMMAND make -j
+                      LOG_CONFIGURE TRUE
+                      LOG_BUILD TRUE
+                      # INSTALL_COMMAND make install
+                      LOG_INSTALL TRUE)
+
+  add_dependencies(spdlog spdlog_proj)
+endif()
+list(APPEND EXT_INCDIRS ${SPDLOG_INCLUDE_DIR})
+set(EXT_LIBRARIES ${EXT_LIBRARIES};spdlog)
+
 # Add all the libraries to the build system at large.
 set(LIBRARIES ${EXT_LIBRARIES} PARENT_SCOPE)
 list(REMOVE_DUPLICATES EXT_INCDIRS)
@@ -271,4 +319,7 @@ endif()
 if (${YAML_CPP_LIBRARY_DIR} MATCHES ${PROJECT_BINARY_DIR}) # we built yaml-cpp
   # note that yaml-cpp is hard-coded to install to "lib"
   install(FILES ${YAML_CPP_LIBRARY} DESTINATION lib)
+endif()
+if (${SPDLOG_LIBRARY_DIR} MATCHES ${PROJECT_BINARY_DIR}) # we built spdlob
+  install(FILES ${SPDLOG_LIBRARY} DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()

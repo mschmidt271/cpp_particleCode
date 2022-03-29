@@ -13,12 +13,14 @@
 
 // #include "ArborX.hpp"
 #include "ArborX_LinearBVH.hpp"
+#include "containers.hpp"
 #include "Kokkos_Core.hpp"
 #include "Kokkos_Random.hpp"
-#include "KokkosSparse_spmv.hpp"
+#include "mass_transfer.hpp"
+// #include "KokkosSparse_spmv.hpp"
 #include "type_defs.hpp"
 #include "version_info.hpp"
-#include "yaml-cpp/yaml.h"
+// #include "yaml-cpp/yaml.h"
 
 // using namespace utils;
 
@@ -55,8 +57,8 @@ struct RandomUniform {
   }
 
   // Constructor, Initialize all members
-  RandomUniform(ko::View<Real*> vals_, RandPool rand_pool_, Scalar start_,
-                Scalar end_)
+  RandomUniform(ko::View<Real*> vals_, const RandPool& rand_pool_, const Scalar& start_,
+                const Scalar& end_)
       : vals(vals_), rand_pool(rand_pool_), start(start_), end(end_) {}
 
 };  // end RandomUniform functor
@@ -91,32 +93,11 @@ struct RandomWalk {
   }
 
   // Constructor, Initialize all members
-  RandomWalk(ko::View<Real*> pvec_, RandPool rand_pool_, Scalar mean_,
-             Scalar stddev_)
+  RandomWalk(ko::View<Real*> pvec_, const RandPool& rand_pool_, const Scalar& mean_,
+             const Scalar& stddev_)
       : pvec(pvec_), rand_pool(rand_pool_), mean(mean_), stddev(stddev_) {}
 
 };  // end RandomWalk functor
-
-enum IC_enum_space { point_loc, uniform, equi, hat };
-enum IC_enum_mass { point_mass, heaviside, gaussian };
-
-// class holding simulation parameters
-class Params {
- public:
-  int Np, nSteps;
-  Real X0_mass, X0_space, maxT, dt, D, pctRW, denom, cdist_coeff, cutdist,
-      hat_pct;
-  std::string IC_str_space, IC_str_mass;
-  std::vector<Real> omega;
-  std::string pFile;
-  IC_enum_space IC_type_space;
-  IC_enum_mass IC_type_mass;
-  void set_values(const std::string& yaml_name);
-  void print_summary();
-  Params() = default;
-  Params(const std::string& yaml_name);
-  void enumerate_IC(std::string IC_str, YAML::Node yml, bool space);
-};
 
 // class for writing particle output
 class ParticleIO {
@@ -137,27 +118,25 @@ class Particles {
   // FIXME: keep a mirror (private?) of these for writing out every xx time
   // steps mass carried by particles (FIXME: units, )
   ko::View<Real*> mass;
-  // mask for distmat reduction
-  // FIXME: make this int/boolean
-  ko::View<Real*> mask;
   // parameter views
-  ko::View<Real> D, pctRW, dt, cutdist;
-  ko::View<int> Np;
+  // ko::View<Real> D, pctRW, dt, cutdist;
+  // ko::View<int> Np;
+  // host version of params and the device view below
   Params params;
+  MassTransfer mass_trans;
+  // ko::View<Params> params;
   // typedef and variable for the random pool, used by the kokkos RNG
   // Note: there's also a 1024-bit generator, but that is probably overkill
   typedef typename ko::Random_XorShift64_Pool<> RandPoolType;
   ParticleIO particleIO;
   RandPoolType rand_pool;
-  Particles(std::string input_file);
+  Particles(const std::string& input_file);
   // constructor that specifies the random number seed
-  Particles(std::string input_file, int rand_seed);
-  void initialize_positions(Params params);
-  void initialize_masses(Params params);
+  Particles(const std::string& input_file, const int& rand_seed);
+  void initialize_positions();
+  void initialize_masses();
   void random_walk();
-  void mass_transfer();
-  SpmatType get_transfer_mat();
-  SpmatType sparse_kernel_mat(const int& nnz, const ko::View<Real*>& mask);
+  // void mass_transfer();
 };
 
 }  // namespace particles

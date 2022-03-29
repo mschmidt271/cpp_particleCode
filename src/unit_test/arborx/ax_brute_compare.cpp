@@ -1,5 +1,7 @@
 #include "ArborX_LinearBVH.hpp"
+#include "containers.hpp"
 #include "Kokkos_Core.hpp"
+#include "mass_transfer.hpp"
 #include "spdlog/formatter.h"
 #include "type_defs.hpp"
 #include "yaml-cpp/yaml.h"
@@ -42,7 +44,7 @@ void usage(const char* exe) {
 
 int main(int argc, char* argv[]) {
   // print usage if to few args are provided
-  if (argc < 3) usage(argv[0]);
+  if (argc < 2) usage(argv[0]);
 
   // this is essentially kokkos initialization, but supposedly
   // takes care of scoping issues proactively
@@ -116,33 +118,69 @@ int main(int argc, char* argv[]) {
                 offsets);
   ko::Profiling::popRegion();
 
-  ko::Profiling::pushRegion("deep copy results to host");
   auto hoff = ko::create_mirror_view(offsets);
   auto hind = ko::create_mirror_view(indices);
   ko::deep_copy(hoff, offsets);
   ko::deep_copy(hind, indices);
-  ko::Profiling::popRegion();
-
-  // write the results out to a text file, with name provided as CLA
-  ko::Profiling::pushRegion("write to file");
-  FILE* outFile;
-  std::string fname = install_prefix;
-  fname += "/unit_test/arborx/";
-  fname += argv[2];
-  outFile = fopen(fname.c_str(), "w");
-
   // this goofy looking loop is because the results are stored in CRS format
-  for (int i = 0; i < xlen; ++i) {
+  for (int i = 0; i < 1; ++i) {
     for (int j = hoff(i); j < hoff(i + 1); ++j) {
-      fmt::print(outFile, "{}", hind(j) + 1);
+      fmt::print(stdout, "{}", hind(j));
       if (j < hoff(i + 1) - 1) {
-        fmt::print(outFile, ", ");
+        fmt::print(stdout, ", ");
       }
     }
-    fmt::print(outFile, "\n");
+    fmt::print(stdout, "\n");
   }
-  fclose(outFile);
-  ko::Profiling::popRegion();
+
+
+
+  // skeleton outline for comparison
+  Params params;
+  params.Np = xlen;
+  params.cutdist = radius;
+  params.pctRW = 0.5;
+  ko::View<Real*> mass;
+  auto X1d = ko::subview(X, ko::ALL(), 0);
+  MassTransfer mass_trans;
+  mass_trans = MassTransfer<BruteForceCRSPolicy>(params, X1d, mass);
+  std::cout << "mass_trans.mask.size() before = " << mass_trans.mask.size() << "\n";
+  int nnz;
+  mass_trans.get_nnz_mask_brute(nnz);
+  std::cout << "nnz = " << nnz << "\n";
+  std::cout << "mass_trans.mask.size() after = " << mass_trans.mask.size() << "\n";
+  std::cout << "mass_trans.mask() = " << mass_trans.mask() << "\n";
+  auto row = ko::View<int*>("row", nnz);
+  auto col = ko::View<int*>("col", nnz);
+  auto val = ko::View<Real*>("val", nnz);
+  auto rowmap = ko::View<int*>("rowmap", xlen + 1);
+  mass_trans.get_crs_views_brute(nnz, mass_trans.mask, row, col, val, rowmap);
+
+  auto hcol = ko::create_mirror_view(col);
+  auto hrow = ko::create_mirror_view(row);
+  auto hrowmap = ko::create_mirror_view(rowmap);
+  ko::deep_copy(hcol, col);
+  ko::deep_copy(hrow, row);
+  ko::deep_copy(hrowmap, rowmap);
+  // this goofy looking loop is because the results are stored in CRS format
+  // for (int i = 0; i < 1; ++i) {
+  //   for (int j = hcol(i); j < hcol(i + 1); ++j) {
+  //     fmt::print(stdout, "{}", hrowmap(j) + 1);
+  //     if (j < hcol(i + 1) - 1) {
+  //       fmt::print(stdout, ", ");
+  //     }
+  //   }
+  //   fmt::print(stdout, "\n");
+  // }
+  for (int i = 0; i < 1; ++i) {
+    for (int j = hrowmap(i); j < hrowmap(i + 1); ++j) {
+      fmt::print(stdout, "{}", col(j));
+      if (j < hrowmap(i + 1) - 1) {
+        fmt::print(stdout, ", ");
+      }
+    }
+  }
+  fmt::print(stdout, "\n");
 
   return 0;
 }

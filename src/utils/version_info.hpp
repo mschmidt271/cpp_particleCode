@@ -4,9 +4,11 @@
 #include <string>
 #include <sstream>
 
+#include "spdlog/formatter.h"
+
 namespace utils {
 
-std::string print_version_info();
+void print_version_info();
 
 }  // namespace utils
 

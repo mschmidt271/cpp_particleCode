@@ -20,8 +20,8 @@ namespace {
 
 // Print usage information and exit.
 void usage(const char* exe) {
-  fprintf(stderr, "ERROR: Too few inputs to %s--usage:\n", exe);
-  fprintf(stderr, "%s <input.yml>\n", exe);
+  fmt::print(stderr, "ERROR: Too few inputs to {}--usage:\n", exe);
+  fmt::print(stderr, "{} <input.yml>\n", exe);
   exit(1);
 }
 }  // namespace
@@ -35,8 +35,10 @@ int main(int argc, char* argv[]) {
   ko::ScopeGuard guard(argc, argv);
 
   {  // Kokkos scope
-    printf("Kokkos execution space is: %s\n", typeid(ExecutionSpace).name());
+    fmt::print("Kokkos execution space is: {}\n", typeid(ExecutionSpace).name());
     ko::print_configuration(std::cout, true);
+
+    mt MassTransfer<BruteForceCRSPolicy>();
 
     // get the input file name from command line argument
     std::string input_file(argv[1]);
@@ -61,7 +63,7 @@ int main(int argc, char* argv[]) {
       particles.random_walk();
       ko::Profiling::popRegion();
       ko::Profiling::pushRegion("MT");
-      particles.mass_transfer();
+      particles.mass_trans.transfer_mass();
       ko::Profiling::popRegion();
       ko::Profiling::pushRegion("tstep_write");
       // write updated particle info to file

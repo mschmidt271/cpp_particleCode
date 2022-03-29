@@ -7,15 +7,20 @@ export OMP_PLACES=cores
 
 # whether we are on a remote computer and don't want to plot
 # FIXME: change this to string matching so we only need one field
-# export remote=true
-# export laptop=false
-export laptop=true
-export remote=false
 export simple_kt=false
-export plot=false
+export plot=true
 
-# export KK_TOOLS_DIR=/home/pfsuser/mjschmidt/kokkos-tools\
-# export KK_TOOLS_DIR=${HOME}/kokkos-tools
+export MACHINE=`hostname`
+export HOME_DIR=$HOME
+if [ $MACHINE = s1046231 ]; then
+    export KK_TOOLS_DIR=${HOME_DIR}/kokkos-tools
+elif [ $MACHINE = s1024454 ]; then
+    export KK_TOOLS_DIR=${HOME_DIR}/kokkos-tools
+elif [ $MACHINE = clamps ]; then
+    export HOME_DIR="${HOME}/mjschmidt"
+    export KK_TOOLS_DIR=${HOME_DIR}/kokkos-tools./bin/parPT /data/particleParams.yaml -v 2> data/a.err
+    fi
+fi
 
 # simple kernel timer location
 # export simple_kt=true
@@ -24,19 +29,19 @@ export plot=false
 
 # space time stack
 # export st_stack=true
-# export KOKKOS_PROFILE_LIBRARY=${HOME}/kokkos-tools/profiling/space-time-stack/kp_space_time_stack.so
-# export PATH=${PATH}:${HOME}/kokkos-tools/profiling/
+# export KOKKOS_PROFILE_LIBRARY=${HOME_DIR}/kokkos-tools/profiling/space-time-stack/kp_space_time_stack.so
+# export PATH=${PATH}:${HOME_DIR}/kokkos-tools/profiling/
 
 # memory events
-# export KOKKOS_PROFILE_LIBRARY=${HOME}/kokkos-tools/profiling/memory-events/kp_memory_events.so
-# export PATH=${PATH}:${HOME}/kokkos-tools/profiling/
+# export KOKKOS_PROFILE_LIBRARY=${HOME_DIR}/kokkos-tools/profiling/memory-events/kp_memory_events.so
+# export PATH=${PATH}:${HOME_DIR}/kokkos-tools/profiling/
 
 # kernel logger
 # export KOKKOS_PROFILE_LIBRARY=${KK_TOOLS_DIR}/kp_kernel_logger.so
 # export PATH=${PATH}:${KK_TOOLS_DIR}
 
-if [ "$laptop" = true ]
-then
+export MACHINE=`hostname`
+if [ $MACHINE = s1046231 ]; then
     if [ "$st_stack" = true ]
     then
         ./bin/parPT /data/particleParams.yaml -v > prof_results.txt
@@ -67,15 +72,22 @@ then
             # ./parPT.exe > a.out 2> a.err
         fi
     fi
-elif [ "$remote" = true ]
-then
+elif [ $MACHINE = s1024454 ]; then
     if [ "$simple_kt" = true ]
     then
         ./bin/parPT /data/particleParams.yaml -v
         kp_reader *.dat > prof_results.txt
-        rm s1024454*.dat
-         # kp_reader *.dat > prof_results.txt
-         # rm clamps-*.dat
+        rm ${MACHINE}*.dat
+        vim prof_results.txt
+    else
+        ./bin/parPT /data/particleParams.yaml -v 2> data/a.err
+    fi
+elif [ $MACHINE = clamps ]; then
+    if [ "$simple_kt" = true ]
+    then
+        ./bin/parPT /data/particleParams.yaml -v
+         kp_reader *.dat > prof_results.txt
+         rm ${MACHINE}*.dat
         vim prof_results.txt
     else
         ./bin/parPT /data/particleParams.yaml -v 2> data/a.err

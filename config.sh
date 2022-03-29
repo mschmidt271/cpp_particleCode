@@ -45,12 +45,14 @@ if [ $MACHINE = s1046231 ]; then
         export KK_ROOT="${HOME_DIR}/kokkos-kernels/install_clang"
         export YCPP_ROOT="${HOME_DIR}/yaml-cpp/install_clang"
         export AX_ROOT="${HOME_DIR}/ArborX/install_clang"
+        export SP_ROOT="${HOME_DIR}/spdlog/install_clang"
     elif [ "$USE_OPENMP" = true ]; then
         echo "Building for OpenMP"
         export KO_ROOT="${HOME_DIR}/kokkos/install_gccomp"
         export KK_ROOT="${HOME_DIR}/kokkos-kernels/install_gccomp"
         export YCPP_ROOT="${HOME_DIR}/yaml-cpp/install_gcc11"
         export AX_ROOT="${HOME_DIR}/ArborX/install_gccomp"
+        export SP_ROOT="${HOME_DIR}/spdlog/install_gccomp"
     else
         echo "ERROR: Unsupported build for this machine"
         exit
@@ -146,6 +148,9 @@ export YAML_CPP_LIBDIR="${YCPP_ROOT}/lib"
 export YAML_CPP_INCDIR="${YCPP_ROOT}/include"
 export YAML_CPP_LIBRARY="libyaml-cpp.a"
 export ARBORX_INCDIR="${AX_ROOT}/include"
+export SPDLOG_LIBDIR="${SP_ROOT}/lib"
+export SPDLOG_INCDIR="${SP_ROOT}/include"
+export SPDLOG_LIBRARY="libspdlogd.a"
 
 # as long as everything above looks good, you should be all set from here down
 export OS=`uname -s`
