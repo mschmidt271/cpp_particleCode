@@ -12,6 +12,21 @@ else()
 endif()
 message(STATUS "Using ${PARPT_PRECISION} precision floating point numbers")
 
+# type of fixed-radius search to use
+# Precision of floating point numbers.
+if (PARPT_SEARCH_TYPE STREQUAL "tree")
+  set(PARPT_SEARCH_POLICY "TreeCRSPolicy")
+  set(PARPT_TREE_SEARCH 1)
+elseif(PARPT_SEARCH_TYPE STREQUAL "brute_force")
+  set(PARPT_SEARCH_POLICY "BruteForceCRSPolicy")
+  set(PARPT_TREE_SEARCH 0)
+elseif(PARPT_SEARCH_TYPE)
+  message(FATAL_ERROR "Invalid PARPT_SEARCH_TYPE: ${PARPT_SEARCH_TYPE} (use 'tree' or 'brute_force')")
+else()
+  message(FATAL_ERROR "PARPT_SEARCH_TYPE not set (use 'tree' or 'brute_force')")
+endif()
+message(STATUS "Using ${PARPT_SEARCH_TYPE} for fixed-radius search")
+
 # generate a configure file
   # currently, just provides the install prefix
   # NOTE: here, and below, PROJECT_SOURCE_DIR refers to the root directory,

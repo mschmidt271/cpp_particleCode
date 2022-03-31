@@ -1,6 +1,11 @@
 #!/bin/bash
 
 # ==============================================================================
+export REAL_TYPE="double"
+# export REAL_TYPE="single"
+export SEARCH_TYPE="tree"
+# export SEARCH_TYPE="brute_force"
+# ==============================================================================
 # choose only one of these build options
 # (1)
 # export USE_OPENMP=false
@@ -195,10 +200,11 @@ rm -rf CMake*
 # -D PARPT_USE_OPENMP=$USE_OPENMP\
 # -D PARPT_USE_CUDA=$USE_CUDA
 cmake .. \
-    -D CMAKE_INSTALL_PREFIX="./"\
-    -D CMAKE_VERBOSE_MAKEFILE=ON\
-    -D CMAKE_CXX_COMPILER=$CXX\
-    -D CMAKE_C_COMPILER=$CC\
-    -D PARPT_USE_OPENMP=$USE_OPENMP\
-    -D PARPT_USE_CUDA=$USE_CUDA\
-    -D PARPT_PRECISION="double"
+    -D CMAKE_INSTALL_PREFIX="./" \
+    -D CMAKE_VERBOSE_MAKEFILE=ON \
+    -D CMAKE_CXX_COMPILER=$CXX \
+    -D CMAKE_C_COMPILER=$CC \
+    -D PARPT_USE_OPENMP=$USE_OPENMP \
+    -D PARPT_USE_CUDA=$USE_CUDA \
+    -D PARPT_PRECISION=$REAL_TYPE \
+    -D PARPT_SEARCH_TYPE=$SEARCH_TYPE

@@ -6,18 +6,18 @@
 #include "ArborX_LinearBVH.hpp"
 #include "Kokkos_Core.hpp"
 #include "Kokkos_Random.hpp"
-#include "brute_force_crs_policy.hpp"
 #include "containers.hpp"
 #include "mass_transfer.hpp"
-#include "tree_crs_policy.hpp"
 #include "type_defs.hpp"
 #include "version_info.hpp"
 
+#include "brute_force_crs_policy.hpp"
+#include "tree_crs_policy.hpp"
+
 namespace particles {
 
-// ***FIXME***: pass this in via config file
-using CRSPolicy = TreeCRSPolicy;
-// using CRSPolicy = BruteForceCRSPolicy;
+// this comes from the parPT_config.hpp via type_defs.hpp
+using CRSPolicy = crs_policy_name;
 
 // functor for generating uniformly-distributed random doubles
 // in the range [start, end]

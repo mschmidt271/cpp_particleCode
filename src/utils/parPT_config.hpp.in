@@ -6,4 +6,10 @@
 // real-valued variables are of this type, provided in the cmake configuration
 typedef @PARPT_REAL_TYPE@ Real;
 
+// namespace particles {
+// // type of fixed-radius search to use, provided in the cmake configuration
+#define crs_policy_name @PARPT_SEARCH_POLICY@
+// typedef @PARPT_SEARCH_POLICY@ CRSPolicy;
+// }
+
 #endif
