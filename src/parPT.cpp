@@ -38,8 +38,6 @@ int main(int argc, char* argv[]) {
     fmt::print("Kokkos execution space is: {}\n", typeid(ExecutionSpace).name());
     ko::print_configuration(std::cout, true);
 
-    mt MassTransfer<BruteForceCRSPolicy>();
-
     // get the input file name from command line argument
     std::string input_file(argv[1]);
     // create the particles object

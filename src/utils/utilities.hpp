@@ -1,30 +1,23 @@
 #ifndef UTILITIES_HPP
 #define UTILITIES_HPP
 
-// ***TESTING***
-// #include <chrono>
-// #include <fstream>
-// #include <random>
-// #include <sstream>
-
 #include <cmath>
-// #include <iostream>
-// #include <string>
 
-// #include "ArborX.hpp"
 #include "ArborX_LinearBVH.hpp"
-#include "containers.hpp"
 #include "Kokkos_Core.hpp"
 #include "Kokkos_Random.hpp"
+#include "brute_force_crs_policy.hpp"
+#include "containers.hpp"
 #include "mass_transfer.hpp"
-// #include "KokkosSparse_spmv.hpp"
+#include "tree_crs_policy.hpp"
 #include "type_defs.hpp"
 #include "version_info.hpp"
-// #include "yaml-cpp/yaml.h"
-
-// using namespace utils;
 
 namespace particles {
+
+// ***FIXME***: pass this in via config file
+using CRSPolicy = TreeCRSPolicy;
+// using CRSPolicy = BruteForceCRSPolicy;
 
 // functor for generating uniformly-distributed random doubles
 // in the range [start, end]
@@ -57,8 +50,8 @@ struct RandomUniform {
   }
 
   // Constructor, Initialize all members
-  RandomUniform(ko::View<Real*> vals_, const RandPool& rand_pool_, const Scalar& start_,
-                const Scalar& end_)
+  RandomUniform(ko::View<Real*> vals_, const RandPool& rand_pool_,
+                const Scalar& start_, const Scalar& end_)
       : vals(vals_), rand_pool(rand_pool_), start(start_), end(end_) {}
 
 };  // end RandomUniform functor
@@ -93,8 +86,8 @@ struct RandomWalk {
   }
 
   // Constructor, Initialize all members
-  RandomWalk(ko::View<Real*> pvec_, const RandPool& rand_pool_, const Scalar& mean_,
-             const Scalar& stddev_)
+  RandomWalk(ko::View<Real*> pvec_, const RandPool& rand_pool_,
+             const Scalar& mean_, const Scalar& stddev_)
       : pvec(pvec_), rand_pool(rand_pool_), mean(mean_), stddev(stddev_) {}
 
 };  // end RandomWalk functor
@@ -118,13 +111,10 @@ class Particles {
   // FIXME: keep a mirror (private?) of these for writing out every xx time
   // steps mass carried by particles (FIXME: units, )
   ko::View<Real*> mass;
-  // parameter views
-  // ko::View<Real> D, pctRW, dt, cutdist;
-  // ko::View<int> Np;
-  // host version of params and the device view below
+  // host version of params
+  // FIXME(?): create a device version?
   Params params;
-  MassTransfer mass_trans;
-  // ko::View<Params> params;
+  MassTransfer<CRSPolicy> mass_trans;
   // typedef and variable for the random pool, used by the kokkos RNG
   // Note: there's also a 1024-bit generator, but that is probably overkill
   typedef typename ko::Random_XorShift64_Pool<> RandPoolType;
@@ -136,7 +126,6 @@ class Particles {
   void initialize_positions();
   void initialize_masses();
   void random_walk();
-  // void mass_transfer();
 };
 
 }  // namespace particles

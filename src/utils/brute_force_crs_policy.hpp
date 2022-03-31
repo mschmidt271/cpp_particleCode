@@ -1,20 +1,55 @@
-#include "mass_transfer.hpp"
+#ifndef BRUTE_FORCE_CRS_POLICY_HPP
+#define BRUTE_FORCE_CRS_POLICY_HPP
+
+#include "constants.hpp"
+#include "containers.hpp"
+#include "Kokkos_Core.hpp"
+#include "type_defs.hpp"
 
 namespace particles {
 
-// anonymous namespace
-namespace {
-
-static constexpr double pi = 3.14159265358979323846264;
-
-}  // end anonymous namespace
-
 struct BruteForceCRSPolicy {
-  static void get_views(const int& nnz, const ko::View<int*>& mask, ko::View<int*>& row,
-                ko::View<int*>& col, ko::View<Real*>& val,
-                ko::View<int*>& rowmap) {
-
-    // ***put nnz calc here***
+  static void get_nnz_mask(const ko::View<Real*>& X, const Params& params,
+                                 int& nnz, ko::View<int*>& mask) {
+    int Np2 = pow(params.Np, 2);
+    auto lcutdist = params.cutdist;
+    auto lX = X;
+    auto lNp = params.Np;
+    auto lmask = mask;
+    ko::parallel_reduce(
+        "sum nnz",
+        ko::MDRangePolicy<ko::Rank<2>>({0, 0}, {params.Np, params.Np}),
+        KOKKOS_LAMBDA(const int& i, const int& j, int& val) {
+          Real dist = fabs(lX(i) - lX(j));
+          int idx = j + (i * lNp);
+          lmask(idx) = 0;
+          if (dist <= lcutdist) {
+            val += 1;
+            lmask(idx) = 1;
+          }
+        },
+        nnz);
+    // FIXME: there's a chance this could compute nnz, depending on how I do
+    // the scan (inclusive/exclusive)
+    ko::parallel_scan(
+        "create_reduction_maskmat", Np2,
+        KOKKOS_LAMBDA(const int& i, int& update, const bool final) {
+          const int val_i = lmask(i);
+          if (final) {
+            lmask(i) = update;
+          }
+          update += val_i;
+        });
+  }
+  static SparseMatViews get_views(const ko::View<Real*>& X, const Params& params,
+                        int& nnz) {
+    SparseMatViews spmat_views;
+    auto mask = ko::View<int*>("idx_mask", pow(params.Np, 2));
+    get_nnz_mask(X, params, nnz, mask);
+    spmat_views.row = ko::View<int*>("row", nnz);
+    spmat_views.col = ko::View<int*>("col", nnz);
+    spmat_views.val = ko::View<Real*>("val", nnz);
+    spmat_views.rowmap = ko::View<int*>("rowmap", params.Np + 1);
     auto lmask = mask;
     Real denom = params.denom;
     Real c = sqrt(denom * pi);
@@ -28,25 +63,28 @@ struct BruteForceCRSPolicy {
           int idx = lmask(j + (i * lNp));
           Real d = fabs(lX(i) - lX(j));
           if (d <= lcutdist) {
-            row(idx) = i;
-            col(idx) = j;
-            val(idx) = exp(pow(d, 2) / -denom) / c;
+            spmat_views.row(idx) = i;
+            spmat_views.col(idx) = j;
+            spmat_views.val(idx) = exp(pow(d, 2) / -denom) / c;
           }
         });
     ko::parallel_for(
         "compute_rowmap", nnz, KOKKOS_LAMBDA(const int& i) {
-          ko::atomic_increment(&rowmap(row(i) + 1));
+          ko::atomic_increment(&spmat_views.rowmap(spmat_views.row(i) + 1));
         });
     ko::parallel_scan(
         "finalize_rowmap", lNp + 1,
         KOKKOS_LAMBDA(const int& i, int& update, const bool final) {
-          const int val_i = rowmap(i);
+          const int val_i = spmat_views.rowmap(i);
           update += val_i;
           if (final) {
-            rowmap(i) = update;
+            spmat_views.rowmap(i) = update;
           }
         });
+    return spmat_views;
   }
 };
 
 }  // namespace particles
+
+#endif

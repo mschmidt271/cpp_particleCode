@@ -2,13 +2,6 @@
 
 namespace particles {
 
-// anonymous namespace for utility fxns used below
-namespace {
-
-static constexpr double pi = 3.14159265358979323846264;
-
-}  // end anonymous namespace
-
 // constructor for WriteParticles object that takes in the filename f and
 // creates an outfile object
 ParticleIO::ParticleIO(std::string f) { outfile = fopen(f.c_str(), "w"); }
@@ -20,7 +13,6 @@ void ParticleIO::write(const ko::View<Real*>& X, const ko::View<Real*>& mass,
   ko::deep_copy(hX, X);
   ko::deep_copy(hmass, mass);
   if (tStep == 0) {
-    // FIXME: consider looking into spdlog for formatting
     fmt::print(outfile, "{} {}\n", pars.Np, pars.nSteps);
     fmt::print(outfile, "{} ", pars.IC_type_space);
     fmt::print(outfile, "{} ", pars.IC_type_mass);
@@ -34,8 +26,8 @@ void ParticleIO::write(const ko::View<Real*>& X, const ko::View<Real*>& mass,
     } else if (pars.IC_type_space == equi) {
       fmt::print(outfile, "-999 -999 ");
     }
-    fmt::print(outfile, "{} {} {} {} {} {} {}\n", pars.X0_mass, pars.maxT, pars.dt,
-            pars.D, pars.pctRW, pars.cdist_coeff, pars.cutdist);
+    fmt::print(outfile, "{} {} {} {} {} {} {}\n", pars.X0_mass, pars.maxT,
+               pars.dt, pars.D, pars.pctRW, pars.cdist_coeff, pars.cutdist);
     for (size_t i = 0; i < hX.extent(0); ++i) {
       fmt::print(outfile, "{} {}\n", hX(i), hmass(i));
     }
@@ -56,9 +48,6 @@ Particles::Particles(const std::string& _input_file)
   ko::Profiling::pushRegion("constructor print");
   params.print_summary();
   ko::Profiling::popRegion();
-  ko::Profiling::pushRegion("constructor param deep copy");
-  // ko::deep_copy(params, params);
-  ko::Profiling::popRegion();
   ko::Profiling::pushRegion("ctor initialize position");
   // initialize the X view
   X = ko::View<Real*>("X", params.Np);
@@ -69,7 +58,7 @@ Particles::Particles(const std::string& _input_file)
   mass = ko::View<Real*>("mass", params.Np);
   initialize_masses();
   ko::Profiling::popRegion();
-  mass_trans = MassTransfer(params, X, mass);
+  mass_trans = MassTransfer<CRSPolicy>(params, X, mass);
 }
 
 void Particles::initialize_positions() {

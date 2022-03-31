@@ -30,6 +30,13 @@ class Params {
                     const bool& space);
 };
 
+struct SparseMatViews {
+  ko::View<int*> row;
+  ko::View<int*> col;
+  ko::View<Real*> val;
+  ko::View<int*> rowmap;
+};
+
 }  // namespace particles
 
 #endif
