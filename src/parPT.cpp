@@ -42,30 +42,30 @@ int main(int argc, char* argv[]) {
     std::string input_file(argv[1]);
     // create the particles object
     ko::Profiling::pushRegion("particle constructor");
-    Particles particles(input_file);
+    Particles parts(input_file);
     ko::Profiling::popRegion();
 
     int tStep = 0;
 
     ko::Profiling::pushRegion("write positions");
     // write initial positions/masses to file
-    particles.particleIO.write(particles.X, particles.mass, particles.params,
+    parts.particleIO.write(parts.X, parts.mass, parts.params,
                                tStep);
     ko::Profiling::popRegion();
 
     ko::Profiling::pushRegion("timestepping");
     // begin time stepping
-    for (int tStep = 1; tStep <= particles.params.nSteps; ++tStep) {
+    for (int tStep = 1; tStep <= parts.params.nSteps; ++tStep) {
       // random walk and mass transfer
       ko::Profiling::pushRegion("RW");
-      particles.random_walk();
+      particles::random_walk(parts.X, parts.params, parts.rand_pool);
       ko::Profiling::popRegion();
       ko::Profiling::pushRegion("MT");
-      particles.mass_trans.transfer_mass();
+      parts.mass_trans.transfer_mass();
       ko::Profiling::popRegion();
       ko::Profiling::pushRegion("tstep_write");
       // write updated particle info to file
-      particles.particleIO.write(particles.X, particles.mass, particles.params,
+      parts.particleIO.write(parts.X, parts.mass, parts.params,
                                  tStep);
       ko::Profiling::popRegion();
     }

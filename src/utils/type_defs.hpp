@@ -2,6 +2,7 @@
 #define TYPE_DEFS_HPP
 
 #include "KokkosKernels_default_types.hpp"
+#include "Kokkos_Random.hpp"
 #include "KokkosSparse_CrsMatrix.hpp"
 #include "parPT_config.hpp"
 
@@ -9,6 +10,9 @@ namespace particles {
 
 // alias the kokkos namespace to make life easier
 namespace ko = Kokkos;
+
+// Note: there's also a 1024-bit generator, but that is probably overkill
+using RandPoolType = typename ko::Random_XorShift64_Pool<>;
 
 // some other kokkos aliases to keep things consistent/easier
 using Scalar = default_scalar;

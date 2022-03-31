@@ -3,6 +3,8 @@ include_directories(${PARPT_INCDIRS})
 add_library(Utils version_info.cpp
                   containers.cpp
                   mass_transfer.cpp
+                  random.cpp
+                  random_walk.cpp
                   utilities.cpp)
 set(Utils PARENT_SCOPE)
 # add_dependencies(Utils yaml_cpp kokkos kokkoskernels arborx spdlog version_info)

@@ -43,11 +43,11 @@ void ParticleIO::write(const ko::View<Real*>& X, const ko::View<Real*>& mass,
 // seed
 Particles::Particles(const std::string& _input_file)
     : params(install_prefix + _input_file),
-      particleIO(install_prefix + params.pFile),
-      rand_pool(5374857) {
+      particleIO(install_prefix + params.pFile) {
   ko::Profiling::pushRegion("constructor print");
   params.print_summary();
   ko::Profiling::popRegion();
+  rand_pool = init_random_seed();
   ko::Profiling::pushRegion("ctor initialize position");
   // initialize the X view
   X = ko::View<Real*>("X", params.Np);
@@ -128,18 +128,18 @@ void Particles::initialize_masses() {
   }
 }
 
-// parallelized random walk function that calls the RandomWalk functor
-void Particles::random_walk() {
-  ko::Profiling::pushRegion("RW_fxn_pre-if");
-  if (params.pctRW > 0.0) {
-    ko::Profiling::pushRegion("RW_fxn");
-    ko::parallel_for(params.Np,
-                     RandomWalk<RandPoolType>(
-                         X, rand_pool, 0.0,
-                         sqrt(2.0 * params.pctRW * params.D * params.dt)));
-    ko::Profiling::popRegion();
-    ko::Profiling::popRegion();
-  }
-}
+// // parallelized random walk function that calls the RandomWalk functor
+// void Particles::random_walk() {
+//   ko::Profiling::pushRegion("RW_fxn_pre-if");
+//   if (params.pctRW > 0.0) {
+//     ko::Profiling::pushRegion("RW_fxn");
+//     ko::parallel_for(params.Np,
+//                      RandomWalk<RandPoolType>(
+//                          X, rand_pool, 0.0,
+//                          sqrt(2.0 * params.pctRW * params.D * params.dt)));
+//     ko::Profiling::popRegion();
+//     ko::Profiling::popRegion();
+//   }
+// }
 
 }  // namespace particles

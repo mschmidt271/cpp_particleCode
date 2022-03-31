@@ -8,6 +8,8 @@
 #include "Kokkos_Random.hpp"
 #include "containers.hpp"
 #include "mass_transfer.hpp"
+// #include "random.hpp"
+#include "random_walk.hpp"
 #include "type_defs.hpp"
 #include "version_info.hpp"
 
@@ -18,79 +20,6 @@ namespace particles {
 
 // this comes from the parPT_config.hpp via type_defs.hpp
 using CRSPolicy = crs_policy_name;
-
-// functor for generating uniformly-distributed random doubles
-// in the range [start, end]
-// Note: RandPoolType is currently hard-coded in the particle class
-// GeneratorPool type
-template <class RandPool>
-struct RandomUniform {
-  // Output View for the random numbers
-  ko::View<Real*> vals;
-
-  // The GeneratorPool
-  RandPool rand_pool;
-
-  typedef Real Scalar;
-  typedef typename RandPool::generator_type gen_type;
-
-  // mean and variance of the normal random variable
-  Scalar start, end;
-
-  KOKKOS_INLINE_FUNCTION
-  void operator()(int i) const {
-    // Get a random number state from the pool for the active thread
-    gen_type rgen = rand_pool.get_state();
-
-    // draw random normal numbers, with mean and variance provided
-    vals(i) = rgen.drand(start, end);
-
-    // Give the state back, which will allow another thread to acquire it
-    rand_pool.free_state(rgen);
-  }
-
-  // Constructor, Initialize all members
-  RandomUniform(ko::View<Real*> vals_, const RandPool& rand_pool_,
-                const Scalar& start_, const Scalar& end_)
-      : vals(vals_), rand_pool(rand_pool_), start(start_), end(end_) {}
-
-};  // end RandomUniform functor
-
-// functor for random-walking particles, templated on the GeneratorPool type
-// Note: RandPoolType is currently hard-coded in the particle class
-// GeneratorPool type
-template <class RandPool>
-struct RandomWalk {
-  // Output View for the random numbers
-  ko::View<Real*> pvec;
-
-  // The GeneratorPool
-  RandPool rand_pool;
-
-  typedef Real Scalar;
-  typedef typename RandPool::generator_type gen_type;
-
-  // mean and std deviation of the normal random variable
-  Scalar mean, stddev;
-
-  KOKKOS_INLINE_FUNCTION
-  void operator()(int i) const {
-    // Get a random number state from the pool for the active thread
-    gen_type rgen = rand_pool.get_state();
-
-    // draw random normal numbers, with mean and std deviation provided
-    pvec(i) = pvec(i) + rgen.normal(mean, stddev);
-
-    // Give the state back, which will allow another thread to acquire it
-    rand_pool.free_state(rgen);
-  }
-
-  // Constructor, Initialize all members
-  RandomWalk(ko::View<Real*> pvec_, const RandPool& rand_pool_,
-             const Scalar& mean_, const Scalar& stddev_)
-      : pvec(pvec_), rand_pool(rand_pool_), mean(mean_), stddev(stddev_) {}
-
-};  // end RandomWalk functor
 
 // class for writing particle output
 class ParticleIO {
@@ -115,17 +44,13 @@ class Particles {
   // FIXME(?): create a device version?
   Params params;
   MassTransfer<CRSPolicy> mass_trans;
-  // typedef and variable for the random pool, used by the kokkos RNG
-  // Note: there's also a 1024-bit generator, but that is probably overkill
-  typedef typename ko::Random_XorShift64_Pool<> RandPoolType;
-  ParticleIO particleIO;
   RandPoolType rand_pool;
+  ParticleIO particleIO;
   Particles(const std::string& input_file);
   // constructor that specifies the random number seed
   Particles(const std::string& input_file, const int& rand_seed);
   void initialize_positions();
   void initialize_masses();
-  void random_walk();
 };
 
 }  // namespace particles
