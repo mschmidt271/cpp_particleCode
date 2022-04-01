@@ -66,31 +66,4 @@ void Params::enumerate_IC(std::string& IC_str, const YAML::Node& yml,
   }
 }
 
-void Params::print_summary() {
-  fmt::print("{}\n",
-             "************************************************************");
-  utils::print_version_info();
-  fmt::print("{}\n",
-             "************************************************************");
-  fmt::print("Np = {}\n", Np);
-  fmt::print("omega = [{}, {}]\n", omega[0], omega[1]);
-  fmt::print("IC type (space) = {}\n", IC_str_space);
-  fmt::print("IC type (mass) = {}\n", IC_str_mass);
-  if (IC_type_space == point_loc) {
-    fmt::print("X0 space = {}\n", X0_space);
-  } else if (IC_type_space == hat) {
-    fmt::print("hat_pct = {}\n", hat_pct);
-  }
-  fmt::print("X0 mass = {}\n", X0_mass);
-  fmt::print("maxT = {}\n", maxT);
-  fmt::print("dt = {}\n", dt);
-  fmt::print("D = {}\n", D);
-  fmt::print("pctRW = {}\n", pctRW);
-  fmt::print("cdist_coeff = {}\n", cdist_coeff);
-  fmt::print("cutdist = {}\n", cutdist);
-  fmt::print("pFile = {}\n", pFile);
-  fmt::print("nSteps = {}\n", nSteps);
-  fmt::print("{}\n",
-             "************************************************************");
-}
 }  // namespace particles

@@ -1,15 +1,10 @@
 #ifndef VERSION_INFO_HPP
 #define VERSION_INFO_HPP
 
-#include <string>
-#include <sstream>
+namespace particles {
 
-#include "spdlog/formatter.h"
+// void print_version_info();
 
-namespace utils {
-
-void print_version_info();
-
-}  // namespace utils
+}  // namespace particles
 
 #endif

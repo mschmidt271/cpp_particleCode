@@ -3,7 +3,7 @@
 
 #include "Kokkos_Core.hpp"
 #include "type_defs.hpp"
-#include "version_info.hpp"
+#include "spdlog/formatter.h"
 #include "yaml-cpp/yaml.h"
 
 namespace particles {
@@ -22,8 +22,6 @@ class Params {
   std::string pFile;
   IC_enum_space IC_type_space;
   IC_enum_mass IC_type_mass;
-  void set_values(const std::string& yaml_name);
-  void print_summary();
   Params() = default;
   Params(const std::string& yaml_name);
   void enumerate_IC(std::string& IC_str, const YAML::Node& yml,

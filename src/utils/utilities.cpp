@@ -7,9 +7,9 @@ namespace particles {
 // seed
 Particles::Particles(const std::string& _input_file)
     : params(install_prefix + _input_file),
-      particleIO(install_prefix + params.pFile) {
+      particleIO(install_prefix + params.pFile, params) {
   ko::Profiling::pushRegion("constructor print");
-  params.print_summary();
+  particleIO.print_params_summary();
   ko::Profiling::popRegion();
   rand_pool = init_random_seed();
   ko::Profiling::pushRegion("ctor initialize position");
