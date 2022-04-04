@@ -11,6 +11,8 @@ namespace particles {
 enum IC_enum_space { point_loc, uniform, equi, hat };
 enum IC_enum_mass { point_mass, heaviside, gaussian };
 
+enum rand_seed_enum { clock_rand, specified_rand, default_rand, missing };
+
 // class holding simulation parameters
 class Params {
  public:
@@ -22,10 +24,13 @@ class Params {
   std::string pFile;
   IC_enum_space IC_type_space;
   IC_enum_mass IC_type_mass;
+  rand_seed_enum seed_type;
+  uint64_t seed_val;
   Params() = default;
   Params(const std::string& yaml_name);
   void enumerate_IC(std::string& IC_str, const YAML::Node& yml,
                     const bool& space);
+  void enumerate_seed_type(std::string& seed_str, const YAML::Node& yml);
 };
 
 struct SparseMatViews {

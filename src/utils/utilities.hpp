@@ -2,6 +2,7 @@
 #define UTILITIES_HPP
 
 #include <cmath>
+#include <chrono>
 
 #include "ArborX_LinearBVH.hpp"
 #include "Kokkos_Core.hpp"
@@ -34,9 +35,9 @@ class Particles {
   MassTransfer<CRSPolicy> mass_trans;
   RandPoolType rand_pool;
   ParticleIO particleIO;
+  // constructor that gets the random number seed from the input yaml, clock time
+  // or uses a standard one that leads to identical, deterministic output
   Particles(const std::string& input_file);
-  // constructor that specifies the random number seed
-  Particles(const std::string& input_file, const int& rand_seed);
   void initialize_positions();
   void initialize_masses();
 };

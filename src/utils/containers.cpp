@@ -17,6 +17,17 @@ Params::Params(const std::string& yaml_name) {
   for (auto iter : file_params["omega"]) {
     omega.push_back(iter.as<Real>());
   }
+  std::string rand_seed_str;
+  // the parser will crash is they type string is empty, so check first
+  // Note: for whatever reason, IsScalar() seems to do the best job of
+  // determining whether or not the value is empty when the key is in the yaml
+  if (file_params["rand_seed_type"] and
+      file_params["rand_seed_type"].IsScalar()) {
+    rand_seed_str = file_params["rand_seed_type"].as<std::string>();
+  } else {
+    rand_seed_str = "missing";
+  }
+  enumerate_seed_type(rand_seed_str, file_params);
   maxT = file_params["maxT"].as<Real>();
   dt = file_params["dt"].as<Real>();
   D = file_params["D"].as<Real>();
@@ -63,6 +74,30 @@ void Params::enumerate_IC(std::string& IC_str, const YAML::Node& yml,
                  &IC_str[0]);
       exit(1);
     }
+  }
+}
+
+void Params::enumerate_seed_type(std::string& seed_str, const YAML::Node& yml) {
+  if (!seed_str.empty()) {
+    transform(seed_str.begin(), seed_str.end(), seed_str.begin(), ::tolower);
+  }
+  if (seed_str.compare("default") == 0) {
+    seed_type = default_rand;
+  } else if (seed_str.compare("clock") == 0) {
+    seed_type = clock_rand;
+  } else if (seed_str.compare("specified") == 0) {
+    seed_type = specified_rand;
+    if (yml["rand_seed_value"] and yml["rand_seed_value"].IsScalar()) {
+      seed_val = yml["rand_seed_value"].as<uint64_t>();
+    } else {
+      seed_type = missing;
+      seed_val = 5374857;
+    }
+  } else if (seed_str.compare("missing") == 0) {
+    seed_type = missing;
+    seed_val = 5374857;
+  } else {
+    seed_type = default_rand;
   }
 }
 

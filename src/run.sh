@@ -19,7 +19,6 @@ elif [ $MACHINE = s1024454 ]; then
 elif [ $MACHINE = clamps ]; then
     export HOME_DIR="${HOME}/mjschmidt"
     export KK_TOOLS_DIR=${HOME_DIR}/kokkos-tools./bin/parPT /data/particleParams.yaml -v 2> data/a.err
-    fi
 fi
 
 # simple kernel timer location

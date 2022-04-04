@@ -2,16 +2,42 @@
 
 namespace particles {
 
-// NOTE: uses pre-defined random seed
-// FIXME: make a new constructor that seeds from clock-time or user-provided
-// seed
+// constructor that seeds the random number pool from using high-resolution
+// clock time (linux claims nanosecond, unclear whether macOS does this)
 Particles::Particles(const std::string& _input_file)
     : params(install_prefix + _input_file),
       particleIO(install_prefix + params.pFile, params) {
   ko::Profiling::pushRegion("constructor print");
   particleIO.print_params_summary();
   ko::Profiling::popRegion();
-  rand_pool = init_random_seed();
+  uint64_t seed;
+  switch (params.seed_type) {
+    case clock_rand: {
+      seed =
+          std::chrono::high_resolution_clock::now().time_since_epoch().count();
+      break;
+    }
+    case specified_rand: {
+      seed = params.seed_val;
+      break;
+    }
+    case default_rand: {
+      seed = 5374857;
+      break;
+    } case missing: {
+      fmt::print("Seed type or value not provided--using default seed 5374857.\n");
+      seed = 5374857;
+      break;
+    }
+    default: {
+      // this should not be possible
+      fmt::print("Seed type or value is invalid--using default seed 5374857.\n");
+      seed = 5374857;
+      break;
+    }
+  }
+  fmt::print("seed = {}\n", seed);
+  rand_pool = init_random_seed(seed);
   ko::Profiling::pushRegion("ctor initialize position");
   // initialize the X view
   X = ko::View<Real*>("X", params.Np);
