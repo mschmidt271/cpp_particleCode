@@ -1,6 +1,8 @@
 #ifndef CONTAINERS_HPP
 #define CONTAINERS_HPP
 
+#include <chrono>
+
 #include "Kokkos_Core.hpp"
 #include "type_defs.hpp"
 #include "spdlog/formatter.h"
@@ -16,7 +18,7 @@ enum rand_seed_enum { clock_rand, specified_rand, default_rand, missing };
 // class holding simulation parameters
 class Params {
  public:
-  int Np, nSteps;
+  int Np, dim, nSteps;
   Real X0_mass, X0_space, maxT, dt, D, pctRW, denom, cdist_coeff, cutdist,
       hat_pct;
   std::string IC_str_space, IC_str_mass;
@@ -32,6 +34,7 @@ class Params {
   void enumerate_IC(std::string& IC_str, const YAML::Node& yml,
                     const bool& space);
   void enumerate_seed_type(std::string& seed_str, const YAML::Node& yml);
+  void set_seed_val(const YAML::Node& yml);
 };
 
 struct SparseMatViews {

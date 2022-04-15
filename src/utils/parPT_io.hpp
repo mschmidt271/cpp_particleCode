@@ -22,7 +22,7 @@ class ParticleIO {
  public:
   ParticleIO(std::string f, const Params& params);
   void print_params_summary();
-  void write(const ko::View<Real*>& X, const ko::View<Real*>& mass,
+  void write(const ko::View<Real**>& X, const ko::View<Real*>& mass,
              const int& i);
 };
 
