@@ -1,16 +1,16 @@
 #ifndef BRUTE_FORCE_CRS_POLICY_HPP
 #define BRUTE_FORCE_CRS_POLICY_HPP
 
+#include "Kokkos_Core.hpp"
 #include "constants.hpp"
 #include "containers.hpp"
-#include "Kokkos_Core.hpp"
 #include "type_defs.hpp"
 
 namespace particles {
 
 struct BruteForceCRSPolicy {
   static void get_nnz_mask(const ko::View<Real*>& X, const Params& params,
-                                 int& nnz, ko::View<int*>& mask) {
+                           int& nnz, ko::View<int*>& mask) {
     int Np2 = pow(params.Np, 2);
     auto lcutdist = params.cutdist;
     auto lX = X;
@@ -41,8 +41,8 @@ struct BruteForceCRSPolicy {
           update += val_i;
         });
   }
-  static SparseMatViews get_views(const ko::View<Real*>& X, const Params& params,
-                        int& nnz) {
+  static SparseMatViews get_views(const ko::View<Real*>& X,
+                                  const Params& params, int& nnz) {
     SparseMatViews spmat_views;
     auto mask = ko::View<int*>("idx_mask", pow(params.Np, 2));
     get_nnz_mask(X, params, nnz, mask);
@@ -83,7 +83,7 @@ struct BruteForceCRSPolicy {
         });
     return spmat_views;
   }
-};
+};  // end struct BruteForceCRSPolicy
 
 }  // namespace particles
 

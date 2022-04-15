@@ -32,45 +32,42 @@ SpmatType MassTransfer<CRSViewPolicy>::build_sparse_transfer_mat() {
   auto lX = X;
   auto lNp = params.Np;
   auto rowcolsum = ko::View<Real*>("rowcolsum", lNp);
-  get_crs_views(nnz, spmat_views);
-  // FIXME: all of the below can be done more efficiently for the tree-policy
-  // case by constructing the crs matrix here
+  get_crs_views(nnz);
   // NOTE: possibly try a team policy here, a la sec. 8.1 in the Kokkos v3
   // paper
   // NOTE: may also be more efficient using auto z = mat.row(i)
-  // built in sum() method??
+  // does a built in sum() method exist?
+  // it's probably just a parfor in the end...
+  auto lspmat = spmat_views;
   ko::parallel_for(
       "compute_rowcolsum", lNp, KOKKOS_LAMBDA(const int& i) {
-        for (int j = spmat_views.rowmap(i); j < spmat_views.rowmap(i + 1);
-             ++j) {
-          rowcolsum(i) += spmat_views.val(j);
+        for (int j = lspmat.rowmap(i); j < lspmat.rowmap(i + 1); ++j) {
+          rowcolsum(i) += lspmat.val(j);
         }
       });
   // NOTE: we may have to do this more than once if we run into issues.
   // I suspect we should be ok, though, since we still guarantee symmetry
   ko::parallel_for(
       "normalize_mat", nnz, KOKKOS_LAMBDA(const int& i) {
-        spmat_views.val(i) =
-            2.0 * spmat_views.val(i) /
-            (rowcolsum(spmat_views.row(i)) + rowcolsum(spmat_views.col(i)));
+        lspmat.val(i) = 2.0 * lspmat.val(i) /
+                        (rowcolsum(lspmat.row(i)) + rowcolsum(lspmat.col(i)));
       });
   auto diagmap = ko::View<int*>("diagmap", lNp);
   // compute the rowsum again for the transfer mat construction
   ko::parallel_for(
       "compute_rowcolsum", lNp, KOKKOS_LAMBDA(const int& i) {
         rowcolsum(i) = 0.0;
-        for (int j = spmat_views.rowmap(i); j < spmat_views.rowmap(i + 1);
-             ++j) {
-          rowcolsum(i) += spmat_views.val(j);
-          if (spmat_views.col(j) == i) {
+        for (int j = lspmat.rowmap(i); j < lspmat.rowmap(i + 1); ++j) {
+          rowcolsum(i) += lspmat.val(j);
+          if (lspmat.col(j) == i) {
             diagmap(i) = j;
           }
         }
       });
   ko::parallel_for(
       "create_transfer_mat", lNp, KOKKOS_LAMBDA(const int& i) {
-        spmat_views.val(diagmap(i)) = spmat_views.val(diagmap(i)) + 1.0 -
-                                      rowcolsum(spmat_views.row(diagmap(i)));
+        lspmat.val(diagmap(i)) =
+            lspmat.val(diagmap(i)) + 1.0 - rowcolsum(lspmat.row(diagmap(i)));
       });
   SpmatType kmat("sparse_transfer_mat", lNp, lNp, nnz, spmat_views.val,
                  spmat_views.rowmap, spmat_views.col);
@@ -78,8 +75,7 @@ SpmatType MassTransfer<CRSViewPolicy>::build_sparse_transfer_mat() {
 }
 
 template <typename CRSViewPolicy>
-void MassTransfer<CRSViewPolicy>::get_crs_views(int& nnz,
-                                                SparseMatViews& spmat_views) {
+void MassTransfer<CRSViewPolicy>::get_crs_views(int& nnz) {
   spmat_views = CRSViewPolicy::get_views(X, params, nnz);
 }
 

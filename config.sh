@@ -6,19 +6,24 @@ export REAL_TYPE="double"
 export SEARCH_TYPE="tree"
 # export SEARCH_TYPE="brute_force"
 # ==============================================================================
+# ==============================================================================
+# FIXME: this is WIP--doesn't pass through the whole build yet
+export BUILD_TYPE="debug"
+# export BUILD_TYPE="release"
+# ==============================================================================
 # choose only one of these build options
 # (1)
 # export USE_OPENMP=false
 # export USE_CUDA=false
 # (2)
-export USE_OPENMP=true
-export USE_CUDA=false
+# export USE_OPENMP=true
+# export USE_CUDA=false
 # (3) ***NOT CURRENTLY SUPPORTED***
 # export USE_OPENMP=false
 # export USE_CUDA=true
 # (4)
-# export USE_OPENMP=true
-# export USE_CUDA=true
+export USE_OPENMP=true
+export USE_CUDA=true
 # ==============================================================================
 # change these to the compilers you plan to use
 # note that cuda builds require the CXX compiler to be the
@@ -35,7 +40,12 @@ export LINUX_C="mpicc"
 # https://github.com/kokkos/kokkos/wiki/Compiling
 # export GPU_ARCHITECTURE="schmidt27"
 # ==============================================================================
-
+# I wouldn't change this unless you have good reason and know what you're doing
+# ==============================================================================
+export MAC_LIBDIR="lib"
+export LINUX_LIBDIR="lib64"
+export WIN_LIBDIR="???"
+# ==============================================================================
 # these are for the various machines I use.
 # I would recommend either adding similar logic for yours, or just
 # hard coding for your environment of choice below all this logic
@@ -43,7 +53,7 @@ export MACHINE=`hostname`
 export HOME_DIR=$HOME
 echo "Configuring for ${MACHINE}"
 if [ $MACHINE = s1046231 ]; then
-    export KO_LIBDIR="lib"
+    export LIBDIR=$MAC_LIBDIR
     if [ "$USE_OPENMP" = false ]; then
         echo "Building for serial"
         export KO_ROOT="${HOME_DIR}/kokkos/install_clang"
@@ -63,7 +73,7 @@ if [ $MACHINE = s1046231 ]; then
         exit
     fi
 elif [ $MACHINE = s1024454 ]; then
-    export KO_LIBDIR="lib64"
+    export LIBDIR=$LINUX_LIBDIR
     if [ "$USE_OPENMP" = false ] && [ "$USE_CUDA" = false ]; then
         echo "Building for serial"
         echo "ERROR: Unsupported build for this machine"
@@ -94,13 +104,14 @@ elif [ $MACHINE = s1024454 ]; then
         export KK_ROOT="${HOME_DIR}/kokkos-kernels/install_cuda"
         export YCPP_ROOT="${HOME_DIR}/yaml-cpp/install"
         export AX_ROOT="${HOME_DIR}/ArborX/install_cuda"
+        export SP_ROOT="${HOME_DIR}/spdlog/install_${BUILD_TYPE}"
     else
         echo "ERROR: Unsupported build for this machine"
         exit
     fi
 elif [ $MACHINE = clamps ]; then
     export HOME_DIR="${HOME}/mjschmidt"
-    export KO_LIBDIR="lib"
+    export LIBDIR=$LINUX_LIBDIR
     if [ "$USE_OPENMP" = false ] && [ "$USE_CUDA" = false ]; then
         echo "Building for serial"
         echo "ERROR: Unsupported build for this machine"
@@ -143,19 +154,30 @@ echo "Home directory is ${HOME_DIR}"
 
 # set these manually to where they are on your machine,
 # or just comment out to build them as subprojects if you don't have them built
-export KOKKOS_LIBDIR="${KO_ROOT}/${KO_LIBDIR}"
+export KOKKOS_LIBDIR="${KO_ROOT}/${LIBDIR}"
 export KOKKOS_INCDIR="${KO_ROOT}/include"
 export KOKKOS_LIBRARY="libkokkoscore.a"
-export KOKKOSKERNELS_LIBDIR="${KK_ROOT}/${KO_LIBDIR}"
+export KOKKOSKERNELS_LIBDIR="${KK_ROOT}/${LIBDIR}"
 export KOKKOSKERNELS_INCDIR="${KK_ROOT}/include"
 export KOKKOSKERNELS_LIBRARY="libkokkoskernels.a"
 export YAML_CPP_LIBDIR="${YCPP_ROOT}/lib"
 export YAML_CPP_INCDIR="${YCPP_ROOT}/include"
 export YAML_CPP_LIBRARY="libyaml-cpp.a"
 export ARBORX_INCDIR="${AX_ROOT}/include"
-export SPDLOG_LIBDIR="${SP_ROOT}/lib"
+export SPDLOG_LIBDIR="${SP_ROOT}/${LIBDIR}"
 export SPDLOG_INCDIR="${SP_ROOT}/include"
-export SPDLOG_LIBRARY="libspdlogd.a"
+if [ "$BUILD_TYPE" == "debug" ]; then
+    export SPDLOG_LIBRARY="libspdlogd.a"
+    echo "given build type is ${BUILD_TYPE}--good luck."
+    echo "spdlog lib name is ${SPDLOG_LIBRARY}"
+elif [ "$BUILD_TYPE" == "release" ]; then
+    export SPDLOG_LIBRARY="libspdlog.a"
+    echo "given build type is ${BUILD_TYPE}--we are not ready for this."
+    echo "spdlog lib name is ${SPDLOG_LIBRARY}"
+else
+    echo "given build type is ${BUILD_TYPE}--why you gotta make it weird?"
+    exit 1
+fi
 
 # as long as everything above looks good, you should be all set from here down
 export OS=`uname -s`

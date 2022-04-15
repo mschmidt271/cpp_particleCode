@@ -8,6 +8,12 @@ add_executable(AX_compare ax_brute_compare.cpp)
 # set(AX_LIBS ${LIBRARIES} arborx)
 add_dependencies(Utils yaml_cpp kokkos kokkoskernels arborx spdlog)
 
+if(PARPT_USE_CUDA)
+  # find_package(CUDA)
+  cuda_add_cublas_to_target(AX_compare)
+  # list(APPEND LIBRARIES; ${CUDA_cusparse_LIBRARY})
+endif()
+
 target_link_libraries(AX_test
                       ${LIBRARIES})
 target_link_libraries(AX_compare

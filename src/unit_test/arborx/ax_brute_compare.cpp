@@ -1,5 +1,3 @@
-// #include <assert.h>
-
 #include "ArborX_LinearBVH.hpp"
 #include "Kokkos_Core.hpp"
 #include "Kokkos_Sort.hpp"
@@ -34,6 +32,7 @@ int main(int argc, char* argv[]) {
 
   fmt::print("Kokkos execution space is: {}\n", typeid(ExecutionSpace).name());
 
+  ko::Profiling::pushRegion("setup");
   // set the string giving the input file
   std::string infile = install_prefix;
   infile += "/unit_test/arborx/";
@@ -76,6 +75,9 @@ int main(int argc, char* argv[]) {
   ko::deep_copy(X, hX);
   ko::Profiling::popRegion();
 
+  ko::Profiling::popRegion();
+  ko::Profiling::pushRegion("***brute_force***");
+
   Params params;
   params.Np = xlen;
   params.cutdist = radius;
@@ -95,6 +97,9 @@ int main(int argc, char* argv[]) {
   ko::deep_copy(hrowmap, mass_trans.spmat_views.rowmap);
   ko::deep_copy(hval, mass_trans.spmat_views.val);
 
+  ko::Profiling::popRegion();
+  ko::Profiling::pushRegion("***tree***");
+
   auto mass_trans_tree = MassTransfer<TreeCRSPolicy>(params, X1d, mass);
   auto temp2 = mass_trans_tree.build_sparse_transfer_mat();
 
@@ -104,20 +109,48 @@ int main(int argc, char* argv[]) {
       ko::create_mirror_view(mass_trans_tree.spmat_views.rowmap);
   auto hval_tree = ko::create_mirror_view(mass_trans_tree.spmat_views.val);
 
+  // the make_pair below needs this info on host
+  ko::deep_copy(hrowmap_tree, mass_trans_tree.spmat_views.rowmap);
+
+  auto col_tree = mass_trans_tree.spmat_views.col;
+  auto val_tree = mass_trans_tree.spmat_views.val;
+
+  ko::Profiling::popRegion();
+  ko::Profiling::pushRegion("***SORT***");
+
   // sort the tree-generated columns, so as to match the naturally ordered brute
   // force ones. then apply the same permutation to the val view
+  ko::Profiling::pushRegion("***LOOP***");
   for (int i = 0; i < xlen; ++i) {
-    auto sort_view = ko::subview(
-        hcol_tree, ko::make_pair(hrowmap_tree(i), hrowmap_tree(i + 1)));
+    // pair for indexing the current row in the sparse structure
+    auto rpair = ko::make_pair(hrowmap_tree(i), hrowmap_tree(i + 1));
+    ko::Profiling::pushRegion("sort-subview");
+    // the subview of the column view that will be sorted in this loop iteration
+    auto sort_view = ko::subview(col_tree, rpair);
+    ko::Profiling::popRegion();
+    ko::Profiling::pushRegion("permutation");
+    // sort the current row of column entries and save the permutation view
     auto permutation =
         ArborX::Details::sortObjects(ExecutionSpace{}, sort_view);
-    auto val_sort_view = ko::subview(
-        hval_tree, ko::make_pair(hrowmap_tree(i), hrowmap_tree(i + 1)));
+    ko::Profiling::popRegion();
+    ko::Profiling::pushRegion("val-subview");
+    // subview of vals to be sorted
+    auto val_sort_view = ko::subview(val_tree, rpair);
+    ko::Profiling::popRegion();
+    ko::Profiling::pushRegion("apply perm");
+    // create a temp view since it appears the original and target view must be
+    // different
     auto temp = ko::View<Real*>("permute_temp", val_sort_view.size());
     ko::deep_copy(temp, val_sort_view);
+    // apply the permutation to the vals view
     ArborX::Details::applyPermutation(ExecutionSpace{}, permutation, temp,
                                       val_sort_view);
+    ko::Profiling::popRegion();
   }
+  ko::Profiling::popRegion();
+
+  ko::Profiling::popRegion();
+  ko::Profiling::pushRegion("***copy***");
 
   ko::deep_copy(hcol_tree, mass_trans_tree.spmat_views.col);
   ko::deep_copy(hrow_tree, mass_trans_tree.spmat_views.row);
@@ -143,5 +176,6 @@ int main(int argc, char* argv[]) {
       stdout,
       "SUCCESS: brute force and tree search produce identical results.\n");
 
+  ko::Profiling::popRegion();
   return 0;
 }

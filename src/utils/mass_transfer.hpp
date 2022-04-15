@@ -25,7 +25,7 @@ class MassTransfer {
   void transfer_mass();
   SpmatType get_transfer_mat();
   SpmatType build_sparse_transfer_mat();
-  void get_crs_views(int& nnz, SparseMatViews& spmat_views);
+  void get_crs_views(int& nnz);
 };
 
 }  // namespace particles

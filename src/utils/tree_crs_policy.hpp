@@ -97,7 +97,6 @@ struct TreeCRSPolicy {
     return spmat_views;
   }
 };
-
 }  // namespace particles
 
 #endif
