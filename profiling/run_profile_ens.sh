@@ -8,8 +8,8 @@ export OMP_PLACES=cores
 # FIXME: change this to string matching so we only need one field
 # export remote=true
 # export laptop=false
-export laptop=true
-export remote=false
+export laptop=false
+export remote=true
 export run_cuda=false
 
 # number of ensemble members
@@ -60,7 +60,7 @@ then
         # do a few less so as not to overrun things
         let "ncores-=6"
         printf "Running profiler up to $ncores cores\n"
-        for (( ncore = 1; ncore <= 2; ncore++ ))
+        for (( ncore = 1; ncore <= ncores; ncore++ ))
         do
             export OMP_NUM_THREADS=$ncore
             printf "Running for ${ncore} cores...\n"
