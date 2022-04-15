@@ -71,8 +71,11 @@ endif()
 
 # add_dependencies(PARPT_LIBS)
 
+# set(PARPT_LIBS Utils)
+# set(LIBRARIES ${LIBRARIES};${PARPT_LIBS})
+
 set(PARPT_LIBS Utils)
-set(LIBRARIES ${LIBRARIES};${PARPT_LIBS})
+set(LIBRARIES ${PARPT_LIBS};${LIBRARIES})
 
 # add the unit testing subdirectory (FIXME: automate this one day...)
 # NOTE: in order for this to see the PARPT_LIBS, this has be be after they are

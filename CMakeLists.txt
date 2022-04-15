@@ -27,9 +27,9 @@ if (UNIX AND NOT APPLE)
 endif()
 
 # for some reason, Linux machines need the extra flag
-if(LINUX)
-  set(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} -ldl")
-endif()
+# if(LINUX)
+#   set(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} -ldl")
+# endif()
 
 # openmp/cuda flags
 if (PARPT_USE_OPENMP)

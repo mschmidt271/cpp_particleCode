@@ -16,14 +16,14 @@ export BUILD_TYPE="debug"
 # export USE_OPENMP=false
 # export USE_CUDA=false
 # (2)
-# export USE_OPENMP=true
-# export USE_CUDA=false
+export USE_OPENMP=true
+export USE_CUDA=false
 # (3) ***NOT CURRENTLY SUPPORTED***
 # export USE_OPENMP=false
 # export USE_CUDA=true
 # (4)
-export USE_OPENMP=true
-export USE_CUDA=true
+# export USE_OPENMP=true
+# export USE_CUDA=true
 # ==============================================================================
 # change these to the compilers you plan to use
 # note that cuda builds require the CXX compiler to be the
@@ -88,6 +88,7 @@ elif [ $MACHINE = s1024454 ]; then
         export KK_ROOT="${HOME_DIR}/kokkos-kernels/install_omp_only"
         export YCPP_ROOT="${HOME_DIR}/yaml-cpp/install"
         export AX_ROOT="${HOME_DIR}/ArborX/install_gccomp"
+        export SP_ROOT="${HOME_DIR}/spdlog/install_${BUILD_TYPE}"
     elif [ "$USE_OPENMP" = false ] && [ "$USE_CUDA" = true ]; then
         echo "Building without OpenMP"
         echo "ERROR: Unsupported build for this machine"
@@ -123,7 +124,7 @@ elif [ $MACHINE = clamps ]; then
     elif [ "$USE_OPENMP" = true ] && [ "$USE_CUDA" = false ]; then
         echo "Building for OpenMP without CUDA"
         export KO_ROOT="${HOME_DIR}/kokkos/install_omp"
-        export KK_ROOT="${HOME_DIR}/kokkos-kernels/install_omp"
+        export KK_ROOT="${HOME_DIR}/kokkos-kernels/install_omp_only"
         export YCPP_ROOT="${HOME_DIR}/yaml-cpp/install"
         export AX_ROOT="${HOME_DIR}/ArborX/install_omp"
     elif [ "$USE_OPENMP" = false ] && [ "$USE_CUDA" = true ]; then
@@ -154,29 +155,47 @@ echo "Home directory is ${HOME_DIR}"
 
 # set these manually to where they are on your machine,
 # or just comment out to build them as subprojects if you don't have them built
-export KOKKOS_LIBDIR="${KO_ROOT}/${LIBDIR}"
-export KOKKOS_INCDIR="${KO_ROOT}/include"
-export KOKKOS_LIBRARY="libkokkoscore.a"
-export KOKKOSKERNELS_LIBDIR="${KK_ROOT}/${LIBDIR}"
-export KOKKOSKERNELS_INCDIR="${KK_ROOT}/include"
-export KOKKOSKERNELS_LIBRARY="libkokkoskernels.a"
-export YAML_CPP_LIBDIR="${YCPP_ROOT}/lib"
-export YAML_CPP_INCDIR="${YCPP_ROOT}/include"
-export YAML_CPP_LIBRARY="libyaml-cpp.a"
-export ARBORX_INCDIR="${AX_ROOT}/include"
-export SPDLOG_LIBDIR="${SP_ROOT}/${LIBDIR}"
-export SPDLOG_INCDIR="${SP_ROOT}/include"
-if [ "$BUILD_TYPE" == "debug" ]; then
-    export SPDLOG_LIBRARY="libspdlogd.a"
-    echo "given build type is ${BUILD_TYPE}--good luck."
-    echo "spdlog lib name is ${SPDLOG_LIBRARY}"
-elif [ "$BUILD_TYPE" == "release" ]; then
-    export SPDLOG_LIBRARY="libspdlog.a"
-    echo "given build type is ${BUILD_TYPE}--we are not ready for this."
-    echo "spdlog lib name is ${SPDLOG_LIBRARY}"
+if [ -z "$KO_ROOT" ]; then
+    echo "No local Kokkos provided"
 else
-    echo "given build type is ${BUILD_TYPE}--why you gotta make it weird?"
-    exit 1
+    export KOKKOS_LIBDIR="${KO_ROOT}/${LIBDIR}"
+    export KOKKOS_INCDIR="${KO_ROOT}/include"
+    export KOKKOS_LIBRARY="libkokkoscore.a"
+fi
+if [ -z "$KK_ROOT" ]; then
+    echo "No local Kokkos Kernels provided"
+else
+    export KOKKOSKERNELS_LIBDIR="${KK_ROOT}/${LIBDIR}"
+    export KOKKOSKERNELS_INCDIR="${KK_ROOT}/include"
+    export KOKKOSKERNELS_LIBRARY="libkokkoskernels.a"
+fi
+if [ -z "$YCPP_ROOT" ]; then
+    echo "No local yaml-cpp provided"
+else
+    export YAML_CPP_LIBDIR="${YCPP_ROOT}/lib"
+    export YAML_CPP_INCDIR="${YCPP_ROOT}/include"
+    export YAML_CPP_LIBRARY="libyaml-cpp.a"
+fi
+if [ -z "$AX_ROOT" ]; then
+    echo "No local ArborX provided"
+else
+    export ARBORX_INCDIR="${AX_ROOT}/include"
+fi
+if [ -z "$SP_ROOT" ]; then
+    echo "No local spdlog provided"
+else
+    export SPDLOG_LIBDIR="${SP_ROOT}/${LIBDIR}"
+    export SPDLOG_INCDIR="${SP_ROOT}/include"
+    if [ "$BUILD_TYPE" == "debug" ]; then
+        export SPDLOG_LIBRARY="libspdlogd.a"
+        echo "given build type is ${BUILD_TYPE}--good luck."
+    elif [ "$BUILD_TYPE" == "release" ]; then
+        export SPDLOG_LIBRARY="libspdlog.a"
+        echo "given build type is ${BUILD_TYPE}--we are not ready for this."
+    else
+        echo "given build type is ${BUILD_TYPE}--why you gotta make it weird?"
+        exit 1
+    fi
 fi
 
 # as long as everything above looks good, you should be all set from here down

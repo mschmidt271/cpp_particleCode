@@ -7,6 +7,7 @@ add_library(Utils version_info.cpp
                   random.cpp
                   random_walk.cpp
                   utilities.cpp)
+# target_link_libraries(Utils ${PARPT_LIBS})
 set(Utils PARENT_SCOPE)
 # add_dependencies(Utils yaml_cpp kokkos kokkoskernels arborx spdlog version_info)
 # copy the plotting directory to install dir
