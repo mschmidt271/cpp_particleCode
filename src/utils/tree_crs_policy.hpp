@@ -33,13 +33,12 @@ struct ArborX::AccessTraits<Spheres<MemorySpace>, ArborX::PredicatesTag> {
 namespace particles {
 
 struct TreeCRSPolicy {
-  static SparseMatViews get_views(const ko::View<Real*>& X,
+  static SparseMatViews get_views(const ko::View<Real**>& X,
                                   const Params& params, int& nnz) {
     SparseMatViews spmat_views;
     Real denom = params.denom;
     Real c = sqrt(denom * pi);
-    // ***FIXMEFIXMEFIXME***: change this when X is a 2d view (Np x dim)
-    // int dim = X.extent(1);
+    auto ldim = params.dim;
     auto lX = X;
     auto lNp = params.Np;
 
@@ -48,11 +47,11 @@ struct TreeCRSPolicy {
     ko::Profiling::pushRegion("create device/float views");
     auto fX = ko::View<float* [3], MemorySpace>("float X", lNp);
     ko::deep_copy(fX, 0.0);
-    // ko::deep_copy(ko::subview(fX, ko::ALL(), ko::make_pair(0, dim)),
-    //               lX);
-    // ***FIXMEFIXMEFIXME***: change this when X is a 2d view (Np x dim)
+    // ***FIXMEFIXMEFIXME***: profile this and figure out which inner loop is
+    // faster
     ko::parallel_for(
-        "fill_floatX", lNp, KOKKOS_LAMBDA(const int& i) { fX(i, 0) = X(i); });
+        "fill_floatX", ko::MDRangePolicy<ko::Rank<2>>({0, 0}, {lNp, ldim}),
+        KOKKOS_LAMBDA(const int& j, const int& i) { fX(i, j) = X(i, j); });
     float frad = float(params.cutdist);
     ko::Profiling::popRegion();
 
@@ -71,7 +70,6 @@ struct TreeCRSPolicy {
     ko::Profiling::popRegion();
 
     nnz = spmat_views.col.size();
-    spmat_views.row = ko::View<int*>("row", nnz);
 
     // keeping this around, just in case
     // sort the tree-generated columns, to make life easier when calculating val
@@ -83,16 +81,25 @@ struct TreeCRSPolicy {
     //       ArborX::Details::sortObjects(ExecutionSpace{}, sort_view);
     // }
 
-    spmat_views.val = ko::View<Real*>("val", nnz);
+    spmat_views.row = ko::View<int*>("row", nnz);
     ko::parallel_for(
         "compute_val", lNp, KOKKOS_LAMBDA(const int& i) {
           int begin = spmat_views.rowmap(i);
           int end = spmat_views.rowmap(i + 1);
           for (int j = begin; j < end; ++j) {
-            spmat_views.val(j) =
-                exp(pow(lX(i) - lX(spmat_views.col(j)), 2) / -denom) / c;
             spmat_views.row(j) = i;
           }
+        });
+
+    spmat_views.val = ko::View<Real*>("val", nnz);
+    ko::parallel_for(
+        "compute_val", nnz, KOKKOS_LAMBDA(const int& i) {
+          Real dim_sum = 0.0;
+          for (int k = 0; k < ldim; ++k) {
+            dim_sum +=
+                pow(lX(k, spmat_views.row(i)) - lX(k, spmat_views.col(i)), 2);
+          }
+          spmat_views.val(i) = exp(sqrt(dim_sum) / -denom) / c;
         });
     return spmat_views;
   }

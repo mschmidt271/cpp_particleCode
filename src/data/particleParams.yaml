@@ -5,6 +5,8 @@
 
 # number of particles
 Np: 10001
+# number of spatial dimensions
+dimension: 2
 # Np: 6
 # domain limits
 omega: [0, 50]

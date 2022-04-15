@@ -4,7 +4,7 @@ namespace particles {
 
 template <typename CRSViewPolicy>
 MassTransfer<CRSViewPolicy>::MassTransfer(const Params& _params,
-                                          const ko::View<Real*>& _X,
+                                          const ko::View<Real**>& _X,
                                           ko::View<Real*>& _mass)
     : params(_params) {
   X = _X;

@@ -16,11 +16,11 @@ class MassTransfer {
  public:
   // copy of the Particles' Params
   Params params;
-  ko::View<Real*> X;
+  ko::View<Real**> X;
   ko::View<Real*> mass;
   SparseMatViews spmat_views;
   MassTransfer<CRSViewPolicy>() = default;
-  MassTransfer<CRSViewPolicy>(const Params& params, const ko::View<Real*>& X,
+  MassTransfer<CRSViewPolicy>(const Params& params, const ko::View<Real**>& X,
                               ko::View<Real*>& mass);
   void transfer_mass();
   SpmatType get_transfer_mat();

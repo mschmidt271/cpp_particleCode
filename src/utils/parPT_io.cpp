@@ -23,6 +23,7 @@ void ParticleIO::print_params_summary() {
   fmt::print("{}\n",
              "************************************************************");
   fmt::print("Np = {}\n", params.Np);
+  fmt::print("dimension = {}\n", params.dim);
   fmt::print("omega = [{}, {}]\n", params.omega[0], params.omega[1]);
   fmt::print("IC type (space) = {}\n", params.IC_str_space);
   fmt::print("IC type (mass) = {}\n", params.IC_str_mass);
@@ -44,7 +45,7 @@ void ParticleIO::print_params_summary() {
              "************************************************************");
 }
 
-void ParticleIO::write(const ko::View<Real*>& X, const ko::View<Real*>& mass,
+void ParticleIO::write(const ko::View<Real**>& X, const ko::View<Real*>& mass,
                        const int& tStep) {
   auto hX = ko::create_mirror_view(X);
   auto hmass = ko::create_mirror_view(mass);

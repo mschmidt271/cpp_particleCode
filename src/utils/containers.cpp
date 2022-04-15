@@ -7,6 +7,7 @@ Params::Params(const std::string& yaml_name) {
   YAML::Node file_params = YAML::LoadFile(yaml_name);
 
   Np = file_params["Np"].as<int>();
+  dim = file_params["dimension"].as<int>();
   IC_str_space =
       file_params["initial_condition"]["space"]["type"].as<std::string>();
   // true if enumerating spatial IC
@@ -28,6 +29,7 @@ Params::Params(const std::string& yaml_name) {
     rand_seed_str = "missing";
   }
   enumerate_seed_type(rand_seed_str, file_params);
+  set_seed_val(file_params);
   maxT = file_params["maxT"].as<Real>();
   dt = file_params["dt"].as<Real>();
   D = file_params["D"].as<Real>();
@@ -87,17 +89,43 @@ void Params::enumerate_seed_type(std::string& seed_str, const YAML::Node& yml) {
     seed_type = clock_rand;
   } else if (seed_str.compare("specified") == 0) {
     seed_type = specified_rand;
-    if (yml["rand_seed_value"] and yml["rand_seed_value"].IsScalar()) {
-      seed_val = yml["rand_seed_value"].as<uint64_t>();
-    } else {
-      seed_type = missing;
-      seed_val = 5374857;
-    }
   } else if (seed_str.compare("missing") == 0) {
     seed_type = missing;
-    seed_val = 5374857;
   } else {
     seed_type = default_rand;
+  }
+}
+
+void Params::set_seed_val(const YAML::Node& yml) {
+  switch (seed_type) {
+    case clock_rand: {
+      seed_val =
+          std::chrono::high_resolution_clock::now().time_since_epoch().count();
+      break;
+    }
+    case specified_rand: {
+      if (yml["rand_seed_value"] and yml["rand_seed_value"].IsScalar()) {
+        seed_val = yml["rand_seed_value"].as<uint64_t>();
+      } else {
+        seed_type = missing;
+        seed_val = 5374857;
+      }
+      break;
+    }
+    case default_rand: {
+      seed_val = 5374857;
+      break;
+    } case missing: {
+      fmt::print("Seed type or value not provided--using default seed 5374857.\n");
+      seed_val = 5374857;
+      break;
+    }
+    default: {
+      // this should not be possible
+      fmt::print("Seed type or value is invalid--using default seed 5374857.\n");
+      seed_val = 5374857;
+      break;
+    }
   }
 }
 
