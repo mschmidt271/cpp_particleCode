@@ -25,6 +25,7 @@ fi
 # export simple_kt=true
 # export KOKKOS_PROFILE_LIBRARY=${KK_TOOLS_DIR}/kp_kernel_timer.so
 # export PATH=${PATH}:${KK_TOOLS_DIR}
+# fields are:  Name, Total Time, Calls, Time/call, %of Kokkos Time, %of Total Time
 
 # space time stack
 # export st_stack=true

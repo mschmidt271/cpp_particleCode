@@ -14,13 +14,14 @@ export MACHINE=`hostname`
 # export totens=10
 
 # location on Nick's workstation
-# export KK_TOOLS_DIR=/home/pfsuser/mjschmidt/kokkos-tools\
+# export KK_TOOLS_DIR=/home/pfsuser/mjschmidt/kokkos-tools
 # standard location
 # export KK_TOOLS_DIR=${HOME}/kokkos-tools
 
 # simple kernel timer location
 export KOKKOS_PROFILE_LIBRARY=${KK_TOOLS_DIR}/kp_kernel_timer.so
 export PATH=${PATH}:${KK_TOOLS_DIR}
+# fields are:  Name, Total Time, Calls, Time/call, %of Kokkos Time, %of Total Time
 
 # base of the filename that will be concatenated with number of cores
 export fname="prof_results"
