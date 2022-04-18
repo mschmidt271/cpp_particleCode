@@ -112,7 +112,7 @@ elif [ $MACHINE = s1024454 ]; then
     fi
 elif [ $MACHINE = clamps ]; then
     export HOME_DIR="${HOME}/mjschmidt"
-    export LIBDIR=$LINUX_LIBDIR
+    export LIBDIR=$MAC_LIBDIR
     if [ "$USE_OPENMP" = false ] && [ "$USE_CUDA" = false ]; then
         echo "Building for serial"
         echo "ERROR: Unsupported build for this machine"
@@ -124,9 +124,10 @@ elif [ $MACHINE = clamps ]; then
     elif [ "$USE_OPENMP" = true ] && [ "$USE_CUDA" = false ]; then
         echo "Building for OpenMP without CUDA"
         export KO_ROOT="${HOME_DIR}/kokkos/install_omp"
-        export KK_ROOT="${HOME_DIR}/kokkos-kernels/install_omp_only"
+        export KK_ROOT="${HOME_DIR}/kokkos-kernels/install_omp"
         export YCPP_ROOT="${HOME_DIR}/yaml-cpp/install"
         export AX_ROOT="${HOME_DIR}/ArborX/install_omp"
+        export SP_ROOT="${HOME_DIR}/spdlog/install_${BUILD_TYPE}"
     elif [ "$USE_OPENMP" = false ] && [ "$USE_CUDA" = true ]; then
         echo "Building without OpenMP"
         echo "ERROR: Unsupported build for this machine"
@@ -143,6 +144,7 @@ elif [ $MACHINE = clamps ]; then
         export KK_ROOT="${HOME_DIR}/kokkos-kernels/install_cuda"
         export YCPP_ROOT="${HOME_DIR}/yaml-cpp/install"
         export AX_ROOT="${HOME_DIR}/ArborX/install_cuda"
+        export SP_ROOT="${HOME_DIR}/spdlog/install_${BUILD_TYPE}"
     else
         echo "ERROR: Unsupported build for this machine"
         exit
