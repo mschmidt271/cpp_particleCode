@@ -215,10 +215,10 @@ if (NOT EXTERNAL_ARBORX)
   message(STATUS "Building ArborX as external project")
   if (CMAKE_BUILD_TYPE STREQUAL Release)
     set(ARBORX_CMAKE_OPTS ${ARBORX_CMAKE_OPTS}
-                          -DCMAKE_BUILD_TYPE=DEBUG)
+                          -DCMAKE_BUILD_TYPE=RELEASE)
   else()
     set(ARBORX_CMAKE_OPTS ${ARBORX_CMAKE_OPTS}
-                          -DCMAKE_BUILD_TYPE=RELEASE)
+                          -DCMAKE_BUILD_TYPE=DEBUG)
   endif()
   if (PARPT_USE_OPENMP)
     set(ARBORX_CMAKE_OPTS ${ARBORX_CMAKE_OPTS}
@@ -282,12 +282,18 @@ if (NOT EXISTS ${SPDLOG_LIBRARY})
   update_submodules()
   set(SPDLOG_CMAKE_OPTS -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
                         -DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR}
-                        -DCMAKE_BUILD_TYPE=RelWithDebInfo
                         -DBUILD_SHARED_LIBS=OFF
                         -DSPDLOG_BUILD_EXAMPLES=OFF
                         -DSPDLOG_BUILD_TESTS=OFF
                         -DSPDLOG_INSTALL=ON
                         -DCMAKE_VERBOSE_MAKEFILE=OFF)
+  if (CMAKE_BUILD_TYPE STREQUAL Release)
+    set(SPDLOG_CMAKE_OPTS ${SPDLOG_CMAKE_OPTS}
+                          -DCMAKE_BUILD_TYPE=RELEASE)
+  else()
+    set(SPDLOG_CMAKE_OPTS ${SPDLOG_CMAKE_OPTS}
+                          -DCMAKE_BUILD_TYPE=DEBUG)
+  endif()
   ExternalProject_Add(spdlog_proj
                       PREFIX ${CMAKE_CURRENT_BINARY_DIR}/spdlog
                       SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/spdlog

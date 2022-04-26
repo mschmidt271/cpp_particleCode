@@ -9,15 +9,19 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # FIXME: pull this out to the config file when things are release-ish
-set(CMAKE_BUILD_TYPE "Debug")
+# set(CMAKE_BUILD_TYPE "Debug")
 
-if (CMAKE_BUILD_TYPE STREQUAL Debug)
+string(TOUPPER "${PARPT_BUILD_TYPE}" CMAKE_BUILD_TYPE)
+if (CMAKE_BUILD_TYPE STREQUAL DEBUG)
   # set compiler debug flag
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
   # set compiler all warnings flag
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+elseif(CMAKE_BUILD_TYPE STREQUAL RELEASE)
+  # set compiler debug flag
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -DNDEBUG")
 else()
-  message(ERROR "This ain't ready for release, only Debug is supported")
+  message(STATUS "invalid build type--options: debug, release")
 endif()
 message(STATUS "Build type = ${CMAKE_BUILD_TYPE}")
 

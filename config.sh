@@ -8,8 +8,8 @@ export SEARCH_TYPE="tree"
 # ==============================================================================
 # ==============================================================================
 # FIXME: this is WIP--doesn't pass through the whole build yet
-export BUILD_TYPE="debug"
-# export BUILD_TYPE="release"
+# export BUILD_TYPE="debug"
+export BUILD_TYPE="release"
 # ==============================================================================
 # choose only one of these build options
 # (1)
@@ -84,10 +84,10 @@ elif [ $MACHINE = s1024454 ]; then
         # export AX_ROOT="${HOME_DIR}/ArborX/"
     elif [ "$USE_OPENMP" = true ] && [ "$USE_CUDA" = false ]; then
         echo "Building for OpenMP without CUDA"
-        export KO_ROOT="${HOME_DIR}/kokkos/install_omp_only"
-        export KK_ROOT="${HOME_DIR}/kokkos-kernels/install_omp_only"
+        export KO_ROOT="${HOME_DIR}/kokkos/install_omp_${BUILD_TYPE}"
+        export KK_ROOT="${HOME_DIR}/kokkos-kernels/install_omp_${BUILD_TYPE}"
         export YCPP_ROOT="${HOME_DIR}/yaml-cpp/install"
-        export AX_ROOT="${HOME_DIR}/ArborX/install_gccomp"
+        export AX_ROOT="${HOME_DIR}/ArborX/install_omp_${BUILD_TYPE}"
         export SP_ROOT="${HOME_DIR}/spdlog/install_${BUILD_TYPE}"
     elif [ "$USE_OPENMP" = false ] && [ "$USE_CUDA" = true ]; then
         echo "Building without OpenMP"
@@ -101,10 +101,10 @@ elif [ $MACHINE = s1024454 ]; then
     elif [ "$USE_OPENMP" = true ] && [ "$USE_CUDA" = true ]; then
         echo "Building for OpenMP and CUDA"
         export DEVICE_ARCH="MAXWELL52"
-        export KO_ROOT="${HOME_DIR}/kokkos/install_cuda"
-        export KK_ROOT="${HOME_DIR}/kokkos-kernels/install_cuda"
+        export KO_ROOT="${HOME_DIR}/kokkos/install_cuda_${BUILD_TYPE}"
+        export KK_ROOT="${HOME_DIR}/kokkos-kernels/install_cuda_${BUILD_TYPE}"
         export YCPP_ROOT="${HOME_DIR}/yaml-cpp/install"
-        export AX_ROOT="${HOME_DIR}/ArborX/install_cuda"
+        export AX_ROOT="${HOME_DIR}/ArborX/install_cuda_${BUILD_TYPE}"
         export SP_ROOT="${HOME_DIR}/spdlog/install_${BUILD_TYPE}"
     else
         echo "ERROR: Unsupported build for this machine"
@@ -193,7 +193,7 @@ else
         echo "given build type is ${BUILD_TYPE}--good luck."
     elif [ "$BUILD_TYPE" == "release" ]; then
         export SPDLOG_LIBRARY="libspdlog.a"
-        echo "given build type is ${BUILD_TYPE}--we are not ready for this."
+        echo "given build type is ${BUILD_TYPE}--we are not ready for this(?)."
     else
         echo "given build type is ${BUILD_TYPE}--why you gotta make it weird?"
         exit 1
@@ -244,6 +244,7 @@ rm -rf CMake*
 # -D PARPT_USE_CUDA=$USE_CUDA
 cmake .. \
     -D CMAKE_INSTALL_PREFIX="./" \
+    -D PARPT_BUILD_TYPE=$BUILD_TYPE \
     -D CMAKE_VERBOSE_MAKEFILE=ON \
     -D CMAKE_CXX_COMPILER=$CXX \
     -D CMAKE_C_COMPILER=$CC \

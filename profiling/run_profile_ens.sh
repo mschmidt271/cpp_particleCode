@@ -6,7 +6,7 @@ export OMP_PLACES=cores
 
 # whether we are on a remote computer and don't want to plot
 # FIXME: change this to string matching so we only need one field
-export run_cuda=true
+export run_cuda=false
 
 export MACHINE=`hostname`
 
