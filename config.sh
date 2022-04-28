@@ -9,8 +9,8 @@ export SEARCH_TYPE="tree"
 # ==============================================================================
 # NOTE: CMAKE_BUILD_TYPE=RELEASE (set below) defaults to -03 -DNDEBUG
 # consider changing this to -O2 if problems arise
-export BUILD_TYPE="debug"
-# export BUILD_TYPE="release"
+# export BUILD_TYPE="debug"
+export BUILD_TYPE="release"
 # ==============================================================================
 # choose only one of these build options
 # (1)
