@@ -75,4 +75,7 @@ for i in range(N):
 
 
 print('Average number of neighbors found = ', float(tot_results) / float(N))
-print('Total incorrect indices = ', int(sum(errs)))
+n_error = int(sum(errs))
+print('Total incorrect indices = ', n_error)
+
+assert n_error == 0, f"greater than zero errors in brute force search: {n_error}"

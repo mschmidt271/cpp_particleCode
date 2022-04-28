@@ -7,7 +7,8 @@ export SEARCH_TYPE="tree"
 # export SEARCH_TYPE="brute_force"
 # ==============================================================================
 # ==============================================================================
-# FIXME: this is WIP--doesn't pass through the whole build yet
+# NOTE: CMAKE_BUILD_TYPE=RELEASE (set below) defaults to -03 -DNDEBUG
+# consider changing this to -O2 if problems arise
 # export BUILD_TYPE="debug"
 export BUILD_TYPE="release"
 # ==============================================================================

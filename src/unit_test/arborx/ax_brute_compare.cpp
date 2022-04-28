@@ -16,7 +16,7 @@ namespace {
 // Print usage information and exit.
 void usage(const char* exe) {
   fmt::print(stderr, "ERROR: Too few inputs to {}--usage:\n", exe);
-  fmt::print(stderr, "{} <input_pts.yml> <outfile.txt>\n", exe);
+  fmt::print(stderr, "{} <input_pts.yml>\n", exe);
   exit(1);
 }
 
@@ -34,9 +34,7 @@ int main(int argc, char* argv[]) {
 
   ko::Profiling::pushRegion("setup");
   // set the string giving the input file
-  std::string infile = install_prefix;
-  infile += "/unit_test/arborx/";
-  infile += argv[1];
+  std::string infile = argv[1];
 
   // host parameters
   // note that radius is a real here and then recast as float for arborx, since

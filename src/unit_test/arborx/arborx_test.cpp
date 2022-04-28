@@ -51,9 +51,7 @@ int main(int argc, char* argv[]) {
   fmt::print("Kokkos execution space is: {}\n", typeid(ExecutionSpace).name());
 
   // set the string giving the input file
-  std::string infile = install_prefix;
-  infile += "/unit_test/arborx/";
-  infile += argv[1];
+  std::string infile = argv[1];
 
   // host parameters
   // note that radius is a real here and then recast as float for arborx, since
@@ -126,9 +124,7 @@ int main(int argc, char* argv[]) {
   // write the results out to a text file, with name provided as CLA
   ko::Profiling::pushRegion("write to file");
   FILE* outFile;
-  std::string fname = install_prefix;
-  fname += "/unit_test/arborx/";
-  fname += argv[2];
+  std::string fname = argv[2];
   outFile = fopen(fname.c_str(), "w");
 
   // this goofy looking loop is because the results are stored in CRS format

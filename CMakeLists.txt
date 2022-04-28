@@ -8,6 +8,8 @@ project(parPT VERSION 0.1 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+enable_testing()
+
 # FIXME: pull this out to the config file when things are release-ish
 # set(CMAKE_BUILD_TYPE "Debug")
 
@@ -63,4 +65,4 @@ add_subdirectory(src)
 
 # add the profiling directory and make the run script executable
 install(DIRECTORY profiling DESTINATION ${CMAKE_INSTALL_PREFIX})
-install(PROGRAMS profiling/run_profile_ens.sh DESTINATION ${CMAKE_INSTALL_PREFIX}/profiling)
+install(PROGRAMS profiling/run_profile_ens.sh; profiling/bg_run_ens.sh DESTINATION ${CMAKE_INSTALL_PREFIX}/profiling)
