@@ -37,3 +37,6 @@ pctRW: 0.0
 cdist_coeff: 6
 # output file name
 pFile: "/tests/MT_only/particles.txt"
+# whether to write position/mass plotting data or not (no => for profiling)
+# FIXME: change this to write frequency later
+write_plot: true

@@ -44,3 +44,6 @@ rand_seed_type: default
 rand_seed_value: 5374857
 # output file name
 pFile: "/data/particles.txt"
+# whether to write position/mass plotting data or not (no => profiling)
+# FIXME: change this to write frequency later
+write_plot: false

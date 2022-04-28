@@ -9,8 +9,8 @@ export SEARCH_TYPE="tree"
 # ==============================================================================
 # NOTE: CMAKE_BUILD_TYPE=RELEASE (set below) defaults to -03 -DNDEBUG
 # consider changing this to -O2 if problems arise
-# export BUILD_TYPE="debug"
-export BUILD_TYPE="release"
+export BUILD_TYPE="debug"
+# export BUILD_TYPE="release"
 # ==============================================================================
 # choose only one of these build options
 # (1)
@@ -61,14 +61,14 @@ if [ $MACHINE = s1046231 ]; then
         export KK_ROOT="${HOME_DIR}/kokkos-kernels/install_clang"
         export YCPP_ROOT="${HOME_DIR}/yaml-cpp/install_clang"
         export AX_ROOT="${HOME_DIR}/ArborX/install_clang"
-        export SP_ROOT="${HOME_DIR}/spdlog/install_clang"
+        export SP_ROOT="${HOME_DIR}/spdlog/install_clang_${BUILD_TYPE}"
     elif [ "$USE_OPENMP" = true ]; then
         echo "Building for OpenMP"
         export KO_ROOT="${HOME_DIR}/kokkos/install_gccomp"
         export KK_ROOT="${HOME_DIR}/kokkos-kernels/install_gccomp"
         export YCPP_ROOT="${HOME_DIR}/yaml-cpp/install_gcc11"
         export AX_ROOT="${HOME_DIR}/ArborX/install_gccomp"
-        export SP_ROOT="${HOME_DIR}/spdlog/install_gccomp"
+        export SP_ROOT="${HOME_DIR}/spdlog/install_gcc_${BUILD_TYPE}"
     else
         echo "ERROR: Unsupported build for this machine"
         exit

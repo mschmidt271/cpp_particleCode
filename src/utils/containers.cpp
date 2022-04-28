@@ -2,6 +2,7 @@
 
 namespace particles {
 
+// TODO: add error-checking/default values here
 Params::Params(const std::string& yaml_name) {
   ko::Profiling::pushRegion("in params constructor");
   YAML::Node file_params = YAML::LoadFile(yaml_name);
@@ -36,6 +37,12 @@ Params::Params(const std::string& yaml_name) {
   cdist_coeff = file_params["cdist_coeff"].as<Real>();
   cutdist = cdist_coeff * sqrt(denom);
   pFile = file_params["pFile"].as<std::string>();
+  if (file_params["write_plot"])
+  {
+    write_plot = file_params["write_plot"].as<bool>();
+  } else {
+    write_plot = false;
+  }
   nSteps = ceil(maxT / dt);
   ko::Profiling::popRegion();
 }

@@ -26,6 +26,7 @@ class Params {
   IC_enum_mass IC_type_mass;
   rand_seed_enum seed_type;
   uint64_t seed_val;
+  bool write_plot;
   Params() = default;
   Params(const std::string& yaml_name);
   void enumerate_IC(std::string& IC_str, const YAML::Node& yml,

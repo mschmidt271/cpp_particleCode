@@ -36,7 +36,6 @@ Particles::Particles(const std::string& _input_file)
       break;
     }
   }
-  fmt::print("seed = {}\n", seed);
   rand_pool = init_random_seed(seed);
   ko::Profiling::pushRegion("ctor initialize position");
   // initialize the X view
