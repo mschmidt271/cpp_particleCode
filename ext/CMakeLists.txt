@@ -206,7 +206,8 @@ if (DEFINED ENV{ARBORX_INCDIR})
   message(STATUS "ArborX headers found at ${ARBORX_INCLUDE_DIRS}")
   set(EXTERNAL_ARBORX TRUE)
 else()
-  set(ARBORX_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/{include,include/details}")
+  set(ARBORX_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/include
+                          ${PROJECT_BINARY_DIR}/include/details)
   set(EXTERNAL_ARBORX FALSE)
 endif()
 
