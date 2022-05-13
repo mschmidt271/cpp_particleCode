@@ -79,3 +79,4 @@ n_error = int(sum(errs))
 print('Total incorrect indices = ', n_error)
 
 assert n_error == 0, f"greater than zero errors in brute force search: {n_error}"
+print('SUCCESS: ArborX and python generate the same results.')

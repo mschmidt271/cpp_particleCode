@@ -9,8 +9,8 @@ export SEARCH_TYPE="tree"
 # ==============================================================================
 # NOTE: CMAKE_BUILD_TYPE=RELEASE (set below) defaults to -03 -DNDEBUG
 # consider changing this to -O2 if problems arise
-# export BUILD_TYPE="debug"
-export BUILD_TYPE="release"
+export BUILD_TYPE="debug"
+# export BUILD_TYPE="release"
 # ==============================================================================
 # choose only one of these build options
 # (1)
@@ -33,8 +33,10 @@ export MAC_SERIAL_CPP="clang++"
 export MAC_SERIAL_C="clang"
 export MAC_OMP_CPP="g++-11"
 export MAC_OMP_C="gcc-11"
-export LINUX_CPP="mpicxx"
-export LINUX_C="mpicc"
+export LINUX_CPP="g++"
+export LINUX_C="gcc"
+export S102_CPP="mpicxx"
+export S102_C="mpicc"
 # if you are using a machine that isn't listed below and you are building
 # for GPU, provide the architecture name
 # see the "Architecture Keywords" section of:
@@ -75,6 +77,8 @@ if [ $MACHINE = s1046231 ]; then
     fi
 elif [ $MACHINE = s1024454 ]; then
     export LIBDIR=$LINUX_LIBDIR
+    export LINUX_CPP=$S102_CPP
+    export LINUX_C=$S102_CPP
     if [ "$USE_OPENMP" = false ] && [ "$USE_CUDA" = false ]; then
         echo "Building for serial"
         echo "ERROR: Unsupported build for this machine"
@@ -151,8 +155,52 @@ elif [ $MACHINE = clamps ]; then
         exit
     fi
 else
-    echo "Unrecognized machine--atempting default build (this may not work)"
-    export DEVICE_ARCH=$GPU_ARCHITECTURE
+    if [ $IN_CONTAINER == true ]; then
+        export BUILD_TYPE="$DOCKER_BUILD_TYPE"
+        export HOME_DIR="/ext-docker-${BUILD_TYPE}"
+        export LIBDIR=$MAC_LIBDIR
+        if [ "$USE_OPENMP" = false ] && [ "$USE_CUDA" = false ]; then
+            echo "Building for serial"
+            echo "ERROR: Unsupported build for this machine"
+            exit
+            # export KO_ROOT="${HOME_DIR}/kokkos/"
+            # export KK_ROOT="${HOME_DIR}/kokkos-kernels/"
+            # export YCPP_ROOT="${HOME_DIR}/yaml-cpp/"
+            # export AX_ROOT="${HOME_DIR}/ArborX/"
+        elif [ "$USE_OPENMP" = true ] && [ "$USE_CUDA" = false ]; then
+            echo "Building for OpenMP without CUDA"
+            export KO_ROOT="${HOME_DIR}/kokkos/install"
+            export KK_ROOT="${HOME_DIR}/kokkos-kernels/install"
+            export YCPP_ROOT="${HOME_DIR}/yaml-cpp/install"
+            export AX_ROOT="${HOME_DIR}/ArborX/install"
+            export SP_ROOT="${HOME_DIR}/spdlog/install"
+        elif [ "$USE_OPENMP" = false ] && [ "$USE_CUDA" = true ]; then
+            echo "Building without OpenMP"
+            echo "ERROR: Unsupported build for this machine"
+            exit
+            # export DEVICE_ARCH="TURING75"
+            # export KO_ROOT="${HOME_DIR}/kokkos/"
+            # export KK_ROOT="${HOME_DIR}/kokkos-kernels/"
+            # export YCPP_ROOT="${HOME_DIR}/yaml-cpp/install"
+            # export AX_ROOT="${HOME_DIR}/ArborX/"
+        elif [ "$USE_OPENMP" = true ] && [ "$USE_CUDA" = true ]; then
+            echo "Building for OpenMP and CUDA"
+            echo "ERROR: Unsupported build for this machine"
+            exit
+            # export DEVICE_ARCH="TURING75"
+            # export KO_ROOT="${HOME_DIR}/kokkos/install"
+            # export KK_ROOT="${HOME_DIR}/kokkos-kernels/install"
+            # export YCPP_ROOT="${HOME_DIR}/yaml-cpp/install"
+            # export AX_ROOT="${HOME_DIR}/ArborX/install"
+            # export SP_ROOT="${HOME_DIR}/spdlog/install"
+        else
+            echo "ERROR: Unsupported build for this machine"
+            exit
+        fi
+    else
+        echo "Unrecognized machine--attempting default build (this may not work)"
+        export DEVICE_ARCH=$GPU_ARCHITECTURE
+    fi
 fi
 echo "Home directory is ${HOME_DIR}"
 
