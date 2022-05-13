@@ -1,0 +1,39 @@
+[core]
+    editor       = vim
+    excludesfile = /root/.gitignore_global
+[alias]
+    co      = checkout
+    ci      = commit
+    cim     = commit -m
+    cam     = commit -am
+    ame     = commit --amend
+    mforce  = push origin +master
+    fpull   = pull --rebase
+    st      = status
+    u       = add -u
+    br      = branch
+    bra     = branch -a
+    last    = log -1 HEAD
+    hash    = rev-parse --short HEAD
+    lg       = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold magenta)%d%C(reset)'
+    lg1     = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(bold black)%s%C(reset) %C(bold black)- %an%C(reset)%C(bold yellow)%d%C(reset)' --all
+    lg2     = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset)%C(bold yellow)%d%C(reset)%n''%C(bold black)%s%C(reset) %C(bold black)- %an%C(reset)' --all
+    lg3     = log --pretty=format:'%C(blue)%h %C(bold green)%ad %C(bold blue)%an%C(bold yellow)%d %Creset%s' --date=short
+    hist    = log --pretty=format:\"%h %ad | %s%d [%an]\" --graph --date=short
+    type    = cat-file -t
+    dump    = cat-file -p
+    rehh    = reset --hard HEAD
+    rmv     = remote -v
+    subrec = submodule update --init --recursive
+    orprune = remote prune origin
+    # List aliases
+    aliases = config --get-regexp alias
+[filter "lfs"]
+    clean    = git-lfs clean -- %f
+    smudge   = git-lfs smudge -- %f
+    process  = git-lfs filter-process
+    required = true
+[color "status"]
+    added     = yellow
+    changed   = green
+    untracked = cyan

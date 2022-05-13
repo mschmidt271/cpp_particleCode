@@ -1,0 +1,19 @@
+# auto save files
+*~
+
+# osx ds_store
+.DS_Store
+
+# pycharm idea file
+.idea
+
+*.dSYM
+
+# latex files
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.synctex.gz
+*.bbl
+*.blg

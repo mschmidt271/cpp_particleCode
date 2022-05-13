@@ -6,6 +6,10 @@ This repository contains random walk particle tracking code with SPH-style mass 
 
 The only current dependencies are **cmake** and __python3__ (with __numpy__ and __matplotlib__, if you want to use some of the plotting utilities). On Mac, your easiest option is to use [Homebrew](https://docs.brew.sh/Installation) and then `brew install cmake`, `brew install python`, `pip install numpy`, and `pip install matplotlib`. Note that if python scripts aren't running properly, you may need to use `pip3` in the above. If you're looking to run unit tests that involve python scripts, then you'll likely have to install more python packages until your code stops crashing. Also, some of the tests are verified using __Jupyter Notebooks__, which can be taken care of via [Homebrew](https://docs.brew.sh/Installation) via `brew install jupyter`, `brew install notebook`, and then run the notebook with `jupyter-notebook <notebook>.ipynb` which will open a browser window.
 
+<ins>**Note:**</ins> All<sup>\*</sup> of the above dependencies can be avoided by using the [Docker](https://docs.docker.com/get-docker/) build instructions below. However, first you must install Docker :upside_down_face: (`brew install docker`).
+
+\*: Except jupyter notebook--haven't figured out how to get those running in the container, but will update once I do.
+
 Note that simply downloading the repository will not work with the external projects (Kokkos, Kokkos Kernels, yaml-cpp, ArborX), as they are git submodules.
 As such, the repository must be cloned.
 For example, in whichever directory you want to put the code:
@@ -18,7 +22,22 @@ For example, in whichever directory you want to put the code:
     - Note: the `-j8` is a parallel flag, allowing git to fetch up to 8 submodules in parallel.
 1. `cd cpp_particleCode`
 
-- To build (and run):
+- To build and run using Docker (recommended for ease):
+    1. `docker build -t ko_pt .`
+        - Default build is `debug` for now. However, if you want to explicitly choose the build mode, use:
+            - `docker build --build-arg BUILD_TYPE_IN=<debug, release> -t ko_pt .`
+    1. `docker run -it --rm ko_pt bash`
+        - This will enter a bash terminal in a Docker container running Ubuntu.
+            - To exit, type: `exit` or `ctrl + d`.
+    1. `./run.sh` or `make test` to run the unit tests (so far only considering the ArborX fixed-radius search).
+        - The example can be modified by editing the input file `src/data/particleParams.yaml`.
+            - Note that if you edit the one in the build directory, it will be overwritten by the original after a `make install`. Similarly, if you edit the one in the top-level `src` directory, `make install` will be required before you can run the new simulation.
+    1. <ins>**Note:**</ins> If you make changes to the source code from within the container, they will not transmit to the actual source code nor persist after exiting and restarting the container. If you want to make persistent changes, I would recommend:
+        - Modify/test within the container.
+        - Once you've got things working, modify the external source code.
+        - Rebuild and restart the container, which will now contain these changes (`docker build -t ko_pt . && docker run -it --rm ko_pt bash`).
+
+- To build from source (and run):
     1. Edit the `config.sh` script to describe your build goals and development environment.
     1. `mkdir build && cd build`
     1. `../config.sh`
@@ -26,8 +45,9 @@ For example, in whichever directory you want to put the code:
     1. `make -j install`
         - Note: similarly to above, the `-j` flag executes the make using the max number of cores available.
         - Note: the current behavior, as given in `config.sh` is to install to the build directory. As such, you can re-build/install/run from the same place without changing directories repeatedly.
-    1. `./run.sh` to run a basic example, which can be modified by editing the input file `src/data/particleParams.yaml`.
-        - Note that if you edit the one in the build directory, it will be overwritten by the original after a `make install`. Similarly, if you edit the one in the top-level `src` directory, `make install` will be required before you can run the new simulation.
+    1. `./run.sh` to run a basic example.
+        - The example can be modified by editing the input file `src/data/particleParams.yaml`.
+            - Note that if you edit the one in the build directory, it will be overwritten by the original after a `make install`. Similarly, if you edit the one in the top-level `src` directory, `make install` will be required before you can run the new simulation.
 
 ## Building for CPU (OpenMP)
 
