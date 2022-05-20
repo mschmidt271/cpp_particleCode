@@ -13,7 +13,7 @@ case "$-" in
         alias sl='ls'
 
         # from Luca
-        alias makej='make -j8'
+        alias makej='make -j6'
         alias make4='make -j4'
 
         # save the PID of the last thing you ran
