@@ -1,11 +1,11 @@
-# this can is the default value, though either choice can be made at build-time
+# this is the default value, though either choice can be made at build-time
 # via the command line argument --build-arg=[debug, release]
 ARG BUILD_TYPE_IN=debug
 
 FROM ubuntu:21.04
 
 # this contains all the pre-built TPLs
-FROM mjschm/cpppt-ext:$BUILD_TYPE_IN
+FROM mjschm/ko_pt:$BUILD_TYPE_IN
 
 # copy in some config files to make the environment more user-friendly (for Mike)
 COPY ./.docker_configs /root
@@ -34,6 +34,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # install the python dependencies, mainly used for testing
 RUN pip3 install numpy pyyaml sklearn
+
+# unset proxy variables that are user-specific
+ENV no_proxy=
+ENV https_proxy=
+ENV NO_PROXY=
+ENV HTTPS_PROXY=
+ENV HTTP_PROXY=
+ENV http_proxy=
+
+# remove user-specific config files
+RUN cd /root && rm -rf .wgetrc .env .pip .sandia
 
 # We build in /particle
 WORKDIR /particle

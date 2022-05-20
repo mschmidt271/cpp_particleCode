@@ -1,0 +1,26 @@
+D: 0.1
+# Note: if space IC type is "equi", then Np is the number of particles in a
+# given *dimension* (e.g., total number of particles = Np^d), if it is
+# uniform" or "point," then it is the *total* number of particles
+Np: 51
+cdist_coeff: 6
+dimension: 1
+dt: 0.1
+initial_condition:
+  mass:
+    X0: 25
+    type: point
+  space:
+    X0: 25
+    hat_pct: 20.0
+    # **see note above regarding Np**
+    type: equi
+maxT: 10.0
+omega:
+- 0
+- 50
+pFile: /tests/MT_only/particles.txt
+pctRW: 0.0
+rand_seed_type: default
+rand_seed_value: 5374857
+write_plot: true

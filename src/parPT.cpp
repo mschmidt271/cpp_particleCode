@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 
-#include "utilities.hpp"
+#include "particles.hpp"
 
 // ***TESTING***
 // #include <ArborX_LinearBVH.hpp>
@@ -51,7 +51,7 @@ int main(int argc, char* argv[]) {
       {
         ko::Profiling::pushRegion("write initial positions");
         // write initial positions/masses to file
-        parts.particleIO.write(parts.X, parts.mass, tStep);
+        parts.particleIO.write(parts.params, parts.X, parts.mass, tStep);
         ko::Profiling::popRegion();
       }
 
@@ -63,13 +63,13 @@ int main(int argc, char* argv[]) {
       particles::random_walk(parts.X, parts.params, parts.rand_pool);
       ko::Profiling::popRegion();
       ko::Profiling::pushRegion("MT");
-      parts.mass_trans.transfer_mass();
+      // parts.mass_trans.transfer_mass();
       ko::Profiling::popRegion();
       ko::Profiling::pushRegion("tstep_write");
       // write updated particle info to file
       if (parts.params.write_plot)
       {
-        parts.particleIO.write(parts.X, parts.mass, tStep);
+        parts.particleIO.write(parts.params, parts.X, parts.mass, tStep);
       }
       ko::Profiling::popRegion();
     }

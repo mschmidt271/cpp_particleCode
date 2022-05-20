@@ -4,10 +4,208 @@ namespace particles {
 
 // constructor for WriteParticles object that takes in the filename f and
 // creates an outfile object
-ParticleIO::ParticleIO(std::string f, const Params& _params) : params(_params) {
-  if(params.write_plot) {
-    outfile = fopen(f.c_str(), "w");
+ParticleIO::ParticleIO(Params& _params, const std::string& yaml_name) {
+  YAML::Node file_params = YAML::LoadFile(yaml_name);
+
+  _params.Np = file_params["Np"].as<int>();
+  _params.dim = file_params["dimension"].as<int>();
+  _params.IC_str_space =
+      file_params["initial_condition"]["space"]["type"].as<std::string>();
+  _params.IC_str_mass =
+      file_params["initial_condition"]["mass"]["type"].as<std::string>();
+  for (auto iter : file_params["omega"]) {
+    _params.omega.push_back(iter.as<Real>());
   }
+  std::string rand_seed_str;
+  // the parser will crash is the type string is empty, so check first
+  // Note: for whatever reason, IsScalar() seems to do the best job of
+  // determining whether or not the value is empty when the key is in the yaml
+  if (file_params["rand_seed_type"] and
+      file_params["rand_seed_type"].IsScalar()) {
+    rand_seed_str = file_params["rand_seed_type"].as<std::string>();
+  } else {
+    rand_seed_str = "missing";
+  }
+  enumerate_seed_type(_params, rand_seed_str, file_params);
+  enumerate_IC(_params, _params.IC_str_space, file_params, true);
+  enumerate_IC(_params, _params.IC_str_mass, file_params, false);
+  set_seed_val(_params, file_params);
+
+  _params.maxT = file_params["maxT"].as<Real>();
+  _params.dt = file_params["dt"].as<Real>();
+  _params.D = file_params["D"].as<Real>();
+  _params.pctRW = file_params["pctRW"].as<Real>();
+  _params.denom = 4 * _params.D * (1.0 - _params.pctRW) * _params.dt;
+  _params.cdist_coeff = file_params["cdist_coeff"].as<Real>();
+  _params.cutdist = _params.cdist_coeff * sqrt(_params.denom);
+  _params.pFile = file_params["pFile"].as<std::string>();
+  if (file_params["write_plot"])
+  {
+    _params.write_plot = file_params["write_plot"].as<bool>();
+  } else {
+    _params.write_plot = false;
+  }
+  _params.nSteps = ceil(_params.maxT / _params.dt);
+
+  if(_params.write_plot) {
+    outfile = fopen(_params.pFile.c_str(), "w");
+  }
+  // set the internal one equal to the one passed in by reference
+  // NOTE: it doesn't appear necessary for IO to have its own params
+  // params = _params;
+}
+
+void ParticleIO::enumerate_IC(Params& params, std::string& IC_str, const YAML::Node& yml,
+                          const bool& space) {
+  transform(IC_str.begin(), IC_str.end(), IC_str.begin(), ::tolower);
+  if (space) {
+    if (IC_str.compare("point") == 0) {
+      params.IC_type_space = point_loc;
+      params.X0_space = yml["initial_condition"]["space"]["X0"].as<Real>();
+    } else if (IC_str.compare("uniform") == 0) {
+      params.IC_type_space = uniform;
+    } else if (IC_str.compare("equi") == 0) {
+      params.IC_type_space = equi;
+    } else if (IC_str.compare("hat") == 0) {
+      params.IC_type_space = hat;
+      params.hat_pct = yml["initial_condition"]["space"]["hat_pct"].as<Real>();
+    } else {
+      fmt::print(stderr, "ERROR: Unsupported initial condition type: {}\n",
+                 &IC_str[0]);
+      exit(1);
+    }
+  } else {
+    if (IC_str.compare("point") == 0) {
+      params.IC_type_mass = point_mass;
+      params.X0_mass = yml["initial_condition"]["mass"]["X0"].as<Real>();
+    } else if (IC_str.compare("heaviside") == 0) {
+      params.IC_type_mass = heaviside;
+      params.X0_mass = yml["initial_condition"]["mass"]["X0"].as<Real>();
+    } else if (IC_str.compare("gaussian") == 0) {
+      params.IC_type_mass = gaussian;
+      params.X0_mass = yml["initial_condition"]["mass"]["X0"].as<Real>();
+    } else {
+      fmt::print(stderr, "ERROR: Unsupported initial condition type: {}\n",
+                 &IC_str[0]);
+      exit(1);
+    }
+  }
+}
+
+void ParticleIO::enumerate_seed_type(Params& params, std::string& seed_str, const YAML::Node& yml) {
+  if (!seed_str.empty()) {
+    transform(seed_str.begin(), seed_str.end(), seed_str.begin(), ::tolower);
+  }
+  if (seed_str.compare("default") == 0) {
+    params.seed_type = default_rand;
+  } else if (seed_str.compare("clock") == 0) {
+    params.seed_type = clock_rand;
+  } else if (seed_str.compare("specified") == 0) {
+    params.seed_type = specified_rand;
+  } else if (seed_str.compare("missing") == 0) {
+    params.seed_type = missing;
+  } else {
+    params.seed_type = default_rand;
+  }
+}
+
+void ParticleIO::set_seed_val(Params& params, const YAML::Node& yml) {
+  switch (params.seed_type) {
+    case clock_rand: {
+      params.seed_val =
+          std::chrono::high_resolution_clock::now().time_since_epoch().count();
+      break;
+    }
+    case specified_rand: {
+      if (yml["rand_seed_value"] and yml["rand_seed_value"].IsScalar()) {
+        params.seed_val = yml["rand_seed_value"].as<uint64_t>();
+      } else {
+        params.seed_type = missing;
+        params.seed_val = 5374857;
+      }
+      break;
+    }
+    case default_rand: {
+      params.seed_val = 5374857;
+      break;
+    } case missing: {
+      fmt::print("Seed type or value not provided--using default seed 5374857.\n");
+      params.seed_val = 5374857;
+      break;
+    }
+    default: {
+      // this should not be possible
+      fmt::print("Seed type or value is invalid--using default seed 5374857.\n");
+      params.seed_val = 5374857;
+      break;
+    }
+  }
+}
+
+// void ParticleIO::read_params_input(const std::string& yaml_name) {
+//   YAML::Node file_params = YAML::LoadFile(yaml_name);
+
+//   params.Np = file_params["Np"].as<int>();
+//   params.dim = file_params["dimension"].as<int>();
+//   params.IC_str_space =
+//       file_params["initial_condition"]["space"]["type"].as<std::string>();
+//   params.IC_str_mass =
+//       file_params["initial_condition"]["mass"]["type"].as<std::string>();
+//   for (auto iter : file_params["omega"]) {
+//     params.omega.push_back(iter.as<Real>());
+//   }
+//   std::string rand_seed_str;
+//   // the parser will crash is the type string is empty, so check first
+//   // Note: for whatever reason, IsScalar() seems to do the best job of
+//   // determining whether or not the value is empty when the key is in the yaml
+//   if (file_params["rand_seed_type"] and
+//       file_params["rand_seed_type"].IsScalar()) {
+//     rand_seed_str = file_params["rand_seed_type"].as<std::string>();
+//   } else {
+//     rand_seed_str = "missing";
+//   }
+//   params.enumerate_seed_type(rand_seed_str, file_params);
+
+//   params.maxT = file_params["maxT"].as<Real>();
+//   params.dt = file_params["dt"].as<Real>();
+//   params.D = file_params["D"].as<Real>();
+//   params.pctRW = file_params["pctRW"].as<Real>();
+//   params.denom = 4 * params.D * (1.0 - params.pctRW) * params.dt;
+//   params.cdist_coeff = file_params["cdist_coeff"].as<Real>();
+//   params.cutdist = params.cdist_coeff * sqrt(params.denom);
+//   params.pFile = file_params["pFile"].as<std::string>();
+//   if (file_params["write_plot"])
+//   {
+//     params.write_plot = file_params["write_plot"].as<bool>();
+//   } else {
+//     params.write_plot = false;
+//   }
+//   params.nSteps = ceil(params.maxT / params.dt);
+
+//   if(params.write_plot) {
+//     outfile = fopen(params.pFile.c_str(), "w");
+//   }
+// }
+
+void ParticleIO::initialize_positions(const Params& params, const std::string& yaml_name, ko::View<Real**>& X) {
+  YAML::Node file_params = YAML::LoadFile(yaml_name);
+
+  std::vector<std::string> dims{"x", "y", "z"};
+
+  auto hX = ko::create_mirror_view(X);
+  auto points = file_params["points"];
+  for (auto j = 0; j < params.dim; ++j)
+  {
+    auto dim_pt = points[dims[j]];
+    int i = 0;
+    for (const auto& pt : dim_pt)
+    {
+      hX(j, i) = pt.as<Real>();
+      fmt::print("hX({}, {}) = {}\n", j, i, hX(j, i));
+      ++i;
+    }
+  }
+  ko::deep_copy(X, hX);
 }
 
 void print_version_info() {
@@ -18,7 +216,7 @@ void print_version_info() {
   fmt::print("{:^60}\n", "Version 0.0.1--NOT FOR SCIENCE");
 }
 
-void ParticleIO::print_params_summary() {
+void ParticleIO::print_params_summary(const Params& params) {
   fmt::print("{}\n",
              "************************************************************");
   print_version_info();
@@ -48,13 +246,21 @@ void ParticleIO::print_params_summary() {
              "************************************************************");
 }
 
-void ParticleIO::write(const ko::View<Real**>& X, const ko::View<Real*>& mass,
+void ParticleIO::write(const Params& params, const ko::View<Real**>& X, const ko::View<Real*>& mass,
                        const int& tStep) {
+  ko::Profiling::pushRegion("write_deep_copy");
   auto hX = ko::create_mirror_view(X);
   auto hmass = ko::create_mirror_view(mass);
   ko::deep_copy(hX, X);
+  std::cout << "**In write**" << "\n";
+  for (int i = 0; i < params.Np; ++i)
+  {
+    std::cout << "hX(0, i) = " << hX(0, i) << "\n";
+  }
   ko::deep_copy(hmass, mass);
+  ko::Profiling::popRegion();
   if (tStep == 0) {
+    ko::Profiling::pushRegion("print_meta_info");
     fmt::print(outfile, "{} {}\n", params.Np, params.nSteps);
     fmt::print(outfile, "{} ", params.IC_type_space);
     fmt::print(outfile, "{} ", params.IC_type_mass);
@@ -70,12 +276,25 @@ void ParticleIO::write(const ko::View<Real**>& X, const ko::View<Real*>& mass,
     }
     fmt::print(outfile, "{} {} {} {} {} {} {}\n", params.X0_mass, params.maxT,
                params.dt, params.D, params.pctRW, params.cdist_coeff, params.cutdist);
-    for (size_t i = 0; i < hX.extent(0); ++i) {
-      fmt::print(outfile, "{} {}\n", hX(i), hmass(i));
+    ko::Profiling::popRegion();
+    ko::Profiling::pushRegion("print_position and mass");
+    for (size_t i = 0; i < hX.extent(1); ++i) {
+      for (size_t j = 0; j < hX.extent(0); ++j) {
+        ko::Profiling::pushRegion("print_position");
+        fmt::print(outfile, "{} ", hX(j, i));
+        ko::Profiling::popRegion();
+      }
+      ko::Profiling::pushRegion("print_mass");
+      fmt::print(outfile, "{}\n", hmass(i));
+      ko::Profiling::popRegion();
     }
+  ko::Profiling::popRegion();
   } else {
-    for (size_t i = 0; i < hX.extent(0); ++i) {
-      fmt::print(outfile, "{} {}\n", hX(i), hmass(i));
+    for (size_t i = 0; i < hX.extent(1); ++i) {
+      for (size_t j = 0; j < hX.extent(0); ++j) {
+        fmt::print(outfile, "{} ", hX(j, i));
+      }
+      fmt::print(outfile, "{}\n", hmass(i));
     }
   }
 }

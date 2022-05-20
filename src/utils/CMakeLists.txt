@@ -6,7 +6,7 @@ add_library(Utils version_info.cpp
                   mass_transfer.cpp
                   random.cpp
                   random_walk.cpp
-                  utilities.cpp)
+                  particles.cpp)
 # target_link_libraries(Utils ${PARPT_LIBS})
 set(Utils PARENT_SCOPE)
 # add_dependencies(Utils yaml_cpp kokkos kokkoskernels arborx spdlog version_info)

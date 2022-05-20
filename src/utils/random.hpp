@@ -25,16 +25,17 @@ struct RandomUniform {
   Scalar start, end;
 
   KOKKOS_INLINE_FUNCTION
-  void operator()(int i) const {
+  // FIXME: determine which way this loop should go
+  void operator()(int j, int i) const {
     // Get a random number state from the pool for the active thread
     gen_type rgen = rand_pool.get_state();
 
     size_t dim = vals.extent(0);
     std::cout << "****dim = ****" << dim << "\n";
-    for (int k = 0; k < dim; ++k) {
+    // for (int k = 0; k < dim; ++k) {
       // draw random normal numbers, with mean and variance provided
-      vals(k, i) = rgen.drand(start, end);
-    }
+      vals(j, i) = rgen.drand(start, end);
+    // }
 
     // Give the state back, which will allow another thread to acquire it
     rand_pool.free_state(rgen);

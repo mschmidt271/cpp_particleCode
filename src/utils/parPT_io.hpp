@@ -8,6 +8,7 @@
 #include "containers.hpp"
 #include "spdlog/formatter.h"
 #include "type_defs.hpp"
+#include "yaml-cpp/yaml.h"
 // maybe add this back in once I get fancier with versioning
 // #include "version_info.hpp"
 
@@ -17,18 +18,24 @@ namespace particles {
 class ParticleIO {
  private:
   FILE* outfile;
-  Params params;
 
  public:
-  ParticleIO(std::string f, const Params& params);
-  void print_params_summary();
-  void write(const ko::View<Real**>& X, const ko::View<Real*>& mass,
+  ParticleIO(Params& params, const std::string& yaml_name);
+  ParticleIO() = default;
+  // void read_params_input(const std::string& yaml_name);
+  void initialize_positions(const Params& params, const std::string& yaml_name, ko::View<Real**>& X);
+  void enumerate_IC(Params& params, std::string& IC_str, const YAML::Node& yml,
+                    const bool& space);
+  void enumerate_seed_type(Params& params, std::string& seed_str, const YAML::Node& yml);
+  void set_seed_val(Params& params, const YAML::Node& yml);
+  void print_params_summary(const Params& params);
+  void write(const Params& params, const ko::View<Real**>& X, const ko::View<Real*>& mass,
              const int& i);
 };
 
 void print_version_info();
 
-void read_params_input(const std::string& yaml_name);
+
 
 }  // namespace particles
 
