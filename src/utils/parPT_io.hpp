@@ -20,6 +20,7 @@ class ParticleIO {
   FILE* outfile;
 
  public:
+<<<<<<< HEAD
   ParticleIO(Params& params, const std::string& yaml_name);
   ParticleIO() = default;
   void set_positions(const Params& params, const std::string& yaml_name,

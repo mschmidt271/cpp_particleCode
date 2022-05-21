@@ -30,8 +30,8 @@ struct RandomUniform {
     // Get a random number state from the pool for the active thread
     gen_type rgen = rand_pool.get_state();
 
+<<<<<<< HEAD
     size_t dim = vals.extent(0);
-    std::cout << "****dim = ****" << dim << "\n";
     // for (int k = 0; k < dim; ++k) {
       // draw random normal numbers, with mean and variance provided
       vals(j, i) = rgen.drand(start, end);

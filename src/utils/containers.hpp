@@ -30,6 +30,10 @@ class Params {
   uint64_t seed_val;
   bool write_plot;
   Params() = default;
+  Params(const std::string& yaml_name);
+  void enumerate_IC(std::string& IC_str, const YAML::Node& yml,
+                    const bool& space);
+  void enumerate_seed_type(std::string& seed_str, const YAML::Node& yml);
 };
 
 struct SparseMatViews {
