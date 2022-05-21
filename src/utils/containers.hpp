@@ -4,9 +4,8 @@
 #include <chrono>
 
 #include "Kokkos_Core.hpp"
-#include "type_defs.hpp"
-// #include "parPT_io.hpp"
 #include "spdlog/formatter.h"
+#include "type_defs.hpp"
 #include "yaml-cpp/yaml.h"
 
 namespace particles {
@@ -31,12 +30,6 @@ class Params {
   uint64_t seed_val;
   bool write_plot;
   Params() = default;
-  // FIXME: const? ref?
-  // Params(const std::string& yaml_name);
-  // void enumerate_IC(std::string& IC_str, const YAML::Node& yml,
-  //                   const bool& space);
-  // void enumerate_seed_type(std::string& seed_str, const YAML::Node& yml);
-  // void set_seed_val(const YAML::Node& yml);
 };
 
 struct SparseMatViews {

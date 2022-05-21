@@ -2,8 +2,6 @@
 
 namespace particles {
 
-// constructor for WriteParticles object that takes in the filename f and
-// creates an outfile object
 ParticleIO::ParticleIO(Params& _params, const std::string& yaml_name) {
   YAML::Node file_params = YAML::LoadFile(yaml_name);
 
@@ -39,24 +37,20 @@ ParticleIO::ParticleIO(Params& _params, const std::string& yaml_name) {
   _params.cdist_coeff = file_params["cdist_coeff"].as<Real>();
   _params.cutdist = _params.cdist_coeff * sqrt(_params.denom);
   _params.pFile = file_params["pFile"].as<std::string>();
-  if (file_params["write_plot"])
-  {
+  if (file_params["write_plot"]) {
     _params.write_plot = file_params["write_plot"].as<bool>();
   } else {
     _params.write_plot = false;
   }
   _params.nSteps = ceil(_params.maxT / _params.dt);
 
-  if(_params.write_plot) {
+  if (_params.write_plot) {
     outfile = fopen(_params.pFile.c_str(), "w");
   }
-  // set the internal one equal to the one passed in by reference
-  // NOTE: it doesn't appear necessary for IO to have its own params
-  // params = _params;
 }
 
-void ParticleIO::enumerate_IC(Params& params, std::string& IC_str, const YAML::Node& yml,
-                          const bool& space) {
+void ParticleIO::enumerate_IC(Params& params, std::string& IC_str,
+                              const YAML::Node& yml, const bool& space) {
   transform(IC_str.begin(), IC_str.end(), IC_str.begin(), ::tolower);
   if (space) {
     if (IC_str.compare("point") == 0) {
@@ -92,7 +86,8 @@ void ParticleIO::enumerate_IC(Params& params, std::string& IC_str, const YAML::N
   }
 }
 
-void ParticleIO::enumerate_seed_type(Params& params, std::string& seed_str, const YAML::Node& yml) {
+void ParticleIO::enumerate_seed_type(Params& params, std::string& seed_str,
+                                     const YAML::Node& yml) {
   if (!seed_str.empty()) {
     transform(seed_str.begin(), seed_str.end(), seed_str.begin(), ::tolower);
   }
@@ -128,80 +123,37 @@ void ParticleIO::set_seed_val(Params& params, const YAML::Node& yml) {
     case default_rand: {
       params.seed_val = 5374857;
       break;
-    } case missing: {
-      fmt::print("Seed type or value not provided--using default seed 5374857.\n");
+    }
+    case missing: {
+      fmt::print(
+          "Seed type or value not provided--using default seed 5374857.\n");
       params.seed_val = 5374857;
       break;
     }
     default: {
       // this should not be possible
-      fmt::print("Seed type or value is invalid--using default seed 5374857.\n");
+      fmt::print(
+          "Seed type or value is invalid--using default seed 5374857.\n");
       params.seed_val = 5374857;
       break;
     }
   }
 }
 
-// void ParticleIO::read_params_input(const std::string& yaml_name) {
-//   YAML::Node file_params = YAML::LoadFile(yaml_name);
-
-//   params.Np = file_params["Np"].as<int>();
-//   params.dim = file_params["dimension"].as<int>();
-//   params.IC_str_space =
-//       file_params["initial_condition"]["space"]["type"].as<std::string>();
-//   params.IC_str_mass =
-//       file_params["initial_condition"]["mass"]["type"].as<std::string>();
-//   for (auto iter : file_params["omega"]) {
-//     params.omega.push_back(iter.as<Real>());
-//   }
-//   std::string rand_seed_str;
-//   // the parser will crash is the type string is empty, so check first
-//   // Note: for whatever reason, IsScalar() seems to do the best job of
-//   // determining whether or not the value is empty when the key is in the yaml
-//   if (file_params["rand_seed_type"] and
-//       file_params["rand_seed_type"].IsScalar()) {
-//     rand_seed_str = file_params["rand_seed_type"].as<std::string>();
-//   } else {
-//     rand_seed_str = "missing";
-//   }
-//   params.enumerate_seed_type(rand_seed_str, file_params);
-
-//   params.maxT = file_params["maxT"].as<Real>();
-//   params.dt = file_params["dt"].as<Real>();
-//   params.D = file_params["D"].as<Real>();
-//   params.pctRW = file_params["pctRW"].as<Real>();
-//   params.denom = 4 * params.D * (1.0 - params.pctRW) * params.dt;
-//   params.cdist_coeff = file_params["cdist_coeff"].as<Real>();
-//   params.cutdist = params.cdist_coeff * sqrt(params.denom);
-//   params.pFile = file_params["pFile"].as<std::string>();
-//   if (file_params["write_plot"])
-//   {
-//     params.write_plot = file_params["write_plot"].as<bool>();
-//   } else {
-//     params.write_plot = false;
-//   }
-//   params.nSteps = ceil(params.maxT / params.dt);
-
-//   if(params.write_plot) {
-//     outfile = fopen(params.pFile.c_str(), "w");
-//   }
-// }
-
-void ParticleIO::initialize_positions(const Params& params, const std::string& yaml_name, ko::View<Real**>& X) {
+void ParticleIO::set_positions(const Params& params,
+                               const std::string& yaml_name,
+                               ko::View<Real**>& X) {
   YAML::Node file_params = YAML::LoadFile(yaml_name);
 
   std::vector<std::string> dims{"x", "y", "z"};
 
   auto hX = ko::create_mirror_view(X);
   auto points = file_params["points"];
-  for (auto j = 0; j < params.dim; ++j)
-  {
+  for (auto j = 0; j < params.dim; ++j) {
     auto dim_pt = points[dims[j]];
     int i = 0;
-    for (const auto& pt : dim_pt)
-    {
+    for (const auto& pt : dim_pt) {
       hX(j, i) = pt.as<Real>();
-      fmt::print("hX({}, {}) = {}\n", j, i, hX(j, i));
       ++i;
     }
   }
@@ -246,17 +198,12 @@ void ParticleIO::print_params_summary(const Params& params) {
              "************************************************************");
 }
 
-void ParticleIO::write(const Params& params, const ko::View<Real**>& X, const ko::View<Real*>& mass,
-                       const int& tStep) {
+void ParticleIO::write(const Params& params, const ko::View<Real**>& X,
+                       const ko::View<Real*>& mass, const int& tStep) {
   ko::Profiling::pushRegion("write_deep_copy");
   auto hX = ko::create_mirror_view(X);
   auto hmass = ko::create_mirror_view(mass);
   ko::deep_copy(hX, X);
-  std::cout << "**In write**" << "\n";
-  for (int i = 0; i < params.Np; ++i)
-  {
-    std::cout << "hX(0, i) = " << hX(0, i) << "\n";
-  }
   ko::deep_copy(hmass, mass);
   ko::Profiling::popRegion();
   if (tStep == 0) {
@@ -288,7 +235,7 @@ void ParticleIO::write(const Params& params, const ko::View<Real**>& X, const ko
       fmt::print(outfile, "{}\n", hmass(i));
       ko::Profiling::popRegion();
     }
-  ko::Profiling::popRegion();
+    ko::Profiling::popRegion();
   } else {
     for (size_t i = 0; i < hX.extent(1); ++i) {
       for (size_t j = 0; j < hX.extent(0); ++j) {

@@ -59,7 +59,7 @@ struct BruteForceCRSPolicy {
     auto lmask = mask;
     auto ldim = params.dim;
     Real denom = params.denom;
-    Real c = sqrt(denom * pi);
+    Real c = pow(denom, (Real) ldim / 2.0 ) * pi;
     auto lX = X;
     auto lNp = params.Np;
     auto lcutdist = params.cutdist;

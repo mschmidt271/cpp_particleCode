@@ -63,7 +63,7 @@ int main(int argc, char* argv[]) {
       particles::random_walk(parts.X, parts.params, parts.rand_pool);
       ko::Profiling::popRegion();
       ko::Profiling::pushRegion("MT");
-      // parts.mass_trans.transfer_mass();
+      parts.mass_trans.transfer_mass();
       ko::Profiling::popRegion();
       ko::Profiling::pushRegion("tstep_write");
       // write updated particle info to file
