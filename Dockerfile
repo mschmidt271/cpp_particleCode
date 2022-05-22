@@ -33,7 +33,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   rm -rf /var/lib/apt/lists/*
 
 # install the python dependencies, mainly used for testing
-RUN pip3 install numpy pyyaml sklearn
+RUN pip3 install numpy pyyaml sklearn matplotlib jupyter
 
 # unset proxy variables that are user-specific
 ENV no_proxy=

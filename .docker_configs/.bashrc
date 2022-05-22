@@ -16,6 +16,10 @@ case "$-" in
         alias makej='make -j6'
         alias make4='make -j4'
 
+        # run jupyter notebook that is accessible from external browser
+        # at localhost:8888
+        djupyter () { jupyter notebook --ip 0.0.0.0 --no-browser --allow-root "$1"; }
+
         # save the PID of the last thing you ran
         alias savepid='echo $! > save_pid.txt'
         alias lasttop='top -n 1 -b -u mjschm | tail -n +7 | sort -k 11Vbr'
