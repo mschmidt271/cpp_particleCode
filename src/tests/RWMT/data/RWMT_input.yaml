@@ -17,7 +17,12 @@ initial_condition:
     type: hat
     # particle starting position (for point source)
     X0: 25.0
-    hat_pct: 20.0
+    # percentage (in one dimension) of the center of the domain that the
+    # particles occupy.
+    # e.g., hat_pct = 40, omega = [0, 1] => equi-spaced particles in [0.4, 0.6]^d
+      # 2-d: equi-spaced particles in [0.4, 0.6]^2
+      # 3-d: equi-spaced particles in [0.4, 0.6]^2
+    hat_pct: 40.0
   mass:
     # initial mass distribution, with options:
     # [point (delta), heaviside (interface = X0), gaussian (with var = sigma)]
