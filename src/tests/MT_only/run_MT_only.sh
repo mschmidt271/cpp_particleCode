@@ -15,15 +15,9 @@ export PATH=${PATH}:${HOME}/kokkos-tools/
 
 export PT_EXE=./../../bin/parPT
 export YAML_IN=/tests/MT_only/data/MT_only_input.yaml
-export YAML_PTS=./data/MT_only_input.yaml
+export YAML_PTS=../MT_only/data/MT_only_input.yaml
 
-./gen_pts.py3 --fname=${YAML_PTS}
+./../utils/gen_pts.py3 --fname=${YAML_PTS}
 
 # run the program and redirect the error output
-# ./../../bin/parPT /tests/MT_only/MT_only_input.yaml -v 2> a.err
 $PT_EXE $YAML_IN -v > a.out 2> a.err
-# echo "c"
-# ./bin/parPT /data/particleParams.yaml -v
-# cd plotting
-# python3 plotParticles.py3
-# cd ..

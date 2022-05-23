@@ -227,13 +227,13 @@ void ParticleIO::write(const Params& params, const ko::View<Real**>& X,
     ko::Profiling::pushRegion("print_position and mass");
     for (size_t i = 0; i < hX.extent(1); ++i) {
       for (size_t j = 0; j < hX.extent(0); ++j) {
-        ko::Profiling::pushRegion("print_position");
+        // ko::Profiling::pushRegion("print_position");
         fmt::print(outfile, "{} ", hX(j, i));
-        ko::Profiling::popRegion();
+        // ko::Profiling::popRegion();
       }
-      ko::Profiling::pushRegion("print_mass");
+      // ko::Profiling::pushRegion("print_mass");
       fmt::print(outfile, "{}\n", hmass(i));
-      ko::Profiling::popRegion();
+      // ko::Profiling::popRegion();
     }
     ko::Profiling::popRegion();
   } else {

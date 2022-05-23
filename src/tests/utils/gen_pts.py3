@@ -30,6 +30,12 @@ elif pt_style == 'point':
         cur_yaml = yaml.safe_load(yamlfile)
         X0 = cur_yaml['initial_condition']['space']['X0']
     pts = X0 * np.ones((N, dim))
+elif pt_style == 'hat':
+    with open(fname, 'r') as yamlfile:
+        cur_yaml = yaml.safe_load(yamlfile)
+        X0 = cur_yaml['initial_condition']['space']['X0']
+        hat_pct = cur_yaml['initial_condition']['space']['hat_pct']
+    pts = X0 * np.ones((N, dim))
 else:
     raise ValueError("How did we get here??")
 
@@ -75,6 +81,16 @@ elif pt_style == 'equi':
         # update the total number of particles
         N = N**3
 elif pt_style == 'point':
+    if dim == 1:
+        pts_out['x'] = pts[:, 0].tolist()
+    elif dim == 2:
+        pts_out['x'] = pts[:, 0].tolist()
+        pts_out['y'] = pts[:, 1].tolist()
+    elif dim == 3:
+        pts_out['x'] = pts[:, 0].tolist()
+        pts_out['y'] = pts[:, 1].tolist()
+        pts_out['z'] = pts[:, 2].tolist()
+elif pt_style == 'hat':
     if dim == 1:
         pts_out['x'] = pts[:, 0].tolist()
     elif dim == 2:
