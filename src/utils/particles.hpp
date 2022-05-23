@@ -1,5 +1,5 @@
-#ifndef UTILITIES_HPP
-#define UTILITIES_HPP
+#ifndef PARTICLES_HPP
+#define PARTICLES_HPP
 
 #include <cmath>
 
@@ -10,12 +10,10 @@
 #include "mass_transfer.hpp"
 #include "parPT_io.hpp"
 #include "random_walk.hpp"
-#include "type_defs.hpp"
+// #include "type_defs.hpp"
 
 #include "brute_force_crs_policy.hpp"
 #include "tree_crs_policy.hpp"
-
-// TODO: make this particles.xpp
 
 namespace particles {
 

@@ -7,7 +7,6 @@
 #include "Kokkos_Random.hpp"
 #include "containers.hpp"
 #include "type_defs.hpp"
-#include "version_info.hpp"
 
 namespace particles {
 

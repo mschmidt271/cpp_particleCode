@@ -36,11 +36,11 @@ struct TreeCRSPolicy {
   static SparseMatViews get_views(const ko::View<Real**>& X,
                                   const Params& params, int& nnz) {
     SparseMatViews spmat_views;
-    Real denom = params.denom;
-    Real c = sqrt(denom * pi);
     auto ldim = params.dim;
     auto lX = X;
     auto lNp = params.Np;
+    Real denom = params.denom;
+    Real c = pow(denom * pi, (Real) ldim / 2.0);
 
     // make a float version of radius and X, as required by arborx, being
     // careful because the X view passed to arborx must have dimension 3
@@ -99,7 +99,7 @@ struct TreeCRSPolicy {
             dim_sum +=
                 pow(lX(k, spmat_views.row(i)) - lX(k, spmat_views.col(i)), 2);
           }
-          spmat_views.val(i) = exp(sqrt(dim_sum) / -denom) / c;
+          spmat_views.val(i) = exp(dim_sum / -denom) / c;
         });
     return spmat_views;
   }

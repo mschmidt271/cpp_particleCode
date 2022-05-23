@@ -9,8 +9,6 @@
 #include "spdlog/formatter.h"
 #include "type_defs.hpp"
 #include "yaml-cpp/yaml.h"
-// maybe add this back in once I get fancier with versioning
-// #include "version_info.hpp"
 
 namespace particles {
 

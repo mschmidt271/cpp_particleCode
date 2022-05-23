@@ -3,17 +3,6 @@
 
 #include "particles.hpp"
 
-// ***TESTING***
-// #include <ArborX_LinearBVH.hpp>
-// #include <string_view>
-// #include <typeinfo>
-
-// #include "KokkosKernels_default_types.hpp"
-// #include "KokkosSparse_CrsMatrix.hpp"
-// #include "KokkosSparse_spmv.hpp"
-// #include "Kokkos_Core.hpp"
-// #include "type_defs.hpp"
-
 using namespace particles;
 
 namespace {

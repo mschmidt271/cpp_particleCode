@@ -1,7 +1,6 @@
 include_directories(${PARPT_INCDIRS})
 # add all the utils libraries to the overall utils object
-add_library(Utils version_info.cpp
-                  parPT_io.cpp
+add_library(Utils parPT_io.cpp
                   mass_transfer.cpp
                   random.cpp
                   random_walk.cpp

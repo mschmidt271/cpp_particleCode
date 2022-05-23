@@ -165,7 +165,7 @@ void print_version_info() {
   // spaces
   fmt::print("{:^60}\n",
              "1D Particle Tracking With Random Walks and Mass Transfer");
-  fmt::print("{:^60}\n", "Version 0.0.1--NOT FOR SCIENCE");
+  fmt::print("{:^60}\n", version_str);
 }
 
 void ParticleIO::print_params_summary(const Params& params) {
