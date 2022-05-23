@@ -6,9 +6,7 @@ This repository contains random walk particle tracking code with SPH-style mass 
 
 The only current dependencies are **cmake** and __python3__ (with __numpy__ and __matplotlib__, if you want to use some of the plotting utilities). On Mac, your easiest option is to use [Homebrew](https://docs.brew.sh/Installation) and then `brew install cmake`, `brew install python`, `pip install numpy`, and `pip install matplotlib`. Note that if python scripts aren't running properly, you may need to use `pip3` in the above. If you're looking to run unit tests that involve python scripts, then you'll likely have to install more python packages until your code stops crashing. Also, some of the tests are verified using __Jupyter Notebooks__, which can be taken care of via [Homebrew](https://docs.brew.sh/Installation) via `brew install jupyter`, `brew install notebook`, and then run the notebook with `jupyter-notebook <notebook>.ipynb` which will open a browser window.
 
-<ins>**Note:**</ins> All<sup>\*</sup> of the above dependencies can be avoided by using the [Docker](https://docs.docker.com/get-docker/) build instructions below. However, first you must install Docker :upside_down_face: (`brew install docker`).
-
-\*: Except jupyter notebook--haven't figured out how to get those running in the container, but will update once I do.
+<ins>**Note:**</ins> All of the above dependencies can be avoided by using the [Docker](https://docs.docker.com/get-docker/) build instructions below. However, first you must install Docker :upside_down_face: (`brew install docker`).
 
 Note that simply downloading the repository will not work with the external projects (Kokkos, Kokkos Kernels, yaml-cpp, ArborX), as they are git submodules.
 As such, the repository must be cloned.
@@ -29,10 +27,26 @@ For example, in whichever directory you want to put the code:
     1. `docker run -it --rm ko_pt bash`
         - This will enter a bash terminal in a Docker container running Ubuntu.
             - To exit, type: `exit` or `ctrl + d`.
-    1. `./run.sh` or `make test` to run the unit tests (so far only considering the ArborX fixed-radius search).
+    1. `./run.sh` runs a simple example or `make test` to run the unit tests (so far only considering the ArborX fixed-radius search).
         - The example can be modified by editing the input file `src/data/particleParams.yaml`.
             - Note that if you edit the one in the build directory, it will be overwritten by the original after a `make install`. Similarly, if you edit the one in the top-level `src` directory, `make install` will be required before you can run the new simulation.
-    1. <ins>**Note:**</ins> If you make changes to the source code from within the container, they will not transmit to the actual source code nor persist after exiting and restarting the container. If you want to make persistent changes, I would recommend:
+        - Some different examples can be found in the `tests` directory, containing `MT_only`, `RWMT`, and `RW_only` (MT = mass-transfer, RW = random walk).
+
+    ### Some Notes
+
+    1. If you wish to run Jupyter notebooks from within the container, run the container using:
+        - `docker run -it -p 8888:8888 ko_pt bash`
+            - Note that the `-p <host-port>:<container-port>` flag maps a port from inside the container to one on your host machine (well, technically publishes internal ports), in this case 8888 to 8888.
+        - Once you've generated the results, run the Jupyter notebook using:
+            1. If you chose the 8888 port mapping above, you can use a macro that I've defined to run the notebook:
+                - `djupyter <notebook-name>.ipynb`
+            1. Otherwise:
+                - `jupyter notebook --ip 0.0.0.0 --no-browser --allow-root <notebook-name>.ipynb`
+        - Now, in your machine's web browser, either,
+            - Copy and paste one of the URLs containing a token into the browser (the final one works for me most reliably).
+            - Go to `localhost:<host-port>`, where `host-port` is 8888 if you're using my macro. You will be prompted for a password or token that is given in the container's terminal at the end of one of the above-referenced URLs.
+        - You will be presented with a directory structure in the browser where you can select the desired notebook and run it.
+    1. If you make changes to the source code from within the container, they will not transmit to the actual source code nor persist after exiting and restarting the container. If you want to make persistent changes, I would recommend:
         - Modify/test within the container.
         - Once you've got things working, modify the external source code.
         - Rebuild and restart the container, which will now contain these changes (`docker build -t ko_pt . && docker run -it --rm ko_pt bash`).
