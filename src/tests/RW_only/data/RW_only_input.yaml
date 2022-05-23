@@ -44,7 +44,7 @@ cdist_coeff: 6
 rand_seed_type: default
 rand_seed_value: 5374857
 # output file name
-pFile: particles.txt
+pFile: data/particles.txt
 # random seed type ["clock_rand", "specified_rand", "default_rand"] and/or value
 # "clock_rand" seeds from clock time, "specified_rand" uses the defined seed below,
 # and "default_rand" uses the arbitrarily-chosen value of 5374857, and if none
