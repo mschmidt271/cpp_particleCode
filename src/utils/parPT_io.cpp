@@ -109,6 +109,9 @@ void ParticleIO::set_seed_val(Params& params, const YAML::Node& yml) {
     case clock_rand: {
       params.seed_val =
           std::chrono::high_resolution_clock::now().time_since_epoch().count();
+      if (params.seed_val % 2 == 0) {
+        params.seed_val = params.seed_val + 1;
+      }
       break;
     }
     case specified_rand: {
@@ -192,6 +195,8 @@ void ParticleIO::print_params_summary(const Params& params) {
   fmt::print("pctRW = {}\n", params.pctRW);
   fmt::print("cdist_coeff = {}\n", params.cdist_coeff);
   fmt::print("cutdist = {}\n", params.cutdist);
+  fmt::print("seed_type = {}\n", params.seed_type);
+  fmt::print("seed_val = {}\n", params.seed_val);
   fmt::print("pFile = {}\n", params.pFile);
   fmt::print("write plot info (position/mass) = {}\n", params.write_plot);
   fmt::print("{}\n\n",
@@ -222,7 +227,8 @@ void ParticleIO::write(const Params& params, const ko::View<Real**>& X,
       fmt::print(outfile, "-999 -999 ");
     }
     fmt::print(outfile, "{} {} {} {} {} {} {}\n", params.X0_mass, params.maxT,
-               params.dt, params.D, params.pctRW, params.cdist_coeff, params.cutdist);
+               params.dt, params.D, params.pctRW, params.cdist_coeff,
+               params.cutdist);
     ko::Profiling::popRegion();
     ko::Profiling::pushRegion("print_position and mass");
     for (size_t i = 0; i < hX.extent(1); ++i) {

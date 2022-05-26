@@ -1,11 +1,8 @@
 #include "particles.hpp"
 
-// TODO: make this particles.xpp
-
 namespace particles {
 
-Particles::Particles(const std::string& _input_file)
-{
+Particles::Particles(const std::string& _input_file) {
   ko::Profiling::pushRegion("construct particleIO");
   const std::string yaml_name = install_prefix + _input_file;
   particleIO = ParticleIO(params, yaml_name);

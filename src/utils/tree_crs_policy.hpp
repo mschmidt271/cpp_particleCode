@@ -40,18 +40,17 @@ struct TreeCRSPolicy {
     auto lX = X;
     auto lNp = params.Np;
     Real denom = params.denom;
-    Real c = pow(denom * pi, (Real) ldim / 2.0);
+    Real c = pow(denom * pi, (Real)ldim / 2.0);
 
     // make a float version of radius and X, as required by arborx, being
     // careful because the X view passed to arborx must have dimension 3
     ko::Profiling::pushRegion("create device/float views");
+    // Note: this needs to be column-major for some reason, or ArborX messes up
     auto fX = ko::View<float* [3], MemorySpace>("float X", lNp);
     ko::deep_copy(fX, 0.0);
-    // ***FIXMEFIXMEFIXME***: profile this and figure out which inner loop is
-    // faster
     ko::parallel_for(
-        "fill_floatX", ko::MDRangePolicy<ko::Rank<2>>({0, 0}, {lNp, ldim}),
-        KOKKOS_LAMBDA(const int& j, const int& i) { fX(i, j) = X(i, j); });
+        "fill_floatX", ko::MDRangePolicy<ko::Rank<2>>({0, 0}, {ldim, lNp}),
+        KOKKOS_LAMBDA(const int& i, const int& j) { fX(j, i) = lX(i, j); });
     float frad = float(params.cutdist);
     ko::Profiling::popRegion();
 
