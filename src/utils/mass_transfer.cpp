@@ -4,7 +4,7 @@ namespace particles {
 
 template <typename CRSViewPolicy>
 MassTransfer<CRSViewPolicy>::MassTransfer(const Params& _params,
-                                          const ko::View<Real*>& _X,
+                                          const ko::View<Real**>& _X,
                                           ko::View<Real*>& _mass)
     : params(_params) {
   X = _X;
@@ -18,9 +18,13 @@ void MassTransfer<CRSViewPolicy>::transfer_mass() {
     // SpmatType mat = get_transfer_mat();
     SpmatType kmat = build_sparse_transfer_mat();
     ko::Profiling::popRegion();
-    ko::Profiling::pushRegion("matvec");
+    ko::Profiling::pushRegion("allocate");
     auto tmpmass = ko::View<Real*>("tmpmass", params.Np);
+    ko::Profiling::popRegion();
+    ko::Profiling::pushRegion("deepcopy");
     ko::deep_copy(tmpmass, mass);
+    ko::Profiling::popRegion();
+    ko::Profiling::pushRegion("matvec");
     KokkosSparse::spmv("N", 1.0, kmat, tmpmass, 0.0, mass);
     ko::Profiling::popRegion();
   }

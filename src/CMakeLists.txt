@@ -104,6 +104,7 @@ install(DIRECTORY tests DESTINATION ${CMAKE_INSTALL_PREFIX})
 foreach(test ${tests})
   install(PROGRAMS tests/${test}/run_${test}.sh DESTINATION ${CMAKE_INSTALL_PREFIX}/tests/${test})
 endforeach()
+install(PROGRAMS tests/utils/gen_pts.py3 DESTINATION ${CMAKE_INSTALL_PREFIX}/tests/utils)
 # NOTE: PROGRAMS (vs. FILES) will automatically make the shell script executable
 install(PROGRAMS run.sh DESTINATION ${CMAKE_INSTALL_PREFIX})
 install(PROGRAMS plot.sh DESTINATION ${CMAKE_INSTALL_PREFIX})

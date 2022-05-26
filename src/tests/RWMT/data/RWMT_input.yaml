@@ -5,7 +5,8 @@
 
 # number of particles
 Np: 5001
-# Np: 6
+# number of spatial dimensions
+dimension: 1
 # domain limits
 omega: [0, 50]
 initial_condition:
@@ -15,19 +16,24 @@ initial_condition:
     #  equi(-spaced), hat (evenly-spaced over limited part of domain)]
     type: hat
     # particle starting position (for point source)
-    X0: 25
-    hat_pct: 20.0
+    X0: 25.0
+    # percentage (in one dimension) of the center of the domain that the
+    # particles occupy.
+    # e.g., hat_pct = 40, omega = [0, 1] => equi-spaced particles in [0.4, 0.6]^d
+      # 2-d: equi-spaced particles in [0.4, 0.6]^2
+      # 3-d: equi-spaced particles in [0.4, 0.6]^2
+    hat_pct: 40.0
   mass:
     # initial mass distribution, with options:
     # [point (delta), heaviside (interface = X0), gaussian (with var = sigma)]
     type: point
-    X0: 25
+    X0: 25.0
 # total simulation time
 maxT: 10.0
 # time step length
 # dt: 0.1
 # dt: 1.0
-dt: 1.e-1
+dt: 1.0e-1
 # diffusion coefficient
 D: 1.0e-1
 # percentage of diffusion to be simulated by random walk
@@ -35,8 +41,21 @@ pctRW: 0.5
 # cutoff distance coefficient
 # e.g., cutoff distance = cdist_coeff * sqrt(beta^-1 * 4 * D * dt)
 cdist_coeff: 6
+# random number seed, with options:
+# ["default", "clock" (seed from clock time), "specified" (e.g., 5374857)]
+# Note: if type is not provided, this defaults to... "default", and if type is
+# anything other than "specified," the value does nothing. Finally "specified",
+# with no provided value also defaults to "default."
+rand_seed_type: default
+rand_seed_value: 5374857
 # output file name
-pFile: "/tests/RWMT/particles.txt"
+pFile: data/particles.txt
+# random seed type ["clock_rand", "specified_rand", "default_rand"] and/or value
+# "clock_rand" seeds from clock time, "specified_rand" uses the defined seed below,
+# and "default_rand" uses the arbitrarily-chosen value of 5374857, and if none
+# are provided the default value is used.
+rand_seed_type: default
+rand_seed_value: 5374857
 # whether to write position/mass plotting data or not (no => for profiling)
 # FIXME: change this to write frequency later
 write_plot: true

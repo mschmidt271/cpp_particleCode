@@ -1,18 +1,7 @@
 #include <iostream>
 #include <vector>
 
-#include "utilities.hpp"
-
-// ***TESTING***
-// #include <ArborX_LinearBVH.hpp>
-// #include <string_view>
-// #include <typeinfo>
-
-// #include "KokkosKernels_default_types.hpp"
-// #include "KokkosSparse_CrsMatrix.hpp"
-// #include "KokkosSparse_spmv.hpp"
-// #include "Kokkos_Core.hpp"
-// #include "type_defs.hpp"
+#include "particles.hpp"
 
 using namespace particles;
 
@@ -51,7 +40,7 @@ int main(int argc, char* argv[]) {
       {
         ko::Profiling::pushRegion("write initial positions");
         // write initial positions/masses to file
-        parts.particleIO.write(parts.X, parts.mass, tStep);
+        parts.particleIO.write(parts.params, parts.X, parts.mass, tStep);
         ko::Profiling::popRegion();
       }
 
@@ -69,7 +58,7 @@ int main(int argc, char* argv[]) {
       // write updated particle info to file
       if (parts.params.write_plot)
       {
-        parts.particleIO.write(parts.X, parts.mass, tStep);
+        parts.particleIO.write(parts.params, parts.X, parts.mass, tStep);
       }
       ko::Profiling::popRegion();
     }

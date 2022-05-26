@@ -3,6 +3,8 @@
 
 #define install_prefix "@CMAKE_INSTALL_PREFIX@"
 
+#define version_str "Version @CMAKE_PROJECT_VERSION@--NOT FOR SCIENCE"
+
 // real-valued variables are of this type, provided in the cmake configuration
 typedef @PARPT_REAL_TYPE@ Real;
 

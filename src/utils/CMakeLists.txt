@@ -1,12 +1,10 @@
 include_directories(${PARPT_INCDIRS})
 # add all the utils libraries to the overall utils object
-add_library(Utils version_info.cpp
-                  containers.cpp
-                  parPT_io.cpp
+add_library(Utils parPT_io.cpp
                   mass_transfer.cpp
                   random.cpp
                   random_walk.cpp
-                  utilities.cpp)
+                  particles.cpp)
 # target_link_libraries(Utils ${PARPT_LIBS})
 set(Utils PARENT_SCOPE)
 # add_dependencies(Utils yaml_cpp kokkos kokkoskernels arborx spdlog version_info)

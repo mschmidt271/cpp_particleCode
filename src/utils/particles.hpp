@@ -1,8 +1,7 @@
-#ifndef UTILITIES_HPP
-#define UTILITIES_HPP
+#ifndef PARTICLES_HPP
+#define PARTICLES_HPP
 
 #include <cmath>
-#include <chrono>
 
 #include "ArborX_LinearBVH.hpp"
 #include "Kokkos_Core.hpp"
@@ -11,7 +10,7 @@
 #include "mass_transfer.hpp"
 #include "parPT_io.hpp"
 #include "random_walk.hpp"
-#include "type_defs.hpp"
+// #include "type_defs.hpp"
 
 #include "brute_force_crs_policy.hpp"
 #include "tree_crs_policy.hpp"
@@ -25,7 +24,7 @@ using CRSPolicy = crs_policy_name;
 class Particles {
  public:
   // real-valued position
-  ko::View<Real*> X;
+  ko::View<Real**> X;
   // FIXME: keep a mirror (private?) of these for writing out every xx time
   // steps mass carried by particles (FIXME: units, )
   ko::View<Real*> mass;

@@ -23,7 +23,7 @@ void usage(const char* exe) {
 }  // end namespace
 
 int main(int argc, char* argv[]) {
-  // print usage if to few args are provided
+  // // print usage if to few args are provided
   if (argc < 2) usage(argv[0]);
 
   // this is essentially kokkos initialization, but supposedly
@@ -52,7 +52,7 @@ int main(int argc, char* argv[]) {
 
   // create the particle location views
   ko::Profiling::pushRegion("create X views and read from yaml");
-  auto X = ko::View<Real**>("X", xlen, dim);
+  auto X = ko::View<Real**>("X", dim, xlen);
   ko::deep_copy(X, 0.0);
   auto hX = ko::create_mirror_view(X);
   ko::deep_copy(hX, 0.0);
@@ -66,7 +66,7 @@ int main(int argc, char* argv[]) {
     auto node = pts[coords[j]];
     int i = 0;
     for (auto iter : node) {
-      hX(i, j) = iter.as<Real>();
+      hX(j, i) = iter.as<Real>();
       ++i;
     }
   }
@@ -81,9 +81,9 @@ int main(int argc, char* argv[]) {
   params.cutdist = radius;
   params.pctRW = 0.5;
   params.denom = 6.384;
+  params.dim = dim;
   ko::View<Real*> mass;
-  auto X1d = ko::subview(X, ko::ALL(), 0);
-  auto mass_trans = MassTransfer<BruteForceCRSPolicy>(params, X1d, mass);
+  auto mass_trans = MassTransfer<BruteForceCRSPolicy>(params, X, mass);
   auto temp = mass_trans.build_sparse_transfer_mat();
 
   auto hcol = ko::create_mirror_view(mass_trans.spmat_views.col);
@@ -98,7 +98,7 @@ int main(int argc, char* argv[]) {
   ko::Profiling::popRegion();
   ko::Profiling::pushRegion("***tree***");
 
-  auto mass_trans_tree = MassTransfer<TreeCRSPolicy>(params, X1d, mass);
+  auto mass_trans_tree = MassTransfer<TreeCRSPolicy>(params, X, mass);
   auto temp2 = mass_trans_tree.build_sparse_transfer_mat();
 
   auto hcol_tree = ko::create_mirror_view(mass_trans_tree.spmat_views.col);

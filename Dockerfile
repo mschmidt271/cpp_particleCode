@@ -46,6 +46,17 @@ ENV http_proxy=
 # remove user-specific config files
 RUN cd /root && rm -rf .wgetrc .env .pip .sandia
 
+# unset proxy variables that are user-specific
+ENV no_proxy=
+ENV https_proxy=
+ENV NO_PROXY=
+ENV HTTPS_PROXY=
+ENV HTTP_PROXY=
+ENV http_proxy=
+
+# remove user-specific config files
+RUN cd /root && rm -rf .wgetrc .env .pip .sandia
+
 # We build in /particle
 WORKDIR /particle
 # copy in the source files

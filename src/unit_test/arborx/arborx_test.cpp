@@ -67,6 +67,9 @@ int main(int argc, char* argv[]) {
   radius = root["dist"].as<Real>();
   ko::Profiling::popRegion();
 
+  // NOTE: These X (fX) views are the transpose of how they are in the actual
+  // code
+
   // create the particle location views
   ko::Profiling::pushRegion("create X views and read from yaml");
   auto X = ko::View<Real**>("X", xlen, dim);

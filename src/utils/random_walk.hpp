@@ -17,7 +17,7 @@ namespace particles {
 template <class RandPool>
 struct RandomWalk {
   // Output View for the random numbers
-  ko::View<Real*> pvec;
+  ko::View<Real**> pvec;
 
   // The GeneratorPool
   RandPool rand_pool;
@@ -29,25 +29,26 @@ struct RandomWalk {
   Scalar mean, stddev;
 
   KOKKOS_INLINE_FUNCTION
-  void operator()(int i) const {
+  // FIXME: determine which way this loop should go
+  void operator()(int j, int i) const {
     // Get a random number state from the pool for the active thread
     gen_type rgen = rand_pool.get_state();
 
     // draw random normal numbers, with mean and std deviation provided
-    pvec(i) = pvec(i) + rgen.normal(mean, stddev);
+    pvec(j, i) = pvec(j, i) + rgen.normal(mean, stddev);
 
     // Give the state back, which will allow another thread to acquire it
     rand_pool.free_state(rgen);
   }
 
   // Constructor, Initialize all members
-  RandomWalk(ko::View<Real*> pvec_, const RandPool& rand_pool_,
+  RandomWalk(ko::View<Real**> pvec_, const RandPool& rand_pool_,
              const Scalar& mean_, const Scalar& stddev_)
       : pvec(pvec_), rand_pool(rand_pool_), mean(mean_), stddev(stddev_) {}
 
 };  // end RandomWalk functor
 
-void random_walk(ko::View<Real*>& X, const Params& params,
+void random_walk(ko::View<Real**>& X, const Params& params,
                  RandPoolType& rand_pool);
 
 }  // namespace particles

@@ -1,13 +1,12 @@
 ---
-#==========================================================================
-# Input parameters for a simple 1D, purely diffusive random walk simulation
-#==========================================================================
+#===============================================================================
+# Input parameters for a simple 1D, purely diffusive mass-transfer simulation
+#===============================================================================
 
 # number of particles
-Np: 10001
+Np: 1001
 # number of spatial dimensions
-dimension: 2
-# Np: 6
+dimension: 1
 # domain limits
 omega: [0, 50]
 initial_condition:
@@ -15,25 +14,25 @@ initial_condition:
     # initial particle positions, with options:
     # [point (all the same, center of domain), uniform (random),
     #  equi(-spaced), hat (evenly-spaced over limited part of domain)]
-    type: hat
+    type: equi
     # particle starting position (for point source)
-    X0: 25
+    X0: 25.0
     hat_pct: 20.0
   mass:
     # initial mass distribution, with options:
     # [point (delta), heaviside (interface = X0), gaussian (with var = sigma)]
     type: point
-    X0: 25
+    X0: 25.0
 # total simulation time
 maxT: 10.0
 # time step length
 # dt: 0.1
 # dt: 1.0
-dt: 1.e-1
+dt: 1.0e-1
 # diffusion coefficient
 D: 1.0e-1
 # percentage of diffusion to be simulated by random walk
-pctRW: 0.5
+pctRW: 0.0
 # cutoff distance coefficient
 # e.g., cutoff distance = cdist_coeff * sqrt(beta^-1 * 4 * D * dt)
 cdist_coeff: 6
@@ -45,7 +44,13 @@ cdist_coeff: 6
 rand_seed_type: default
 rand_seed_value: 5374857
 # output file name
-pFile: "/data/particles.txt"
-# whether to write position/mass plotting data or not (no => profiling)
+pFile: data/particles.txt
+# random seed type ["clock_rand", "specified_rand", "default_rand"] and/or value
+# "clock_rand" seeds from clock time, "specified_rand" uses the defined seed below,
+# and "default_rand" uses the arbitrarily-chosen value of 5374857, and if none
+# are provided the default value is used.
+rand_seed_type: default
+rand_seed_value: 5374857
+# whether to write position/mass plotting data or not (no => for profiling)
 # FIXME: change this to write frequency later
-write_plot: false
+write_plot: true

@@ -1,9 +1,11 @@
 #ifndef CONTAINERS_HPP
 #define CONTAINERS_HPP
 
+#include <chrono>
+
 #include "Kokkos_Core.hpp"
-#include "type_defs.hpp"
 #include "spdlog/formatter.h"
+#include "type_defs.hpp"
 #include "yaml-cpp/yaml.h"
 
 namespace particles {
@@ -16,7 +18,7 @@ enum rand_seed_enum { clock_rand, specified_rand, default_rand, missing };
 // class holding simulation parameters
 class Params {
  public:
-  int Np, nSteps;
+  int Np, dim, nSteps;
   Real X0_mass, X0_space, maxT, dt, D, pctRW, denom, cdist_coeff, cutdist,
       hat_pct;
   std::string IC_str_space, IC_str_mass;
