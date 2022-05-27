@@ -10,21 +10,64 @@
 // these are some structs that are necessary for the ArborX fixed-radius search
 // this was provided by the helpful ArborX/Kokkos developer dalg24
 template <class MemorySpace>
+struct Points {
+  Kokkos::View<float*, MemorySpace> x;
+  Kokkos::View<float*, MemorySpace> y;
+  Kokkos::View<float*, MemorySpace> z;
+  int N;
+  Points<MemorySpace>(Kokkos::View<Real**> _X) {
+    N = _X.extent(1);
+    x = Kokkos::View<float*, MemorySpace>("pts x", N);
+    y = Kokkos::View<float*, MemorySpace>("pts y", N);
+    z = Kokkos::View<float*, MemorySpace>("pts z", N);
+    int dim = _X.extent(0);
+    if (dim == 1) {
+      deep_copy(x, Kokkos::subview(_X, 0, Kokkos::ALL()));
+      deep_copy(y, 0.0);
+      deep_copy(z, 0.0);
+    } else if (dim == 2) {
+      deep_copy(x, Kokkos::subview(_X, 0, Kokkos::ALL()));
+      deep_copy(y, Kokkos::subview(_X, 1, Kokkos::ALL()));
+      deep_copy(z, 0.0);
+
+    } else if (dim == 3) {
+      deep_copy(x, Kokkos::subview(_X, 0, Kokkos::ALL()));
+      deep_copy(y, Kokkos::subview(_X, 1, Kokkos::ALL()));
+      deep_copy(z, Kokkos::subview(_X, 2, Kokkos::ALL()));
+    } else {
+      printf("Dimensions of X = %i. Why so many?", dim);
+      exit(EXIT_FAILURE);
+    }
+  }
+};
+template <class MemorySpace>
 struct Spheres {
-  Kokkos::View<float**, MemorySpace> points;
+  Points<MemorySpace> points;
   float radius;
+};
+template <class MemorySpace>
+struct ArborX::AccessTraits<Points<MemorySpace>, ArborX::PrimitivesTag> {
+  using memory_space = MemorySpace;
+  using size_type = std::size_t;
+  static KOKKOS_FUNCTION size_type size(Points<MemorySpace> const& points) {
+    return points.N;
+  }
+  static KOKKOS_FUNCTION ArborX::Point get(Points<MemorySpace> const& points,
+                                           size_type i) {
+    return {{points.x(i), points.y(i), points.z(i)}};
+  }
 };
 template <class MemorySpace>
 struct ArborX::AccessTraits<Spheres<MemorySpace>, ArborX::PredicatesTag> {
   using memory_space = MemorySpace;
   using size_type = std::size_t;
   static KOKKOS_FUNCTION size_type size(Spheres<MemorySpace> const& x) {
-    return x.points.extent(0);
+    return x.points.N;
   }
   static KOKKOS_FUNCTION auto get(Spheres<MemorySpace> const& x, size_type i) {
     return ArborX::attach(
         ArborX::intersects(ArborX::Sphere{
-            ArborX::Point{x.points(i, 0), x.points(i, 1), x.points(i, 2)},
+            ArborX::Point{x.points.x(i), x.points.y(i), x.points.z(i)},
             x.radius}),
         (int)i);
   }
@@ -46,11 +89,10 @@ struct TreeCRSPolicy {
     // careful because the X view passed to arborx must have dimension 3
     ko::Profiling::pushRegion("create device/float views");
     // Note: this needs to be column-major for some reason, or ArborX messes up
-    auto fX = ko::View<float* [3], MemorySpace>("float X", lNp);
-    ko::deep_copy(fX, 0.0);
-    ko::parallel_for(
-        "fill_floatX", ko::MDRangePolicy<ko::Rank<2>>({0, 0}, {ldim, lNp}),
-        KOKKOS_LAMBDA(const int& i, const int& j) { fX(j, i) = lX(i, j); });
+    Points<MemorySpace> fX(lX);
+    // ko::parallel_for(
+    //     "fill_floatX", ko::MDRangePolicy<ko::Rank<2>>({0, 0}, {ldim, lNp}),
+    //     KOKKOS_LAMBDA(const int& i, const int& j) { fX(j, i) = lX(i, j); });
     float frad = float(params.cutdist);
     ko::Profiling::popRegion();
 

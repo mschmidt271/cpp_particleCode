@@ -9,6 +9,13 @@ fi
 export OMP_PROC_BIND=spread
 export OMP_PLACES=threads
 
+export KK_TOOLS_DIR=${HOME}/kokkos-tools
+export MACHINE=`hostname`
+
+# simple kernel timer location
+export KOKKOS_PROFILE_LIBRARY=${KK_TOOLS_DIR}/kp_kernel_timer.so
+export PATH=${PATH}:${KK_TOOLS_DIR}
+
 export THIS_DIR=@CMAKE_CURRENT_BINARY_DIR@
 
 export dim=(1 2 3)
@@ -39,3 +46,7 @@ do
     ${THIS_DIR}/gen_pts.py3 ${dim[i]} ${N[i]} ${L[i]} ${dist[i]} ${pt_type[i]} --fname=${infile}
     ${THIS_DIR}/AX_compare ${infile}
 done
+
+kp_reader *.dat > time_data.txt
+# mike's laptop
+rm ${MACHINE}*.dat
