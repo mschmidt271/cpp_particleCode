@@ -12,6 +12,8 @@ export OMP_PLACES=threads
 export KK_TOOLS_DIR=${HOME}/kokkos-tools
 export MACHINE=`hostname`
 
+export INSTALL_DIR=`pwd`/../..
+
 # kernel logger
 # export KOKKOS_PROFILE_LIBRARY=${KK_TOOLS_DIR}/kp_kernel_logger.so
 # export PATH=${PATH}:${KK_TOOLS_DIR}/
@@ -20,11 +22,10 @@ export MACHINE=`hostname`
 # export KOKKOS_PROFILE_LIBRARY=${KK_TOOLS_DIR}/kp_kernel_timer.so
 # export PATH=${PATH}:${KK_TOOLS_DIR}
 
-export PT_EXE=./../../bin/parPT
-export YAML_IN=/tests/RWMT/data/RWMT_input.yaml
-export YAML_PTS=../RWMT/data/RWMT_input.yaml
+export PT_EXE=${INSTALL_DIR}/bin/parPT
+export YAML_IN=${INSTALL_DIR}/tests/RWMT/data/RWMT_input.yaml
 
-./../utils/gen_pts.py3 --fname=${YAML_PTS}
+./../utils/gen_pts.py3 --fname=${YAML_IN}
 
 # run the program and redirect the error output
 $PT_EXE $YAML_IN -v > a.out 2> a.err

@@ -4,7 +4,7 @@ namespace particles {
 
 Particles::Particles(const std::string& _input_file) {
   ko::Profiling::pushRegion("construct particleIO");
-  const std::string yaml_name = install_prefix + _input_file;
+  const std::string yaml_name = _input_file;
   particleIO = ParticleIO(params, yaml_name);
   ko::Profiling::popRegion();
   ko::Profiling::pushRegion("constructor print");
