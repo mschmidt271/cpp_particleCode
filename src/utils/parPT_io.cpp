@@ -214,6 +214,7 @@ void ParticleIO::write(const Params& params, const ko::View<Real**>& X,
   if (tStep == 0) {
     ko::Profiling::pushRegion("print_meta_info");
     fmt::print(outfile, "{} {}\n", params.Np, params.nSteps);
+    fmt::print(outfile, "{}\n", params.dim);
     fmt::print(outfile, "{} ", params.IC_type_space);
     fmt::print(outfile, "{} ", params.IC_type_mass);
     for (auto i : params.omega) {

@@ -8,6 +8,7 @@ omega = np.zeros(2);
 
 with open(fname) as f:
     shapeData = f.readline()
+    dim = f.readline()
     p = f.readline()
 
 params = p.split()
@@ -24,7 +25,7 @@ D = float(params[9])
 pctRW = float(params[10])
 cdist_coeff = float(params[11])
 cutdist = float(params[12])
-data = np.loadtxt(fname, skiprows=2)
+data = np.loadtxt(fname, skiprows=3)
 
 # print('IC_type_space: python var, file var = ', IC_type_space, float(params[0]))
 # print('IC_type_mass: python var, file var = ', IC_type_mass, float(params[1]))
