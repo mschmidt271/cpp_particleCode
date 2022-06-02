@@ -12,8 +12,6 @@ add_test(MT_test ${BASH_PROGRAM}
 # copy the data and utils dirs
 file(COPY utils data DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
-add_dependencies(MT_test parPT)
-
 # install the executable and the unit test utility scripts
 set(MT_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/unit_test/physics/diffusion)
 install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/run_MT_test.sh

@@ -11,7 +11,7 @@ omega = np.zeros(2);
 
 with open(fname) as f:
     shapeData = f.readline()
-    dim = f.readline()
+    dim = int(f.readline())
     p = f.readline()
 
 params = p.split()
@@ -35,30 +35,44 @@ sigma = 0.0
 
 shapeData = shapeData.split()
 shapeData = [int(i) for i in shapeData]
+Np = shapeData[0]
+Nsteps = shapeData[1] + 1
 
-X = np.reshape(data[:, 0], (shapeData[1] + 1, shapeData[0]))
-mass = np.reshape(data[:, 1], (shapeData[1] + 1, shapeData[0]))
+X = np.ndarray([dim, Np, Nsteps])
 
-framesNum = shapeData[1]
+for i in range(dim):
+    X[i, :, :] = np.reshape(data[:, i], (Np, Nsteps), 'f')
+mass = np.reshape(data[:, dim], (Np, Nsteps), 'f')
 
 L = omega[1] - omega[0]
-def analytic(dim, X, t, sigma, D, L):
-    sol =  (1 / np.power(2 * np.pi * (sigma**2 + 2 * D * t), float(dim) / 2.0))\
-        * np.exp(-((0.5 * L - X[:])**2 / (2 * (sigma**2 + 2 * D * t))));
+def analytic1d(X, t, sigma, D, L):
+    sol =  (1 / np.sqrt(2 * np.pi * (sigma + 2 * D * t)))\
+        * np.exp(-((0.5 * L - X[:])**2 / (2 * (sigma + 2 * D * t))));
+    return sol
+def analytic2d(dim, X, Y, t, sigma, D, L):
+    sol =  (1 / np.power(2 * np.pi * (sigma + 2 * D * t), float(dim) / 2.0))\
+           * np.exp(-(((0.5 * L - X)**2 + (0.5 * L - Y)**2)/ (2 * (sigma + 2 * D * t))));
     return sol
 
-asoln = analytic(dim, X[-1, :], maxT, sigma, D, L)
-asoln = asoln / sum(asoln)
-error = np.linalg.norm(asoln - mass[-1, :])
-# print('error = ', error)
+if dim == 1:
+    asoln = analytic1d(X[0, :, -1], maxT, sigma, D, L)
+    asoln = asoln / sum(asoln)
+    error = np.linalg.norm(asoln - mass[:, -1])
+    mse = np.square(np.subtract(asoln, mass[:, -1])).mean()
+    rmse = np.sqrt(mse)
+elif dim == 2:
+    asoln = analytic2d(dim, X[0, :, -1], X[1, :, -1], maxT, sigma, D, L)
+    asoln = asoln / sum(asoln)
+    error = np.linalg.norm(asoln - mass[:, -1])
+    mse = np.square(np.subtract(asoln, mass[:, -1])).mean()
+    rmse = np.sqrt(mse)
+# print('error = ', error, 'rmse = ', rmse)
 
-# fig = plt.figure()
-# plt.scatter(X[-1, :], mass[-1, :] / sum(mass[-1, :]), label='PT')
-# plt.scatter(X[-1, :], asoln, label='analytic')
-# plt.legend()
-# plt.title('Final')
-# plt.show()
+if dim == 1:
+    tol = 1.0e-14
+elif dim == 2:
+    tol = 1.0e-3
 
-assert error <= 1.0e-14, f"1D MT error too high: error = {error}"
+assert error <= tol, f"1D MT error too high: error = {error}"
 
-print('SUCCESS: 1D MT passes.')
+print('SUCCESS: {}-d MT passes with tolerance = {}.'.format(dim, tol))
