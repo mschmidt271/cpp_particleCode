@@ -73,6 +73,6 @@ if dim == 1:
 elif dim == 2:
     tol = 1.0e-3
 
-assert error <= tol, f"1D MT error too high: error = {error}"
+assert error <= tol, '{}-d MT error too high: error = {}'.format(dim, error)
 
 print('SUCCESS: {}-d MT passes with tolerance = {}.'.format(dim, tol))

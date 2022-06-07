@@ -23,7 +23,7 @@ export INSTALL_DIR=@CMAKE_BINARY_DIR@
 # export KOKKOS_PROFILE_LIBRARY=${HOME}/kokkos-tools/kp_kernel_logger.so
 # export PATH=${PATH}:${HOME}/kokkos-tools/
 
-export PT_EXE=${INSTALL_DIR}/bin/parPT
+export PT_EXE=${INSTALL_DIR}/src/parPT
 
 for ((i=1; i<=2; i++))
 do
@@ -46,7 +46,7 @@ do
     $PT_EXE $YAML_RUN -v > a.out 2> a.err
 
     # verify against analytical solution
-    ${THIS_DIR}/utils/verify_mt.py3 ${THIS_DIR}/data/particles.txt
+    ${THIS_DIR}/utils/verify_mt.py3
 done
 
 # # used when timing

@@ -47,9 +47,9 @@ target_include_directories(AX_compare PUBLIC
                            ${PARPT_INCDIRS})
 
 # install the executable and the unit test utility scripts
-set(AX_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/unit_test/arborx)
-install(TARGETS AX_test DESTINATION ${AX_INSTALL_DIR})
-install(TARGETS AX_compare DESTINATION ${AX_INSTALL_DIR})
-install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/run_ax_test.sh
-                 ${CMAKE_CURRENT_BINARY_DIR}/run_ax_compare.sh
-                 DESTINATION ${AX_INSTALL_DIR})
+# set(AX_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/unit_test/arborx)
+# install(TARGETS AX_test DESTINATION ${AX_INSTALL_DIR})
+# install(TARGETS AX_compare DESTINATION ${AX_INSTALL_DIR})
+# install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/run_ax_test.sh
+#                  ${CMAKE_CURRENT_BINARY_DIR}/run_ax_compare.sh
+#                  DESTINATION ${AX_INSTALL_DIR})
