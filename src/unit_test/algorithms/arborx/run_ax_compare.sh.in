@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # OpenMP environment variables
-if [ $IN_CONTAINER == true ]; then
+if [ IN_CONTAINER = true ]; then
     export OMP_NUM_THREADS=$(nproc)
 else
     export OMP_NUM_THREADS=8
@@ -13,8 +13,8 @@ export KK_TOOLS_DIR=${HOME}/kokkos-tools
 export MACHINE=`hostname`
 
 # simple kernel timer location
-export KOKKOS_PROFILE_LIBRARY=${KK_TOOLS_DIR}/kp_kernel_timer.so
-export PATH=${PATH}:${KK_TOOLS_DIR}
+# export KOKKOS_PROFILE_LIBRARY=${KK_TOOLS_DIR}/kp_kernel_timer.so
+# export PATH=${PATH}:${KK_TOOLS_DIR}
 
 export THIS_DIR=@CMAKE_CURRENT_BINARY_DIR@
 
@@ -47,6 +47,6 @@ do
     ${THIS_DIR}/AX_compare ${infile}
 done
 
-kp_reader *.dat > time_data.txt
+# kp_reader *.dat > time_data.txt
 # mike's laptop
-rm ${MACHINE}*.dat
+# rm ${MACHINE}*.dat
