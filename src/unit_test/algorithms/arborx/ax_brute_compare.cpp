@@ -156,11 +156,16 @@ int main(int argc, char* argv[]) {
   ko::deep_copy(hval_tree, mass_trans_tree.spmat_views.val);
 
   for (int i = 0; i < xlen + 1; ++i) {
-    assert(hrow(i) - hrow_tree(i) == 0);
+    assert(hrowmap(i) - hrowmap_tree(i) == 0);
   }
   fmt::print(stdout, "Rowmaps match!\n");
 
   int nnz = hcol_tree.size();
+  for (int i = 0; i < nnz; ++i) {
+    assert(hrow(i) - hrow_tree(i) == 0);
+  }
+  fmt::print(stdout, "Rows match!\n");
+
   for (int i = 0; i < nnz; ++i) {
     assert(hcol(i) - hcol_tree(i) == 0);
   }
