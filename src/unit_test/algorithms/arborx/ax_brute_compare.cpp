@@ -84,7 +84,11 @@ int main(int argc, char* argv[]) {
   params.dim = dim;
   ko::View<Real*> mass;
   auto mass_trans = MassTransfer<BruteForceCRSPolicy>(params, X, mass);
-  auto temp = mass_trans.build_sparse_transfer_mat();
+  mass_trans.Nc = params.Np;
+  mass_trans.Np1 = params.Np;
+  mass_trans.substart = 0;
+  mass_trans.subend = params.Np;
+  auto temp = mass_trans.build_sparse_transfer_submat();
 
   auto hcol = ko::create_mirror_view(mass_trans.spmat_views.col);
   auto hrow = ko::create_mirror_view(mass_trans.spmat_views.row);
@@ -98,8 +102,16 @@ int main(int argc, char* argv[]) {
   ko::Profiling::popRegion();
   ko::Profiling::pushRegion("***tree***");
 
+  ko::Profiling::pushRegion("create MassTrans object");
   auto mass_trans_tree = MassTransfer<TreeCRSPolicy>(params, X, mass);
-  auto temp2 = mass_trans_tree.build_sparse_transfer_mat();
+  ko::Profiling::popRegion();
+  mass_trans_tree.Nc = params.Np;
+  mass_trans_tree.Np1 = params.Np;
+  mass_trans_tree.substart = 0;
+  mass_trans_tree.subend = params.Np;
+  ko::Profiling::pushRegion("build sparsemats");
+  auto temp2 = mass_trans_tree.build_sparse_transfer_submat();
+  ko::Profiling::popRegion();
 
   auto hcol_tree = ko::create_mirror_view(mass_trans_tree.spmat_views.col);
   auto hrow_tree = ko::create_mirror_view(mass_trans_tree.spmat_views.row);

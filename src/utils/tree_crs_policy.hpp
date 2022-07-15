@@ -15,25 +15,25 @@ struct Points {
   Kokkos::View<float*, MemorySpace> y;
   Kokkos::View<float*, MemorySpace> z;
   int N;
-  Points<MemorySpace>(Kokkos::View<Real**> _X) {
+  Points<MemorySpace>(const Kokkos::View<Real**>& _X, const int& dim) {
     N = _X.extent(1);
     x = Kokkos::View<float*, MemorySpace>("pts x", N);
     y = Kokkos::View<float*, MemorySpace>("pts y", N);
     z = Kokkos::View<float*, MemorySpace>("pts z", N);
-    int dim = _X.extent(0);
+    // FIXME: it'd be cleaner to pre-initialize and do this in a dim-length loop
     if (dim == 1) {
-      deep_copy(x, Kokkos::subview(_X, 0, Kokkos::ALL()));
-      deep_copy(y, 0.0);
-      deep_copy(z, 0.0);
+      Kokkos::deep_copy(x, Kokkos::subview(_X, 0, Kokkos::ALL()));
+      Kokkos::deep_copy(y, 0.0);
+      Kokkos::deep_copy(z, 0.0);
     } else if (dim == 2) {
-      deep_copy(x, Kokkos::subview(_X, 0, Kokkos::ALL()));
-      deep_copy(y, Kokkos::subview(_X, 1, Kokkos::ALL()));
-      deep_copy(z, 0.0);
+      Kokkos::deep_copy(x, Kokkos::subview(_X, 0, Kokkos::ALL()));
+      Kokkos::deep_copy(y, Kokkos::subview(_X, 1, Kokkos::ALL()));
+      Kokkos::deep_copy(z, 0.0);
 
     } else if (dim == 3) {
-      deep_copy(x, Kokkos::subview(_X, 0, Kokkos::ALL()));
-      deep_copy(y, Kokkos::subview(_X, 1, Kokkos::ALL()));
-      deep_copy(z, Kokkos::subview(_X, 2, Kokkos::ALL()));
+      Kokkos::deep_copy(x, Kokkos::subview(_X, 0, Kokkos::ALL()));
+      Kokkos::deep_copy(y, Kokkos::subview(_X, 1, Kokkos::ALL()));
+      Kokkos::deep_copy(z, Kokkos::subview(_X, 2, Kokkos::ALL()));
     } else {
       printf("Dimensions of X = %i. Why so many?", dim);
       exit(EXIT_FAILURE);
@@ -77,11 +77,12 @@ namespace particles {
 
 struct TreeCRSPolicy {
   static SparseMatViews get_views(const ko::View<Real**>& X,
-                                  const Params& params, int& nnz) {
+                                  const Params& params, int& nnz, const int& Nc,
+                                  const int& substart, const int& subend) {
     SparseMatViews spmat_views;
     auto ldim = params.dim;
     auto lX = X;
-    auto lNp = params.Np;
+    auto lNp = Nc;
     Real denom = params.denom;
     Real c = pow(denom * pi, (Real)ldim / 2.0);
 
@@ -89,10 +90,10 @@ struct TreeCRSPolicy {
     // careful because the X view passed to arborx must have dimension 3
     ko::Profiling::pushRegion("create device/float views");
     // Note: this needs to be column-major for some reason, or ArborX messes up
-    Points<MemorySpace> fX(lX);
-    // ko::parallel_for(
-    //     "fill_floatX", ko::MDRangePolicy<ko::Rank<2>>({0, 0}, {ldim, lNp}),
-    //     KOKKOS_LAMBDA(const int& i, const int& j) { fX(j, i) = lX(i, j); });
+    Points<MemorySpace> fX(lX, ldim);
+    auto subX = ko::View<Real**, MemorySpace>("subX", ldim, subend - substart);
+    ko::deep_copy(subX, ko::subview(lX, ko::ALL(), ko::make_pair(substart, subend)));
+    Points<MemorySpace> fsubX(subX, ldim);
     float frad = float(params.cutdist);
     ko::Profiling::popRegion();
 
@@ -106,7 +107,7 @@ struct TreeCRSPolicy {
     spmat_views.col = ko::View<int*, MemorySpace>("col", 0);
     ko::Profiling::popRegion();
     ko::Profiling::pushRegion("query BVH");
-    ArborX::query(bvh, ExecutionSpace{}, Spheres<MemorySpace>{fX, frad},
+    ArborX::query(bvh, ExecutionSpace{}, Spheres<MemorySpace>{fsubX, frad},
                   spmat_views.col, spmat_views.rowmap);
     ko::Profiling::popRegion();
 
@@ -122,6 +123,9 @@ struct TreeCRSPolicy {
     //       ArborX::Details::sortObjects(ExecutionSpace{}, sort_view);
     // }
 
+    // FIXME:
+    // keeping this around, since it makes some of the transfer mat calculations
+    // easier, though it could probably be eliminated with some cleverness
     spmat_views.row = ko::View<int*>("row", nnz);
     ko::parallel_for(
         "compute_val", lNp, KOKKOS_LAMBDA(const int& i) {

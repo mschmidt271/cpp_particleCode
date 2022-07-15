@@ -1,16 +1,16 @@
 #ifndef BRUTE_FORCE_CRS_POLICY_HPP
 #define BRUTE_FORCE_CRS_POLICY_HPP
 
+#include "Kokkos_Core.hpp"
 #include "constants.hpp"
 #include "containers.hpp"
-#include "Kokkos_Core.hpp"
 #include "type_defs.hpp"
 
 namespace particles {
 
 struct BruteForceCRSPolicy {
   static void get_nnz_mask(const ko::View<Real**>& X, const Params& params,
-                                 int& nnz, ko::View<int*>& mask) {
+                           int& nnz, ko::View<int*>& mask) {
     int Np2 = pow(params.Np, 2);
     auto ldim = params.dim;
     auto lcutdist = params.cutdist;
@@ -22,8 +22,7 @@ struct BruteForceCRSPolicy {
         ko::MDRangePolicy<ko::Rank<2>>({0, 0}, {params.Np, params.Np}),
         KOKKOS_LAMBDA(const int& i, const int& j, int& val) {
           Real dim_sum = 0.0;
-          for (int k = 0; k < ldim; ++k)
-          {
+          for (int k = 0; k < ldim; ++k) {
             dim_sum += pow(lX(k, i) - lX(k, j), 2);
           }
           Real dist = sqrt(dim_sum);
@@ -47,8 +46,9 @@ struct BruteForceCRSPolicy {
           update += val_i;
         });
   }
-  static SparseMatViews get_views(const ko::View<Real**>& X, const Params& params,
-                        int& nnz) {
+  static SparseMatViews get_views(const ko::View<Real**>& X,
+                                  const Params& params, int& nnz, const int& Nc,
+                                  const int& substart, const int& subend) {
     SparseMatViews spmat_views;
     auto mask = ko::View<int*>("idx_mask", pow(params.Np, 2));
     get_nnz_mask(X, params, nnz, mask);
@@ -59,7 +59,7 @@ struct BruteForceCRSPolicy {
     auto lmask = mask;
     auto ldim = params.dim;
     Real denom = params.denom;
-    Real c = pow(denom  * pi, (Real) ldim / 2.0 );
+    Real c = pow(denom * pi, (Real)ldim / 2.0);
     auto lX = X;
     auto lNp = params.Np;
     auto lcutdist = params.cutdist;
@@ -69,8 +69,7 @@ struct BruteForceCRSPolicy {
         KOKKOS_LAMBDA(const int& i, const int& j) {
           int idx = lmask(j + (i * lNp));
           Real dim_sum = 0.0;
-          for (int k = 0; k < ldim; ++k)
-          {
+          for (int k = 0; k < ldim; ++k) {
             dim_sum += pow(lX(k, i) - lX(k, j), 2);
           }
           Real d = sqrt(dim_sum);
